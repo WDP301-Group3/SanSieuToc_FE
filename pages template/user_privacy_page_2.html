@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chính sách người dùng - Sân Siêu Tốc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E536",
+                        secondary: "#166534",
+                        accent: "#FDE047",
+                        "background-light": "#F8FAFC", 
+                        "background-dark": "#052e16",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#14532d",
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "sans-serif"],
+                        body: ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        .glass-effect {
+            @apply bg-white/70 backdrop-blur-md border-b border-gray-200;
+        }
+        .dark .glass-effect {
+            @apply bg-surface-dark/70 border-green-900;
+        }
+        .logo-text-shadow {
+            text-shadow: 2px 2px 0px #FDE047;
+        }
+        .sidebar-link {
+            @apply flex items-center px-4 py-3 text-sm font-medium text-gray-600 transition-colors rounded-lg hover:bg-green-50 hover:text-primary dark:text-gray-300 dark:hover:bg-green-900/30;
+        }
+        .sidebar-link.active {
+            @apply bg-green-50 text-primary border-r-4 border-primary dark:bg-green-900/40;
+        }
+        .policy-content h2 {
+            @apply text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 flex items-center gap-2;
+        }
+        .policy-content h3 {
+            @apply text-lg font-bold text-secondary dark:text-primary mt-6 mb-3;
+        }
+        .policy-content p {
+            @apply text-gray-600 dark:text-gray-300 leading-relaxed mb-4;
+        }
+        .policy-content ul {
+            @apply list-disc list-inside space-y-2 mb-6 text-gray-600 dark:text-gray-300;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300">
+<nav class="sticky top-0 z-50 glass-effect">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-20">
+<div class="flex-shrink-0 flex items-center gap-3">
+<img alt="Sân Siêu Tốc Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq7zC5pNcJWTDf9zpprn7dQwHfeIAibcsBA0J2cdnhk7wwD-6SwdJSCPMknpyx-HighEqclSyG38AH2j8k8lHYAJNqlh5aAbvPR42Gb7e6Ka7-dsvg1oikm4K4EUScrYN2fenWe2dMs3BREUzjazdf6cUq9cgK_XiSkSpky6FTkLvLx9DPvDcdM2iEL0mNyzZoT_NyD4KKGPEDKVbV2YB7WS6FIrvyh0UQiIQX9TLt3Eql4hcjIjTkQ_iMp8En4sJkIwzPcJgU"/>
+<span class="hidden md:block font-display font-extrabold text-2xl text-primary logo-text-shadow tracking-tight">Sân Siêu Tốc</span>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Trang chủ</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Đặt sân</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Tin tức</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Liên hệ</a>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-surface-dark transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-primary hover:bg-green-500 text-white dark:text-green-900 font-bold py-2 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">login</span>
+                        Đăng nhập
+                    </button>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="mb-10">
+<h1 class="text-3xl md:text-4xl font-display font-extrabold text-gray-900 dark:text-white">Chính sách người dùng</h1>
+<p class="text-gray-500 dark:text-gray-400 mt-2">Cập nhật lần cuối: 24 tháng 05, 2024</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-12">
+<aside class="lg:w-1/4">
+<div class="sticky top-32 space-y-1 bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-green-900">
+<a class="sidebar-link active" href="#general-terms">
+<span class="material-symbols-outlined mr-3 text-xl">gavel</span>
+                        Điều khoản chung
+                    </a>
+<a class="sidebar-link" href="#booking-policy">
+<span class="material-symbols-outlined mr-3 text-xl">event_available</span>
+                        Quy định đặt sân
+                    </a>
+<a class="sidebar-link" href="#refund-policy">
+<span class="material-symbols-outlined mr-3 text-xl">payments</span>
+                        Hủy lịch &amp; Hoàn tiền
+                    </a>
+<a class="sidebar-link" href="#privacy-policy">
+<span class="material-symbols-outlined mr-3 text-xl">verified_user</span>
+                        Chính sách bảo mật
+                    </a>
+<a class="sidebar-link" href="#community-rules">
+<span class="material-symbols-outlined mr-3 text-xl">groups</span>
+                        Quy tắc cộng đồng
+                    </a>
+</div>
+</aside>
+<article class="lg:w-3/4 bg-white dark:bg-surface-dark p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100 dark:border-green-900 policy-content">
+<section id="general-terms">
+<h2><span class="material-symbols-outlined text-primary">info</span> 1. Điều khoản chung</h2>
+<p>Chào mừng bạn đến với Sân Siêu Tốc. Bằng việc truy cập và sử dụng dịch vụ của chúng tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu tại đây.</p>
+<ul>
+<li>Dịch vụ của chúng tôi chỉ dành cho cá nhân từ 15 tuổi trở lên.</li>
+<li>Người dùng có trách nhiệm bảo mật thông tin tài khoản cá nhân.</li>
+<li>Sân Siêu Tốc có quyền thay đổi nội dung chính sách này bất kỳ lúc nào mà không cần thông báo trước.</li>
+</ul>
+</section>
+<hr class="my-8 border-gray-100 dark:border-green-900"/>
+<section id="booking-policy">
+<h2><span class="material-symbols-outlined text-primary">calendar_month</span> 2. Quy định đặt sân</h2>
+<p>Để đảm bảo trải nghiệm tốt nhất cho mọi người dùng, chúng tôi áp dụng các quy tắc đặt sân sau:</p>
+<h3>Quy trình đặt sân</h3>
+<ul>
+<li>Người dùng chọn sân, khung giờ và thực hiện thanh toán đặt cọc (nếu có).</li>
+<li>Lịch đặt chỉ được xác nhận khi bạn nhận được thông báo "Thành công" qua ứng dụng/email.</li>
+<li>Mỗi tài khoản không được đặt quá 3 sân trong cùng một khung giờ.</li>
+</ul>
+<h3>Trách nhiệm của người chơi</h3>
+<p>Người chơi cần có mặt tại sân ít nhất 10 phút trước giờ bắt đầu. Trong trường hợp đến muộn quá 15 phút mà không thông báo, chủ sân có quyền cho thuê lại sân đó cho đối tượng khác.</p>
+</section>
+<hr class="my-8 border-gray-100 dark:border-green-900"/>
+<section id="refund-policy">
+<h2><span class="material-symbols-outlined text-primary">undo</span> 3. Hủy lịch &amp; Hoàn tiền</h2>
+<p>Chính sách hủy lịch được thiết kế để bảo vệ quyền lợi của cả người chơi và chủ sân:</p>
+<ul>
+<li><strong>Hủy trước 24 giờ:</strong> Hoàn lại 100% tiền cọc vào ví Sân Siêu Tốc.</li>
+<li><strong>Hủy từ 12 - 24 giờ:</strong> Hoàn lại 50% tiền cọc.</li>
+<li><strong>Hủy dưới 12 giờ:</strong> Không được hoàn lại tiền cọc.</li>
+<li>Trường hợp bất khả kháng (thiên tai, dịch bệnh): Hoàn trả toàn bộ phí theo quyết định của ban quản lý.</li>
+</ul>
+</section>
+<hr class="my-8 border-gray-100 dark:border-green-900"/>
+<section id="privacy-policy">
+<h2><span class="material-symbols-outlined text-primary">security</span> 4. Chính sách bảo mật</h2>
+<p>Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo tiêu chuẩn an toàn cao nhất.</p>
+<h3>Thông tin thu thập</h3>
+<p>Chúng tôi thu thập các thông tin bao gồm: Họ tên, số điện thoại, email và vị trí GPS (khi được phép) để gợi ý các sân gần nhất.</p>
+<h3>Sử dụng thông tin</h3>
+<ul>
+<li>Xác nhận lịch đặt sân và thông báo các thay đổi.</li>
+<li>Cải thiện chất lượng dịch vụ và cá nhân hóa trải nghiệm.</li>
+<li>Không cung cấp thông tin cho bên thứ ba ngoại trừ các đối tác vận hành sân bãi liên quan.</li>
+</ul>
+</section>
+<hr class="my-8 border-gray-100 dark:border-green-900"/>
+<section id="community-rules">
+<h2><span class="material-symbols-outlined text-primary">sentiment_satisfied</span> 5. Quy tắc cộng đồng</h2>
+<p>Xây dựng cộng đồng thể thao văn minh, chuyên nghiệp:</p>
+<ul>
+<li>Không gây gổ, mất trật tự tại các cơ sở thể thao.</li>
+<li>Giữ gìn vệ sinh chung và bảo quản trang thiết bị của sân.</li>
+<li>Nghiêm cấm các hành vi gian lận trong việc đặt lịch hoặc đánh giá dịch vụ.</li>
+</ul>
+</section>
+<div class="mt-12 p-6 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
+<p class="text-sm text-gray-600 dark:text-gray-400 text-center italic">
+                        Nếu bạn có bất kỳ câu hỏi nào về các chính sách này, vui lòng liên hệ với chúng tôi qua hotline <span class="text-primary font-bold">1900 1234</span> hoặc email <span class="text-primary font-bold">legal@sansieutoc.vn</span>.
+                    </p>
+</div>
+</article>
+</div>
+</main>
+<footer class="bg-white dark:bg-black border-t border-gray-100 dark:border-green-900 pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-2 mb-4">
+<img alt="Sân Siêu Tốc Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA205xaw0m6HmDVPzPlqv08sQ42b_tVpkht9D6xlg8xjGfpYYL56rUCaA8NnN-nw1NCkaPSaUTT9BqHhpYI-cgBUJgkKNo2DS1mhBcV0Z_vJXnJapqTs5F1CrC_c-1tLkHbiyJBQTdNgHtCB6B88dfDa54qazT8NSxHx0eJFDug1ED_AqQ9nt1X_M2s8jXy3SrqkmT_NQqWOAkP0plXvSRcelQ_rfP18nQT3vvQd4FhGlSsXtGtDX0ToS-uDN19QJKWg-jlg5ih"/>
+<span class="font-display font-bold text-xl text-gray-900 dark:text-white">Sân Siêu Tốc</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                        Hệ thống đặt sân thể thao số 1 Việt Nam. Nhanh chóng, tiện lợi và uy tín.
+                    </p>
+<div class="flex space-x-4">
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">social_leaderboard</span></a>
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">photo_camera</span></a>
+</div>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Về chúng tôi</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary" href="#">Giới thiệu</a></li>
+<li><a class="hover:text-primary" href="#">Tuyển dụng</a></li>
+<li><a class="hover:text-primary font-semibold text-primary" href="#">Điều khoản sử dụng</a></li>
+<li><a class="hover:text-primary" href="#">Chính sách bảo mật</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Dành cho chủ sân</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary" href="#">Đăng ký sân</a></li>
+<li><a class="hover:text-primary" href="#">Phần mềm quản lý</a></li>
+<li><a class="hover:text-primary" href="#">Bảng giá dịch vụ</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Liên hệ</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">mail</span> support@sansieutoc.vn</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">call</span> 1900 1234</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">location_on</span> Hà Nội, Việt Nam</li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-100 dark:border-green-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-gray-500 dark:text-gray-500 text-sm">© 2024 Sân Siêu Tốc. All rights reserved.</p>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-gray-400">Powered by</span>
+<span class="font-bold text-gray-300 dark:text-gray-600 text-sm">Tailwind CSS</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        // Active sidebar logic simple toggle
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+    </script>
+
+</body></html>
