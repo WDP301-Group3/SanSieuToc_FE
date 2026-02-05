@@ -1,0 +1,334 @@
+/* RegisterPage.css - Styles for Register Page */
+
+/* Page Container */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(246 248 246);
+}
+
+.dark .register-page {
+  background-color: rgb(16 34 16);
+}
+
+/* Main Content */
+.register-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.register-container {
+  max-width: 72rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .register-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Hero Visual Section */
+.register-hero {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .register-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
+
+.register-hero-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.register-hero-image-wrapper:hover .register-hero-image {
+  transform: scale(1.05);
+}
+
+.register-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+  z-index: 10;
+}
+
+.register-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+
+.register-hero-content {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 2.5rem;
+  right: 2.5rem;
+  z-index: 20;
+}
+
+.register-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: #00E536;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+}
+
+.register-hero-title {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.register-hero-description {
+  color: rgb(229 231 235);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+/* Form Card */
+.register-form-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(243 244 246);
+}
+
+.dark .register-form-card {
+  background-color: rgba(17 24 39, 0.5);
+  border-color: rgb(31 41 55);
+}
+
+@media (min-width: 640px) {
+  .register-form-card {
+    padding: 2.5rem;
+  }
+}
+
+/* Card Header */
+.register-form-header {
+  margin-bottom: 2rem;
+}
+
+.register-form-title {
+  color: rgb(13 27 13);
+  font-size: 1.875rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.dark .register-form-title {
+  color: white;
+}
+
+.register-form-subtitle {
+  color: rgb(107 114 128);
+  font-size: 0.875rem;
+}
+
+.dark .register-form-subtitle {
+  color: rgb(156 163 175);
+}
+
+/* Form */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Error Alert */
+.register-error {
+  background-color: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+  color: rgb(220 38 38);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dark .register-error {
+  background-color: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: rgb(248 113 113);
+}
+
+/* Form Row */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-row {
+    flex-direction: row;
+  }
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Terms Checkbox */
+.terms-group {
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.terms-checkbox {
+  margin-top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgb(209 213 219);
+  accent-color: #00E536;
+  cursor: pointer;
+}
+
+.terms-label {
+  font-size: 0.875rem;
+  color: rgb(75 85 99);
+  cursor: pointer;
+}
+
+.dark .terms-label {
+  color: rgb(156 163 175);
+}
+
+.terms-link {
+  color: #00E536;
+  transition: text-decoration 0.2s;
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.register-submit-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  height: 3.5rem;
+  padding: 0 1rem;
+  background-color: #00E536;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.3s;
+  box-shadow: 0 10px 15px -3px rgba(0, 229, 54, 0.125);
+  border: none;
+  cursor: pointer;
+}
+
+.dark .register-submit-btn {
+  color: rgb(20 83 45);
+}
+
+.register-submit-btn:hover {
+  filter: brightness(1.05);
+}
+
+.register-submit-btn:active {
+  transform: scale(0.98);
+}
+
+.register-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.register-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.register-footer-text {
+  color: rgb(75 85 99);
+  font-size: 0.875rem;
+}
+
+.dark .register-footer-text {
+  color: rgb(156 163 175);
+}
+
+.register-footer-link {
+  color: #00E536;
+  font-weight: 700;
+  transition: text-decoration 0.2s;
+  text-decoration: none;
+}
+
+.register-footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Decorative Background */
+.register-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+.dark .register-background {
+  opacity: 0.1;
+}
+
+.register-background-circle-1 {
+  position: absolute;
+  top: 10%;
+  right: 5%;
+  width: 16rem;
+  height: 16rem;
+  background-color: rgba(0, 229, 54, 0.3);
+  border-radius: 9999px;
+  filter: blur(100px);
+}
+
+.register-background-circle-2 {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 24rem;
+  height: 24rem;
+  background-color: rgba(0, 229, 54, 0.2);
+  border-radius: 9999px;
+  filter: blur(120px);
+}
