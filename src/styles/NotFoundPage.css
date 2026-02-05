@@ -1,0 +1,63 @@
+/* NotFoundPage.css - Styles for 404 Not Found Page */
+
+.notfound-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(249 250 251);
+}
+
+.dark .notfound-page {
+  background-color: rgb(17 24 39);
+}
+
+.notfound-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.notfound-title {
+  font-size: 6rem;
+  font-weight: 700;
+  color: #00E536;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .notfound-title {
+    font-size: 4rem;
+  }
+}
+
+.notfound-message {
+  font-size: 1.25rem;
+  color: rgb(75 85 99);
+  margin-bottom: 2rem;
+}
+
+.dark .notfound-message {
+  color: rgb(209 213 219);
+}
+
+.notfound-button {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background-color: #00E536;
+  color: white;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.notfound-button:hover {
+  background-color: #00c430;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.notfound-button:active {
+  transform: translateY(0);
+}

@@ -5,6 +5,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Common Utilities */
+@import './styles/common.css';
+
 @layer base {
   :root {
     /* Color Variables - Matching home.html design */
