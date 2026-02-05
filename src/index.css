@@ -18,6 +18,16 @@
     --color-background-dark: #052e16;
     --color-surface-light: #FFFFFF;
     --color-surface-dark: #14532d;
+    
+    /* Additional variables for Field pages */
+    --primary: #00E536;
+    --primary-hover: #00CC30;
+    --bg-primary: #F0FDF4;
+    --bg-primary-dark: #102210;
+    --text-primary: #111811;
+    --text-secondary: #618961;
+    --surface-light: #FFFFFF;
+    --surface-dark: #1a2e1a;
   }
 
   * {

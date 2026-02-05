@@ -11,20 +11,9 @@ import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-// Field Pages (Placeholder)
-const FieldListPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Field List Page</h1>
-    <p className="placeholder-text">Field list with filters and search will be displayed here.</p>
-  </div>
-);
-
-const FieldDetailPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Field Detail Page</h1>
-    <p className="placeholder-text">Detailed field information and booking form will be displayed here.</p>
-  </div>
-);
+// Field Pages
+import FieldListPage from './pages/Field/FieldListPage';
+import FieldDetailPage from './pages/Field/FieldDetailPage';
 
 // Customer Pages (Placeholder)
 const CustomerProfilePage = () => (
