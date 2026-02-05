@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import AdminLayout from './components/layout/AdminLayout';
+import ManagerLayout from './components/layout/ManagerLayout';
 
 // Pages
 import HomePage from './pages/Home/HomePage';
@@ -14,15 +14,15 @@ import TermsPage from './pages/TermsPage';
 const FieldListPage = () => <div className="p-8">Field List Page (Coming Soon)</div>;
 const FieldDetailPage = () => <div className="p-8">Field Detail Page (Coming Soon)</div>;
 
-// User Pages (Placeholder)
-const UserProfilePage = () => <div className="p-8">User Profile Page (Coming Soon)</div>;
+// Customer Pages (Placeholder)
+const CustomerProfilePage = () => <div className="p-8">Customer Profile Page (Coming Soon)</div>;
 const BookingHistoryPage = () => <div className="p-8">Booking History Page (Coming Soon)</div>;
 
-// Admin Pages (Placeholder)
-const AdminDashboardPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Admin Dashboard</h1><p className="mt-4 text-gray-600">Statistics and overview will be displayed here.</p></div>;
-const AdminUsersPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">User Management</h1><p className="mt-4 text-gray-600">User list and management tools will be displayed here.</p></div>;
-const AdminFieldsPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Field Management</h1><p className="mt-4 text-gray-600">Field list and management tools will be displayed here.</p></div>;
-const AdminManagersPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Manager Permissions</h1><p className="mt-4 text-gray-600">Assign field owner permissions here.</p></div>;
+// Manager Pages (Placeholder)
+const ManagerDashboardPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Manager Dashboard</h1><p className="mt-4 text-gray-600">Statistics and overview will be displayed here.</p></div>;
+const ManagerCustomersPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Customer Management</h1><p className="mt-4 text-gray-600">Customer list and management tools will be displayed here.</p></div>;
+const ManagerFieldsPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Field Management</h1><p className="mt-4 text-gray-600">Field list and management tools will be displayed here.</p></div>;
+const ManagerBookingsPage = () => <div className="p-8 bg-white dark:bg-gray-900 rounded-lg shadow"><h1 className="text-2xl font-bold">Booking Management</h1><p className="mt-4 text-gray-600">Booking list and management tools will be displayed here.</p></div>;
 
 // Not Found Page
 const NotFoundPage = () => (
@@ -56,17 +56,17 @@ function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/profile" element={<CustomerProfilePage />} />
           <Route path="/booking-history" element={<BookingHistoryPage />} />
         </Route>
 
-        {/* Admin Routes with AdminLayout */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="fields" element={<AdminFieldsPage />} />
-          <Route path="managers" element={<AdminManagersPage />} />
+        {/* Manager Routes with ManagerLayout */}
+        <Route path="/manager" element={<ManagerLayout />}>
+          <Route index element={<Navigate to="/manager/dashboard" replace />} />
+          <Route path="dashboard" element={<ManagerDashboardPage />} />
+          <Route path="customers" element={<ManagerCustomersPage />} />
+          <Route path="fields" element={<ManagerFieldsPage />} />
+          <Route path="bookings" element={<ManagerBookingsPage />} />
         </Route>
 
         {/* 404 Not Found */}

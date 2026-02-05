@@ -50,7 +50,7 @@ const LoginPage = () => {
       
       // Redirect based on role
       if (activeTab === 'manager') {
-        navigate('/admin/dashboard');
+        navigate('/manager/dashboard');
       } else {
         navigate('/');
       }

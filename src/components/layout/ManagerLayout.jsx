@@ -1,43 +1,43 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import '../../styles/AdminLayout.css';
+import '../../styles/ManagerLayout.css';
 
-const AdminLayout = () => {
+const ManagerLayout = () => {
   const location = useLocation();
 
   const menuItems = [
     {
-      path: '/admin/dashboard',
+      path: '/manager/dashboard',
       icon: 'bar_chart',
       label: 'Thống kê website',
     },
     {
-      path: '/admin/users',
+      path: '/manager/customers',
       icon: 'group',
-      label: 'Quản lý người dùng',
+      label: 'Quản lý khách hàng',
     },
     {
-      path: '/admin/fields',
+      path: '/manager/fields',
       icon: 'sports_soccer',
       label: 'Quản lý sân',
     },
     {
-      path: '/admin/managers',
-      icon: 'manage_accounts',
-      label: 'Cấp quyền chủ sân',
+      path: '/manager/bookings',
+      icon: 'event',
+      label: 'Quản lý đặt sân',
     },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="admin-layout">
-      <div className="admin-layout-inner">
+    <div className="manager-layout">
+      <div className="manager-layout-inner">
         {/* Sidebar */}
-        <aside className="admin-sidebar">
+        <aside className="manager-sidebar">
           {/* Logo */}
-          <div className="admin-sidebar-logo">
+          <div className="manager-sidebar-logo">
             <svg
-              className="admin-sidebar-logo-icon"
+              className="manager-sidebar-logo-icon"
               fill="none"
               viewBox="0 0 48 48"
               xmlns="http://www.w3.org/2000/svg"
@@ -55,81 +55,81 @@ const AdminLayout = () => {
                 fillRule="evenodd"
               />
             </svg>
-            <h2 className="admin-sidebar-logo-text">Sân Siêu Tốc</h2>
+            <h2 className="manager-sidebar-logo-text">Sân Siêu Tốc</h2>
           </div>
 
           {/* Navigation */}
-          <div className="admin-sidebar-nav">
-            <div className="admin-sidebar-menu">
+          <div className="manager-sidebar-nav">
+            <div className="manager-sidebar-menu">
               {menuItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`admin-menu-item ${
+                  className={`manager-menu-item ${
                     isActive(item.path) ? 'active' : ''
                   }`}
                 >
                   <span className="material-icons-outlined">{item.icon}</span>
-                  <p className="admin-menu-item-text">{item.label}</p>
+                  <p className="manager-menu-item-text">{item.label}</p>
                 </Link>
               ))}
             </div>
 
             {/* Bottom Menu */}
-            <div className="admin-sidebar-bottom">
-              <Link to="/admin/settings" className="admin-bottom-item">
+            <div className="manager-sidebar-bottom">
+              <Link to="/manager/settings" className="manager-bottom-item">
                 <span className="material-icons-outlined">settings</span>
-                <p className="admin-menu-item-text">Settings</p>
+                <p className="manager-menu-item-text">Settings</p>
               </Link>
               <button
                 onClick={() => {
                   // TODO: Implement logout
                   console.log('Logout');
                 }}
-                className="admin-bottom-item"
+                className="manager-bottom-item"
               >
                 <span className="material-icons-outlined">logout</span>
-                <p className="admin-menu-item-text">Logout</p>
+                <p className="manager-menu-item-text">Logout</p>
               </button>
             </div>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="admin-main">
+        <main className="manager-main">
           {/* Top Navbar */}
-          <header className="admin-header">
-            <div className="admin-header-title-wrapper">
-              <h2 className="admin-header-title">Dashboard Admin</h2>
+          <header className="manager-header">
+            <div className="manager-header-title-wrapper">
+              <h2 className="manager-header-title">Dashboard Chủ Sân</h2>
             </div>
-            <div className="admin-header-actions">
-              <label className="admin-search-wrapper">
-                <div className="admin-search-icon">
+            <div className="manager-header-actions">
+              <label className="manager-search-wrapper">
+                <div className="manager-search-icon">
                   <span className="material-icons-outlined">search</span>
                 </div>
                 <input
-                  className="admin-search-input"
+                  className="manager-search-input"
                   placeholder="Search"
                   type="search"
                 />
               </label>
-              <button className="admin-notification-btn">
+              <button className="manager-notification-btn">
                 <span className="material-icons-outlined">
                   notifications
                 </span>
               </button>
-              <div className="admin-avatar">
+              <div className="manager-avatar">
                 <img
                   src="https://via.placeholder.com/40"
-                  alt="Admin Avatar"
-                  className="admin-avatar-image"
+                  alt="Manager Avatar"
+                  className="manager-avatar-image"
                 />
               </div>
             </div>
           </header>
 
           {/* Page Content */}
-          <div className="admin-content">
+          <div className="manager-content">
             <Outlet />
           </div>
         </main>
@@ -138,4 +138,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default ManagerLayout;
