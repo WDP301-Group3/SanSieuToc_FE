@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sân Siêu Tốc - Đặt sân bóng nhanh chóng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E536", // Bright green from logo
+                        secondary: "#166534", // Darker green for contrast
+                        accent: "#FDE047", // Yellow/Gold from logo outline/lightning
+                        "background-light": "#F0FDF4", // Very light green tint
+                        "background-dark": "#052e16", // Very dark green
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#14532d", // Dark green surface
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "sans-serif"],
+                        body: ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(0, 229, 54, 0.5)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-effect {
+            background: rgba(20, 83, 45, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo-text-shadow {
+            text-shadow: 2px 2px 0px #FDE047;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300">
+<nav class="sticky top-0 z-50 glass-effect border-b border-gray-200 dark:border-green-900">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-20">
+<div class="flex-shrink-0 flex items-center gap-3">
+<img alt="Sân Siêu Tốc Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq7zC5pNcJWTDf9zpprn7dQwHfeIAibcsBA0J2cdnhk7wwD-6SwdJSCPMknpyx-HighEqclSyG38AH2j8k8lHYAJNqlh5aAbvPR42Gb7e6Ka7-dsvg1oikm4K4EUScrYN2fenWe2dMs3BREUzjazdf6cUq9cgK_XiSkSpky6FTkLvLx9DPvDcdM2iEL0mNyzZoT_NyD4KKGPEDKVbV2YB7WS6FIrvyh0UQiIQX9TLt3Eql4hcjIjTkQ_iMp8En4sJkIwzPcJgU"/>
+<span class="hidden md:block font-display font-extrabold text-2xl text-primary logo-text-shadow tracking-tight">Sân Siêu Tốc</span>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Trang chủ</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Đặt sân</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Tin tức</a>
+<a class="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary font-medium transition-colors" href="#">Liên hệ</a>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-surface-dark transition-colors">
+<span class="material-icons-outlined">notifications</span>
+</button>
+<button class="bg-primary hover:bg-green-500 text-white dark:text-green-900 font-bold py-2 px-6 rounded-full shadow-lg hover:shadow-neon transition-all duration-300 flex items-center gap-2">
+<span class="material-icons-outlined text-sm">login</span>
+                        Đăng nhập
+                    </button>
+</div>
+</div>
+</div>
+</nav>
+<div class="relative bg-gradient-to-br from-green-50 to-green-100 dark:from-background-dark dark:to-surface-dark overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 dark:opacity-5">
+<svg class="absolute w-full h-full text-primary fill-current" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path d="M0 100 C 20 0 50 0 100 100 Z"></path>
+</svg>
+</div>
+<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 flex flex-col items-center text-center">
+<h1 class="text-4xl md:text-6xl font-display font-extrabold text-gray-900 dark:text-white mb-6">
+                Tìm sân chơi <span class="text-primary logo-text-shadow">Siêu Tốc</span>
+</h1>
+<p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl">
+                Đặt sân bóng đá, cầu lông, tennis ngay lập tức. Hệ thống tìm kiếm thông minh, đặt sân dễ dàng chỉ trong 30 giây.
+            </p>
+<div class="w-full max-w-4xl bg-white dark:bg-surface-dark rounded-2xl shadow-xl p-3 flex flex-col md:flex-row gap-3 transform transition-all hover:scale-[1.01]">
+<div class="flex-1 relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-gray-400 group-focus-within:text-primary">sports_soccer</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-xl bg-gray-50 dark:bg-green-900/30 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Tìm tên sân, khu vực..." type="text"/>
+</div>
+<div class="w-full md:w-48 relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-gray-400 group-focus-within:text-primary">calendar_today</span>
+</div>
+<select class="block w-full pl-10 pr-10 py-3 border-none rounded-xl bg-gray-50 dark:bg-green-900/30 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+<option>Hôm nay</option>
+<option>Ngày mai</option>
+<option>Cuối tuần này</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-gray-400">expand_more</span>
+</div>
+</div>
+<div class="w-full md:w-48 relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-gray-400 group-focus-within:text-primary">schedule</span>
+</div>
+<select class="block w-full pl-10 pr-10 py-3 border-none rounded-xl bg-gray-50 dark:bg-green-900/30 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+<option>17:00 - 18:30</option>
+<option>18:30 - 20:00</option>
+<option>20:00 - 21:30</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-gray-400">expand_more</span>
+</div>
+</div>
+<button class="w-full md:w-auto bg-primary hover:bg-green-500 text-white dark:text-green-900 font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+<span class="material-icons-outlined">search</span>
+                    Tìm kiếm
+                </button>
+</div>
+</div>
+</div>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">
+<span class="material-icons-outlined text-accent">bolt</span> Sân Nổi Bật
+                </h2>
+<p class="text-gray-500 dark:text-gray-400 mt-2">Các sân được đặt nhiều nhất tuần qua</p>
+</div>
+<a class="hidden sm:flex items-center text-primary font-semibold hover:text-green-600 dark:hover:text-green-300 transition-colors" href="#">
+                Xem tất cả <span class="material-icons-outlined ml-1">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="group bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-green-800">
+<div class="relative h-48 overflow-hidden">
+<img alt="Sân bóng đá cỏ nhân tạo" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEqgwHohTzYnewp5b7DyelYmp910BmXiV3P7ereLn2tn0GXIzIVRVa1lJGps18k_Ae8gAo4MQIREnRpDFgoKfB_DLdiSXb5yL9ytzWiAOyKHNj7pL5w4heSvdJD2ct0VpunHVy5GeuCE7nOAmXD0LOq7z163_1FU0hgGIj0HKGX31CoPLlHNXcupoBfS4PvTT7FXOO5FO_maXprMi4oMsg4CMvnqUAfC8pe8KoO-xdK0HmFaPJDO8Mpk6vWQmo1A0kBJUabwqc"/>
+<div class="absolute top-3 right-3 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-xs font-bold text-primary shadow-sm flex items-center gap-1">
+<span class="material-icons-outlined text-[14px]">star</span> 4.8
+                    </div>
+<div class="absolute bottom-3 left-3 bg-primary text-white dark:text-green-900 text-xs font-bold px-3 py-1 rounded-full">
+                        Sân 7
+                    </div>
+</div>
+<div class="p-5">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors">Sân Bóng Chảo Lửa</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1">
+<span class="material-icons-outlined text-[16px]">location_on</span> Quận Cầu Giấy, Hà Nội
+                    </p>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-green-800">
+<div>
+<span class="text-xs text-gray-500 dark:text-gray-400 block">Giá từ</span>
+<span class="text-lg font-bold text-primary">300.000đ<span class="text-xs text-gray-400 font-normal">/trận</span></span>
+</div>
+<button class="bg-gray-50 dark:bg-green-900 text-gray-900 dark:text-white p-2 rounded-lg hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-green-900 transition-colors">
+<span class="material-icons-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-green-800">
+<div class="relative h-48 overflow-hidden">
+<img alt="Sân bóng đá buổi tối" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYM55J0HDca4QrUNB8BEPELTq7c8v7CVVQKOpQ3FZUEH8tVT-5s2X-QW0ncXVlhfFMhRLWYQwSe5E_N-eJlrZWY5RZxhjPcehUnCrxqswYCtF0t73Utflxu0bVQbMvHMT7f1EGWPfvjDdTdpcfOx18YuhkomnNK4FRoY63t32q0iCD0A5GfWDax2jxd-_zHEN_C6mxaO1XbsHCVKP9OMkNcJt_Ib97kfX8ZnFwqEKd5YR2_zlr57vb42PuDN2TwtM4F9TAWPq7"/>
+<div class="absolute top-3 right-3 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-xs font-bold text-primary shadow-sm flex items-center gap-1">
+<span class="material-icons-outlined text-[14px]">star</span> 4.5
+                    </div>
+<div class="absolute bottom-3 left-3 bg-primary text-white dark:text-green-900 text-xs font-bold px-3 py-1 rounded-full">
+                        Sân 5
+                    </div>
+</div>
+<div class="p-5">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors">Sân Vận Động Mỹ Đình 2</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1">
+<span class="material-icons-outlined text-[16px]">location_on</span> Quận Nam Từ Liêm, Hà Nội
+                    </p>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-green-800">
+<div>
+<span class="text-xs text-gray-500 dark:text-gray-400 block">Giá từ</span>
+<span class="text-lg font-bold text-primary">250.000đ<span class="text-xs text-gray-400 font-normal">/trận</span></span>
+</div>
+<button class="bg-gray-50 dark:bg-green-900 text-gray-900 dark:text-white p-2 rounded-lg hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-green-900 transition-colors">
+<span class="material-icons-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-green-800">
+<div class="relative h-48 overflow-hidden">
+<img alt="Sân tennis" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-3rU5SoKK5Uuz3YEilUa8cMDBJSykEqpVBvo-CD03VhH9qlJuMoe_QdsFOqRRHqxIunMySciBA33eBap7NEKsWCZCchEEDVq8N-2KvZvixubjes1Hhfe9OKXxz3LgSAzk31fV0Z2aub0mkN2ROoBrjE-iq_qN1FeX9_xPLD7i-WG5oLRAGcNfYlCv6Kv_6NPHEbeF83zNnbVkP730xAa2FQQWXISghkI6tOWMUfzGcr-ATBPFWUuXm-3o7-_x5kwfWPdqvXVn"/>
+<div class="absolute top-3 right-3 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-xs font-bold text-primary shadow-sm flex items-center gap-1">
+<span class="material-icons-outlined text-[14px]">star</span> 5.0
+                    </div>
+<div class="absolute bottom-3 left-3 bg-accent text-green-900 text-xs font-bold px-3 py-1 rounded-full">
+                        Tennis
+                    </div>
+</div>
+<div class="p-5">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors">CLB Tennis Thanh Xuân</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1">
+<span class="material-icons-outlined text-[16px]">location_on</span> Quận Thanh Xuân, Hà Nội
+                    </p>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-green-800">
+<div>
+<span class="text-xs text-gray-500 dark:text-gray-400 block">Giá từ</span>
+<span class="text-lg font-bold text-primary">150.000đ<span class="text-xs text-gray-400 font-normal">/giờ</span></span>
+</div>
+<button class="bg-gray-50 dark:bg-green-900 text-gray-900 dark:text-white p-2 rounded-lg hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-green-900 transition-colors">
+<span class="material-icons-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 bg-white dark:bg-surface-dark border-y border-gray-100 dark:border-green-900">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Khám phá theo môn thể thao</h2>
+<div class="flex flex-wrap justify-center gap-4 md:gap-8">
+<button class="flex flex-col items-center group min-w-[100px]">
+<div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900 flex items-center justify-center mb-3 group-hover:bg-primary transition-colors duration-300 shadow-sm">
+<span class="material-icons-outlined text-3xl text-green-600 dark:text-green-300 group-hover:text-white transition-colors">sports_soccer</span>
+</div>
+<span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Bóng đá</span>
+</button>
+<button class="flex flex-col items-center group min-w-[100px]">
+<div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900 flex items-center justify-center mb-3 group-hover:bg-primary transition-colors duration-300 shadow-sm">
+<span class="material-icons-outlined text-3xl text-green-600 dark:text-green-300 group-hover:text-white transition-colors">sports_tennis</span>
+</div>
+<span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Tennis</span>
+</button>
+<button class="flex flex-col items-center group min-w-[100px]">
+<div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900 flex items-center justify-center mb-3 group-hover:bg-primary transition-colors duration-300 shadow-sm">
+<span class="material-icons-outlined text-3xl text-green-600 dark:text-green-300 group-hover:text-white transition-colors">sports_basketball</span>
+</div>
+<span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Bóng rổ</span>
+</button>
+<button class="flex flex-col items-center group min-w-[100px]">
+<div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900 flex items-center justify-center mb-3 group-hover:bg-primary transition-colors duration-300 shadow-sm">
+<span class="material-icons-outlined text-3xl text-green-600 dark:text-green-300 group-hover:text-white transition-colors">pool</span>
+</div>
+<span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Bơi lội</span>
+</button>
+<button class="flex flex-col items-center group min-w-[100px]">
+<div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900 flex items-center justify-center mb-3 group-hover:bg-primary transition-colors duration-300 shadow-sm">
+<span class="material-icons-outlined text-3xl text-green-600 dark:text-green-300 group-hover:text-white transition-colors">sports_volleyball</span>
+</div>
+<span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Bóng chuyền</span>
+</button>
+</div>
+</div>
+</section>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Tất cả sân trống</h2>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full border border-gray-200 dark:border-green-800 bg-white dark:bg-surface-dark text-sm font-medium hover:border-primary hover:text-primary dark:hover:text-primary transition-colors shadow-sm">
+                    Gần tôi nhất
+                </button>
+<button class="px-4 py-2 rounded-full border border-gray-200 dark:border-green-800 bg-white dark:bg-surface-dark text-sm font-medium hover:border-primary hover:text-primary dark:hover:text-primary transition-colors shadow-sm">
+                    Giá thấp nhất
+                </button>
+<button class="px-4 py-2 rounded-full border border-gray-200 dark:border-green-800 bg-white dark:bg-surface-dark text-sm font-medium hover:border-primary hover:text-primary dark:hover:text-primary transition-colors shadow-sm">
+                    Đánh giá cao
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng mini" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFgwivz62bMLFzwoCJoEv_xjVi8Es721jnjd8hrc0sdcRSMIcmC8vvcRKw8vJkRxUDO2Pn69fAbzMoZF0dQsgYkCMj4lpAeAsAYwKxvkvwgkTkFB4VBWB9unmEPbSRMAzD0lkfF1vjQysGC9e4CiGPhqO-xkBzFox4IdGsKh03ufnl1Wemr2iDHJGokyIWBbh6EEPLcScggsfMJwgKZ_Ek90HpfkpD4G5c9nC5tAGGGZgno04FImeXfFwGuofMrZGR19U8taCD"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            2km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân Mini Hoàng Mai</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Ngõ 15 Gốc Đề, Hoàng Mai</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">Trống 3 sân</span>
+<span class="font-bold text-primary text-sm">200k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng rổ" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0Ff6MraJTwzffGt-tRnX2QMrxwnDuCikLlwmjhPpxQ7Hn7nXX5cS5oVsmSo5WqOpZhGQEJFMVAquOofvJeoqjLA3ody8kmBRr0bVormtwa1LCyggDlPx-lAes4z3lCB8Jp9jegwXCTrNx5MqHOpUJ8WN46_oobdhneqO7djnbrP6OrWVKqRM2yb3JtBnx9hKROLbUNU0LFcWFueQtb4N7xEu_Qt45sNf5uO1zVTzm7BkVVXzQ9lwFR_pxv6y5bLNJ6Hi9FYWp"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            5km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Nhà thi đấu Bách Khoa</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Tạ Quang Bửu, Hai Bà Trưng</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 px-2 py-1 rounded-md">Sắp hết chỗ</span>
+<span class="font-bold text-primary text-sm">350k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng đá" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS0gL_5gh-9fk19ElZyVS0Fuek_KijaUqwtO0L-XPPXczuMdwU0suFLi6UoOBAPiyIryuGDT4uGrpe9yFsB5ZYTHeheezuHjVVS0GvWrH6B1rZEvlovhBZiY-j37R11lcUG_OjTmU__25nYs2t0LWsifXIyaxJqM_NrdKPirfBGQkv2nkSbHthC8zmGj9BAK7qwVebv7ITRMMxRKqSwFpl74KKud8jO4qmwzNQkT2nzziZ4CT2EwIDdvM5jMb3tX-fhdu7xn6h"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            3.5km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân bóng Đại học Y</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Tôn Thất Tùng, Đống Đa</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">Trống 5 sân</span>
+<span class="font-bold text-primary text-sm">220k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân tennis" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDudORmu2dX2zHqVJPlYj5tZU7Cdy6K-keNOgDO_SVydp5l2YhNa3kj1g1IB2AKHGwPGediZukUkd2-6pRh-by427ETw2OUvChS2wgJgRXH0LrfHqdTIZkLoxXK7p_UMKKFyglFsVMZiqwhKWJgHc0kQaO_slCo8iEmOunqk17LQuGOH5kRXDlzatQGR0XdsdFu5VtEeDXpHBTPZo301ql75mcrp8nx3wzJrmo-khXdfbXiteKwJ8qJuX4J47aLACp4LpI035Ag"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            7km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Tennis Court Royal City</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Nguyễn Trãi, Thanh Xuân</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 px-2 py-1 rounded-md">Còn 1 sân</span>
+<span class="font-bold text-primary text-sm">500k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng đá cỏ" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZWkRfdUSSjnTrkIRMIMUIPDt5S2QeX2XfLzJLIFB162sW4LM55Dz394LaauPPFUzm3GtKS5WPJ75DcIs1Q3JxDt9UsU9to4bEy7fdt7MtzpKPuTA78W_dIR2xzT4KXONry9wVTitzPP0ndfbDwtexF3f7nT1dvvzhAklPomm1igwM5IlyyxMAhptyp71KtcEFDPH94xRRkRs-ORWy2NVruyJ4k0vBLRUvYMeDP04KcBFe0yHHUv2_LzxGtSmevlhgxbonMYJ5"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            1.2km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân bóng Trung Kính</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Trung Kính, Cầu Giấy</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">Trống nhiều</span>
+<span class="font-bold text-primary text-sm">280k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng đá" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFCJmO169sGEPHNb8xXTmWM3lD4x6fHBbSbMvQY_eqr_qhiunQ81r2YIHm7k4UFc5UXk5yp6Sstlgi8owrxryBzVADoJHwRUT3f2_nSnKXH7n1MNIYo6aWlde2YdpqrKMOWRLNh26dLxDiBQ7J-Izu_Jmftlv4mvi1hEZgGnmpLXvL1DFubSvLY5FHMS3-k5ccAihZlkuqCdEetAhOeAMhMfY_3N_S_VzVaGx0oEyxLVJd1i59SZAilcD8NsIqFgpoQ9zKJ4d1"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            8km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân Mỹ Đình 1</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Lê Đức Thọ, Nam Từ Liêm</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">Trống 2 sân</span>
+<span class="font-bold text-primary text-sm">300k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân cầu lông" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRtaQQVHengVzfguY7XAPSxqEMOj59xQHjOBLT5M0tqFXUM26aq9d8uQUBPbQeaJQBhylV4cgwNaXPAJ9e23hjdFP32hoFyvqoV61KSRbIyi9Z0mm6wjVMV2mpfYxsPPUp5KcKRmLQXcKnvLS_pa59ukwrz4xRMr6RoGe4AVhX_maC0I9KB2vtoMQJTooSQNtVP8ANDcO_qv_16LoVHrUVMrgIq2vCqZL7dcuLOb5Z2v76aDDdBORbcJH_RKRTXUDY5wtz4Lnh"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            4km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân Cầu Lông Cầu Giấy</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Trần Quốc Hoàn, Cầu Giấy</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">Trống 4 sân</span>
+<span class="font-bold text-primary text-sm">100k</span>
+</div>
+</div>
+</div>
+</a>
+<a class="block group" href="#">
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
+<div class="h-40 bg-gray-200 relative">
+<img alt="Sân bóng đá buổi tối" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRNYACy_2yUl7HDuV9ENIICi3AIGWiRUt8KZRHj5jCTN9yMQnJyiSEL_EZNbTi1_NQfvFdfI0P7G9_ExmOOVVTuGFGVmUKGrG-jeVJQnPBbj-WuLTyWEPnm6fvELPhjrJi5QZqwz9FmZ-guO3BD4CASVq8X_bc0HK547jofzeo33oJImEL7djINBFE90v2Kdej_DYmhlPH8zw8qrNDUvc5e0YV8656qAmDckZfZn4kU0BGb1plhFXNOANfINtQxggglUM2tjSu"/>
+<div class="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                            6km
+                        </div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">Sân Bóng PVV</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">Trần Thái Tông, Cầu Giấy</p>
+<div class="flex items-center justify-between mt-3">
+<span class="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 px-2 py-1 rounded-md">Hết sân</span>
+<span class="font-bold text-primary text-sm">320k</span>
+</div>
+</div>
+</div>
+</a>
+</div>
+<div class="mt-12 text-center">
+<button class="inline-flex items-center justify-center px-8 py-3 border border-gray-300 dark:border-green-700 text-base font-medium rounded-xl text-gray-700 dark:text-white bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-green-800 transition-colors">
+                Xem thêm sân khác
+            </button>
+</div>
+</section>
+<footer class="bg-white dark:bg-black border-t border-gray-100 dark:border-green-900 pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-2 mb-4">
+<img alt="Sân Siêu Tốc Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA205xaw0m6HmDVPzPlqv08sQ42b_tVpkht9D6xlg8xjGfpYYL56rUCaA8NnN-nw1NCkaPSaUTT9BqHhpYI-cgBUJgkKNo2DS1mhBcV0Z_vJXnJapqTs5F1CrC_c-1tLkHbiyJBQTdNgHtCB6B88dfDa54qazT8NSxHx0eJFDug1ED_AqQ9nt1X_M2s8jXy3SrqkmT_NQqWOAkP0plXvSRcelQ_rfP18nQT3vvQd4FhGlSsXtGtDX0ToS-uDN19QJKWg-jlg5ih"/>
+<span class="font-display font-bold text-xl text-gray-900 dark:text-white">Sân Siêu Tốc</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                        Hệ thống đặt sân thể thao số 1 Việt Nam. Nhanh chóng, tiện lợi và uy tín.
+                    </p>
+<div class="flex space-x-4">
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><i class="material-icons-outlined">facebook</i></a>
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><i class="material-icons-outlined">camera_alt</i></a>
+</div>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Về chúng tôi</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary" href="#">Giới thiệu</a></li>
+<li><a class="hover:text-primary" href="#">Tuyển dụng</a></li>
+<li><a class="hover:text-primary" href="#">Điều khoản sử dụng</a></li>
+<li><a class="hover:text-primary" href="#">Chính sách bảo mật</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Dành cho chủ sân</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li><a class="hover:text-primary" href="#">Đăng ký sân</a></li>
+<li><a class="hover:text-primary" href="#">Phần mềm quản lý</a></li>
+<li><a class="hover:text-primary" href="#">Bảng giá dịch vụ</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white mb-4">Liên hệ</h3>
+<ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+<li class="flex items-center gap-2"><span class="material-icons-outlined text-sm">email</span> support@sansieutoc.vn</li>
+<li class="flex items-center gap-2"><span class="material-icons-outlined text-sm">phone</span> 1900 1234</li>
+<li class="flex items-center gap-2"><span class="material-icons-outlined text-sm">place</span> Hà Nội, Việt Nam</li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-100 dark:border-green-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-gray-500 dark:text-gray-500 text-sm">© 2023 Sân Siêu Tốc. All rights reserved.</p>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-gray-400">Powered by</span>
+<span class="font-bold text-gray-300 dark:text-gray-600 text-sm">Tailwind CSS</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Check local storage or system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+</body></html>
