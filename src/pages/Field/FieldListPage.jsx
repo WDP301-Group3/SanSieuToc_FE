@@ -4,7 +4,7 @@ import '../../styles/FieldListPage.css';
 
 const FieldListPage = () => {
   const [filters, setFilters] = useState({
-    sportType: ['Bóng đá'],
+    sportType: 'Bóng đá',
     district: '',
     date: '2023-10-27',
     timeFrom: '17:00',
@@ -15,6 +15,7 @@ const FieldListPage = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
 
   // Mock data for fields
   const fields = [
@@ -62,15 +63,13 @@ const FieldListPage = () => {
   const handleSportTypeChange = (sport) => {
     setFilters(prev => ({
       ...prev,
-      sportType: prev.sportType.includes(sport)
-        ? prev.sportType.filter(s => s !== sport)
-        : [...prev.sportType, sport]
+      sportType: sport
     }));
   };
 
   const handleReset = () => {
     setFilters({
-      sportType: [],
+      sportType: '',
       district: '',
       date: '',
       timeFrom: '',
@@ -79,6 +78,40 @@ const FieldListPage = () => {
       priceMax: 1000000
     });
   };
+
+  // Generate 30-minute time slots
+  const timeSlots = [];
+  for (let h = 5; h <= 23; h++) {
+    const hour = h.toString().padStart(2, '0');
+    timeSlots.push(`${hour}:00`);
+    if (h < 23) timeSlots.push(`${hour}:30`);
+  }
+
+  const adjustTime = (field, direction) => {
+    const currentIdx = timeSlots.indexOf(filters[field]);
+    const newIdx = currentIdx + direction;
+    if (newIdx >= 0 && newIdx < timeSlots.length) {
+      setFilters(prev => ({ ...prev, [field]: timeSlots[newIdx] }));
+    }
+  };
+
+  // Price range helpers
+  const PRICE_MIN = 0;
+  const PRICE_MAX = 1000000;
+  const PRICE_STEP = 50000;
+
+  const handlePriceMinChange = (e) => {
+    const val = Math.min(Number(e.target.value), filters.priceMax - PRICE_STEP);
+    setFilters(prev => ({ ...prev, priceMin: val }));
+  };
+
+  const handlePriceMaxChange = (e) => {
+    const val = Math.max(Number(e.target.value), filters.priceMin + PRICE_STEP);
+    setFilters(prev => ({ ...prev, priceMax: val }));
+  };
+
+  const fillLeft = ((filters.priceMin - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+  const fillRight = ((PRICE_MAX - filters.priceMax) / (PRICE_MAX - PRICE_MIN)) * 100;
 
   return (
     <div className="field-list-page">
@@ -114,8 +147,9 @@ const FieldListPage = () => {
                 {['Bóng đá', 'Cầu lông', 'Tennis', 'Bóng rổ'].map(sport => (
                   <label key={sport} className="chip-label">
                     <input
-                      type="checkbox"
-                      checked={filters.sportType.includes(sport)}
+                      type="radio"
+                      name="sportType"
+                      checked={filters.sportType === sport}
                       onChange={() => handleSportTypeChange(sport)}
                       className="chip-input"
                     />
@@ -155,19 +189,59 @@ const FieldListPage = () => {
                   className="time-input"
                 />
                 <div className="time-range">
-                  <input
-                    type="time"
-                    value={filters.timeFrom}
-                    onChange={(e) => setFilters({...filters, timeFrom: e.target.value})}
-                    className="time-input small"
-                  />
+                  <div className="time-spinner">
+                    <button
+                      type="button"
+                      className="time-arrow"
+                      onClick={() => adjustTime('timeFrom', -1)}
+                    >
+                      <span className="material-symbols-outlined">keyboard_arrow_down</span>
+                    </button>
+                    <select
+                      value={filters.timeFrom}
+                      onChange={(e) => setFilters({...filters, timeFrom: e.target.value})}
+                      className="time-input small"
+                    >
+                      <option value="">Từ</option>
+                      {timeSlots.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="time-arrow"
+                      onClick={() => adjustTime('timeFrom', 1)}
+                    >
+                      <span className="material-symbols-outlined">keyboard_arrow_up</span>
+                    </button>
+                  </div>
                   <span className="time-separator">-</span>
-                  <input
-                    type="time"
-                    value={filters.timeTo}
-                    onChange={(e) => setFilters({...filters, timeTo: e.target.value})}
-                    className="time-input small"
-                  />
+                  <div className="time-spinner">
+                    <button
+                      type="button"
+                      className="time-arrow"
+                      onClick={() => adjustTime('timeTo', -1)}
+                    >
+                      <span className="material-symbols-outlined">keyboard_arrow_down</span>
+                    </button>
+                    <select
+                      value={filters.timeTo}
+                      onChange={(e) => setFilters({...filters, timeTo: e.target.value})}
+                      className="time-input small"
+                    >
+                      <option value="">Đến</option>
+                      {timeSlots.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="time-arrow"
+                      onClick={() => adjustTime('timeTo', 1)}
+                    >
+                      <span className="material-symbols-outlined">keyboard_arrow_up</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,48 +254,52 @@ const FieldListPage = () => {
               </div>
               <div className="price-range-slider">
                 <div className="range-track">
-                  <div className="range-fill" style={{ left: '25%', right: '25%' }}></div>
-                  <div className="range-thumb" style={{ left: '25%' }}></div>
-                  <div className="range-thumb" style={{ left: '75%' }}></div>
+                  <div
+                    className="range-fill"
+                    style={{ left: `${fillLeft}%`, right: `${fillRight}%` }}
+                  ></div>
                 </div>
+                <input
+                  type="range"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={filters.priceMin}
+                  onChange={handlePriceMinChange}
+                  className="range-input range-input-min"
+                />
+                <input
+                  type="range"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={filters.priceMax}
+                  onChange={handlePriceMaxChange}
+                  className="range-input range-input-max"
+                />
               </div>
               <div className="price-inputs">
                 <input
                   type="number"
                   value={filters.priceMin}
-                  onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value)})}
+                  onChange={(e) => setFilters({...filters, priceMin: Math.round(Number(e.target.value) / PRICE_STEP) * PRICE_STEP})}
                   className="price-input"
+                  step={PRICE_STEP}
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
                   placeholder="Min"
                 />
                 <span>-</span>
                 <input
                   type="number"
                   value={filters.priceMax}
-                  onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value)})}
+                  onChange={(e) => setFilters({...filters, priceMax: Math.round(Number(e.target.value) / PRICE_STEP) * PRICE_STEP})}
                   className="price-input"
+                  step={PRICE_STEP}
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
                   placeholder="Max"
                 />
-              </div>
-            </div>
-
-            {/* Amenities Filter */}
-            <div className="filter-group">
-              <p className="filter-label">Tiện ích</p>
-              <div className="amenities-grid">
-                {['Wifi', 'Parking', 'Shower', 'Lighting', 'Water', 'Seating'].map(amenity => (
-                  <label key={amenity} className="amenity-checkbox">
-                    <input type="checkbox" />
-                    <span className="amenity-icon material-symbols-outlined">
-                      {amenity === 'Wifi' && 'wifi'}
-                      {amenity === 'Parking' && 'local_parking'}
-                      {amenity === 'Shower' && 'shower'}
-                      {amenity === 'Lighting' && 'light_mode'}
-                      {amenity === 'Water' && 'local_drink'}
-                      {amenity === 'Seating' && 'chair'}
-                    </span>
-                    <span>{amenity}</span>
-                  </label>
-                ))}
               </div>
             </div>
 
@@ -251,10 +329,16 @@ const FieldListPage = () => {
             <div className="results-meta">
               <p className="results-count">Tìm thấy <strong>{fields.length}</strong> sân</p>
               <div className="view-toggle">
-                <button className="view-button active">
+                <button
+                  className={`view-button ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                >
                   <span className="material-symbols-outlined">grid_view</span>
                 </button>
-                <button className="view-button">
+                <button
+                  className={`view-button ${viewMode === 'list' ? 'active' : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
                   <span className="material-symbols-outlined">view_list</span>
                 </button>
               </div>
@@ -268,9 +352,9 @@ const FieldListPage = () => {
           </div>
 
           {/* Fields Grid */}
-          <div className="fields-grid">
+          <div className={`fields-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
             {fields.map(field => (
-              <Link to={`/fields/${field.id}`} key={field.id} className="field-card">
+              <Link to={`/fields/${field.id}`} key={field.id} className={`field-card ${viewMode === 'list' ? 'field-card-list' : ''}`}>
                 <div className="field-image" style={{ backgroundImage: `url(${field.image})` }}>
                   <div className="field-badges">
                     {field.verified && (
