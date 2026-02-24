@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/UserProfilePage.css';
 
 const UserProfilePage = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +20,7 @@ const UserProfilePage = () => {
     { key: 'profile', icon: 'person', label: 'Thông tin cá nhân', to: '/profile' },
     { key: 'bookings', icon: 'calendar_month', label: 'Lịch sử đặt sân', to: '/booking-history' },
     { key: 'payment', icon: 'credit_card', label: 'Phương thức thanh toán', to: '#' },
-    { key: 'settings', icon: 'settings', label: 'Cài đặt', to: '#' },
+    { key: 'settings', icon: 'settings', label: 'Cài đặt', to: '/settings' },
   ];
 
   const upcomingBookings = [
@@ -253,7 +254,8 @@ const UserProfilePage = () => {
                   </div>
                   <div className="profile-booking-actions">
                     {booking.status === 'confirmed' ? (
-                      <button className="btn-detail">Chi tiết</button>
+                      <button className="btn-detail" onClick={() => navigate(`/booking-history/${booking.id}`)}>Chi tiết</button>
+
                     ) : (
                       <button className="btn-rebook">Đặt lại</button>
                     )}
