@@ -15,13 +15,8 @@ import NotFoundPage from './pages/NotFoundPage';
 import FieldListPage from './pages/Field/FieldListPage';
 import FieldDetailPage from './pages/Field/FieldDetailPage';
 
-// Customer Pages (Placeholder)
-const CustomerProfilePage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Customer Profile</h1>
-    <p className="placeholder-text">Customer profile information and settings will be displayed here.</p>
-  </div>
-);
+// Customer Pages
+import UserProfilePage from './pages/Customer/UserProfilePage';
 
 const BookingHistoryPage = () => (
   <div className="placeholder-container">
@@ -73,7 +68,7 @@ function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<CustomerProfilePage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/booking-history" element={<BookingHistoryPage />} />
         </Route>
 
