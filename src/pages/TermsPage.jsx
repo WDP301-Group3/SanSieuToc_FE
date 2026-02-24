@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/TermsPage.css';
 
 const TermsPage = () => {
   const [activeSection, setActiveSection] = useState('general-terms');
@@ -81,25 +82,27 @@ const TermsPage = () => {
         <article className="terms-content">
           {/* Section 1: General Terms */}
           <section id="general-terms" className="terms-section">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 flex items-center gap-2">
-              <span className="material-icons-outlined text-primary">info</span>
+            <h2 className="terms-section-title">
+              <span className="material-icons-outlined terms-section-icon">info</span>
               1. Điều khoản chung
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-              Chào mừng bạn đến với Sân Siêu Tốc. Bằng việc truy cập và sử dụng dịch vụ của chúng
-              tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu tại đây.
-            </p>
-            <ul className="list-disc list-inside space-y-2 mb-6 text-gray-600 dark:text-gray-300">
-              <li>Dịch vụ của chúng tôi chỉ dành cho cá nhân từ 15 tuổi trở lên.</li>
-              <li>Người dùng có trách nhiệm bảo mật thông tin tài khoản cá nhân.</li>
-              <li>
-                Sân Siêu Tốc có quyền thay đổi nội dung chính sách này bất kỳ lúc nào mà không cần
-                thông báo trước.
-              </li>
-            </ul>
+            <div className="terms-section-content">
+              <p>
+                Chào mừng bạn đến với Sân Siêu Tốc. Bằng việc truy cập và sử dụng dịch vụ của chúng
+                tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu tại đây.
+              </p>
+              <ul>
+                <li>Dịch vụ của chúng tôi chỉ dành cho cá nhân từ 15 tuổi trở lên.</li>
+                <li>Người dùng có trách nhiệm bảo mật thông tin tài khoản cá nhân.</li>
+                <li>
+                  Sân Siêu Tốc có quyền thay đổi nội dung chính sách này bất kỳ lúc nào mà không cần
+                  thông báo trước.
+                </li>
+              </ul>
+            </div>
           </section>
 
-          <hr className="my-8 border-gray-100 dark:border-green-900" />
+          <hr className="terms-section-divider" />
 
           {/* Section 2: Booking Policy */}
           <section id="booking-policy" className="terms-section">
@@ -113,7 +116,7 @@ const TermsPage = () => {
                 đặt sân sau:
               </p>
 
-              <h3>
+              <h3 className="terms-subsection-title">
                 Quy trình đặt sân
               </h3>
               <ul>
@@ -127,7 +130,7 @@ const TermsPage = () => {
                 <li>Mỗi tài khoản không được đặt quá 3 sân trong cùng một khung giờ.</li>
               </ul>
 
-              <h3>
+              <h3 className="terms-subsection-title">
                 Trách nhiệm của người chơi
               </h3>
               <p>
@@ -181,7 +184,7 @@ const TermsPage = () => {
                 Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo tiêu chuẩn an toàn cao nhất.
               </p>
 
-              <h3>
+              <h3 className="terms-subsection-title">
                 Thông tin thu thập
               </h3>
               <p>
@@ -189,7 +192,7 @@ const TermsPage = () => {
                 (khi được phép) để gợi ý các sân gần nhất.
               </p>
 
-              <h3>
+              <h3 className="terms-subsection-title">
                 Sử dụng thông tin
               </h3>
               <ul>
@@ -228,6 +231,7 @@ const TermsPage = () => {
           {/* Contact Info */}
           <div className="terms-highlight">
             <p className="terms-highlight-content">
+              <span className="material-icons-outlined" style={{ fontSize: '1.25rem', verticalAlign: 'middle', marginRight: '0.5rem' }}>info</span>
               Nếu bạn có bất kỳ câu hỏi nào về các chính sách này, vui lòng liên hệ với chúng tôi
               qua hotline{' '}
               <span className="terms-contact-link">1900 1234</span> hoặc email{' '}

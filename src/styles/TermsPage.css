@@ -185,6 +185,16 @@
   scroll-margin-top: 7rem;
 }
 
+.terms-section-divider {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid rgb(229 231 235);
+}
+
+.dark .terms-section-divider {
+  border-top-color: rgb(55 65 81);
+}
+
 .terms-section-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -202,6 +212,18 @@
 .terms-section-icon {
   color: #00E536;
   font-size: 1.75rem;
+}
+
+.terms-subsection-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dark .terms-subsection-title {
+  color: rgb(229 231 235);
 }
 
 .terms-section-content {

@@ -1,82 +1,146 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { searchFields } from '../../services/fieldService';
+import { ALL_DISTRICTS, PRICE_RANGE } from '../../data/mockData';
 import '../../styles/FieldListPage.css';
 
+/**
+ * FieldListPage Component
+ * Displays searchable and filterable list of sports fields
+ * 
+ * Features:
+ * - 6 filter types (text search, category, field type, location, price range, date/time)
+ * - Field type filter dynamically shown only for Football category
+ * - 4 sort options (name, price asc/desc, newest)
+ * - Pagination (9 items per page)
+ * - Responsive design with mobile filters
+ * - Loading, error, and empty states
+ * 
+ * Note: Utilities are displayed on cards but NOT filterable (simplified UX)
+ * Note: Field type filter (Sân 5/7/11 người) only appears when Football is selected
+ * 
+ * @component
+ */
 const FieldListPage = () => {
+  // Filter state matching fieldService API
   const [filters, setFilters] = useState({
-    sportType: ['Bóng đá'],
+    searchText: '',
+    categoryName: '', // 'Football', 'Tennis', 'Badminton', 'Basketball', 'Volleyball'
+    fieldTypeName: '', // Only used when categoryName === 'Football'
     district: '',
-    date: '2023-10-27',
-    timeFrom: '17:00',
-    timeTo: '19:00',
-    priceMin: 200000,
-    priceMax: 800000
+    priceMin: PRICE_RANGE.min,
+    priceMax: PRICE_RANGE.max,
+    date: '',
+    startTime: '',
+    endTime: '',
+    status: 'Available', // Filter only available fields
+    sortBy: 'newest', // 'name' | 'price-asc' | 'price-desc' | 'newest'
+    page: 1
   });
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // UI state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  
+  // Data state
+  const [fields, setFields] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 9, total: 0, totalPages: 1 });
+  const [facets, setFacets] = useState({ categories: [], districts: [], priceRange: PRICE_RANGE });
+  
+  // Loading & error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data for fields
-  const fields = [
-    {
-      id: 1,
-      name: 'Sân Bóng Đá Mini 7 Người - Khu A',
-      address: '123 Đường Thể Thao, Quận 7, TP.HCM',
-      sportType: 'Bóng đá',
-      price: 300000,
-      rating: 4.8,
-      reviews: 128,
-      image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400',
-      amenities: ['Wifi', 'Parking', 'Shower', 'Lighting'],
-      verified: true,
-      quickBook: true
-    },
-    {
-      id: 2,
-      name: 'Sân Cầu Lông Số 3',
-      address: '456 Nguyễn Văn Linh, Quận Cầu Giấy, Hà Nội',
-      sportType: 'Cầu lông',
-      price: 150000,
-      rating: 4.6,
-      reviews: 89,
-      image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400',
-      amenities: ['Wifi', 'Parking', 'Water'],
-      verified: true,
-      quickBook: false
-    },
-    {
-      id: 3,
-      name: 'Sân Tennis Cao Cấp',
-      address: '789 Lê Lợi, Quận Thanh Xuân, Hà Nội',
-      sportType: 'Tennis',
-      price: 500000,
-      rating: 4.9,
-      reviews: 245,
-      image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400',
-      amenities: ['Wifi', 'Parking', 'Shower', 'Lighting', 'Water'],
-      verified: true,
-      quickBook: true
-    }
-  ];
+  /**
+   * Fetch fields from service based on current filters
+   * Called on mount and when filters change
+   */
+  useEffect(() => {
+    const fetchFields = async () => {
+      setLoading(true);
+      setError(null);
 
-  const handleSportTypeChange = (sport) => {
+      try {
+        const result = await searchFields(filters);
+        
+        if (result.success) {
+          setFields(result.data.fields);
+          setPagination(result.data.pagination);
+          setFacets(result.data.facets);
+        } else {
+          setError(result.error || 'Không thể tải danh sách sân');
+        }
+      } catch (err) {
+        setError('Đã xảy ra lỗi khi tải dữ liệu');
+        console.error('Error fetching fields:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFields();
+  }, [filters]);
+
+  /**
+   * Handle category filter change
+   * @param {string} category - Category name to toggle
+   */
+  const handleCategoryChange = (category) => {
     setFilters(prev => ({
       ...prev,
-      sportType: prev.sportType.includes(sport)
-        ? prev.sportType.filter(s => s !== sport)
-        : [...prev.sportType, sport]
+      categoryName: prev.categoryName === category ? '' : category,
+      fieldTypeName: '', // Reset field type when category changes
+      page: 1 // Reset to page 1 when filter changes
     }));
   };
 
+  /**
+   * Handle field type filter change (only for Football)
+   * @param {string} typeName - Field type name
+   */
+  const handleFieldTypeChange = (typeName) => {
+    setFilters(prev => ({
+      ...prev,
+      fieldTypeName: prev.fieldTypeName === typeName ? '' : typeName,
+      page: 1
+    }));
+  };
+
+  /**
+   * Handle sort change
+   * @param {string} sortValue - Sort option value
+   */
+  const handleSortChange = (sortValue) => {
+    setFilters(prev => ({ ...prev, sortBy: sortValue, page: 1 }));
+  };
+
+  /**
+   * Handle page change
+   * @param {number} newPage - Page number to navigate to
+   */
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setFilters(prev => ({ ...prev, page: newPage }));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  /**
+   * Reset all filters to default values
+   */
   const handleReset = () => {
     setFilters({
-      sportType: [],
+      searchText: '',
+      categoryName: '',
+      fieldTypeName: '',
       district: '',
+      priceMin: PRICE_RANGE.min,
+      priceMax: PRICE_RANGE.max,
       date: '',
-      timeFrom: '',
-      timeTo: '',
-      priceMin: 0,
-      priceMax: 1000000
+      startTime: '',
+      endTime: '',
+      status: 'Available',
+      sortBy: 'newest',
+      page: 1
     });
   };
 
@@ -111,19 +175,43 @@ const FieldListPage = () => {
             <div className="filter-group">
               <p className="filter-label">Môn thể thao</p>
               <div className="sport-chips">
-                {['Bóng đá', 'Cầu lông', 'Tennis', 'Bóng rổ'].map(sport => (
-                  <label key={sport} className="chip-label">
+                {facets.categories.map(({ name, count }) => (
+                  <label key={name} className="chip-label">
                     <input
                       type="checkbox"
-                      checked={filters.sportType.includes(sport)}
-                      onChange={() => handleSportTypeChange(sport)}
+                      checked={filters.categoryName === name}
+                      onChange={() => handleCategoryChange(name)}
                       className="chip-input"
                     />
-                    <div className="chip">{sport}</div>
+                    <div className="chip">
+                      {name} ({count})
+                    </div>
                   </label>
                 ))}
               </div>
             </div>
+
+            {/* Field Type Filter - Only for Football */}
+            {filters.categoryName === 'Football' && (
+              <div className="filter-group">
+                <p className="filter-label">Loại sân</p>
+                <div className="sport-chips">
+                  {['Sân 5 người', 'Sân 7 người', 'Sân 11 người'].map((typeName) => (
+                    <label key={typeName} className="chip-label">
+                      <input
+                        type="checkbox"
+                        checked={filters.fieldTypeName === typeName}
+                        onChange={() => handleFieldTypeChange(typeName)}
+                        className="chip-input"
+                      />
+                      <div className="chip">
+                        {typeName}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Location Filter */}
             <div className="filter-group">
@@ -131,14 +219,18 @@ const FieldListPage = () => {
               <div className="select-wrapper">
                 <select
                   value={filters.district}
-                  onChange={(e) => setFilters({...filters, district: e.target.value})}
+                  onChange={(e) => setFilters({...filters, district: e.target.value, page: 1})}
                   className="filter-select"
                 >
                   <option value="">Tất cả Quận/Huyện</option>
-                  <option value="dongda">Quận Đống Đa</option>
-                  <option value="caugiay">Quận Cầu Giấy</option>
-                  <option value="thanhxuan">Quận Thanh Xuân</option>
-                  <option value="haibatrung">Quận Hai Bà Trưng</option>
+                  {ALL_DISTRICTS.map(district => (
+                    <option key={district} value={district}>
+                      {district}
+                      {facets.districts.find(d => d.name === district) && 
+                        ` (${facets.districts.find(d => d.name === district).count})`
+                      }
+                    </option>
+                  ))}
                 </select>
                 <span className="material-symbols-outlined select-icon">expand_more</span>
               </div>
@@ -151,21 +243,22 @@ const FieldListPage = () => {
                 <input
                   type="date"
                   value={filters.date}
-                  onChange={(e) => setFilters({...filters, date: e.target.value})}
+                  onChange={(e) => setFilters({...filters, date: e.target.value, page: 1})}
                   className="time-input"
+                  min={new Date().toISOString().split('T')[0]}
                 />
                 <div className="time-range">
                   <input
                     type="time"
-                    value={filters.timeFrom}
-                    onChange={(e) => setFilters({...filters, timeFrom: e.target.value})}
+                    value={filters.startTime}
+                    onChange={(e) => setFilters({...filters, startTime: e.target.value, page: 1})}
                     className="time-input small"
                   />
                   <span className="time-separator">-</span>
                   <input
                     type="time"
-                    value={filters.timeTo}
-                    onChange={(e) => setFilters({...filters, timeTo: e.target.value})}
+                    value={filters.endTime}
+                    onChange={(e) => setFilters({...filters, endTime: e.target.value, page: 1})}
                     className="time-input small"
                   />
                 </div>
@@ -176,56 +269,37 @@ const FieldListPage = () => {
             <div className="filter-group">
               <div className="price-header">
                 <p className="filter-label">Khoảng giá</p>
-                <p className="price-display">{filters.priceMin / 1000}k - {filters.priceMax / 1000}k</p>
-              </div>
-              <div className="price-range-slider">
-                <div className="range-track">
-                  <div className="range-fill" style={{ left: '25%', right: '25%' }}></div>
-                  <div className="range-thumb" style={{ left: '25%' }}></div>
-                  <div className="range-thumb" style={{ left: '75%' }}></div>
-                </div>
+                <p className="price-display">
+                  {(filters.priceMin / 1000).toLocaleString()}k - {(filters.priceMax / 1000).toLocaleString()}k
+                </p>
               </div>
               <div className="price-inputs">
                 <input
                   type="number"
                   value={filters.priceMin}
-                  onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value)})}
+                  onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value), page: 1})}
                   className="price-input"
                   placeholder="Min"
+                  min={PRICE_RANGE.min}
+                  max={filters.priceMax}
+                  step={10000}
                 />
                 <span>-</span>
                 <input
                   type="number"
                   value={filters.priceMax}
-                  onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value)})}
+                  onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value), page: 1})}
                   className="price-input"
                   placeholder="Max"
+                  min={filters.priceMin}
+                  max={PRICE_RANGE.max}
+                  step={10000}
                 />
               </div>
             </div>
 
-            {/* Amenities Filter */}
-            <div className="filter-group">
-              <p className="filter-label">Tiện ích</p>
-              <div className="amenities-grid">
-                {['Wifi', 'Parking', 'Shower', 'Lighting', 'Water', 'Seating'].map(amenity => (
-                  <label key={amenity} className="amenity-checkbox">
-                    <input type="checkbox" />
-                    <span className="amenity-icon material-symbols-outlined">
-                      {amenity === 'Wifi' && 'wifi'}
-                      {amenity === 'Parking' && 'local_parking'}
-                      {amenity === 'Shower' && 'shower'}
-                      {amenity === 'Lighting' && 'light_mode'}
-                      {amenity === 'Water' && 'local_drink'}
-                      {amenity === 'Seating' && 'chair'}
-                    </span>
-                    <span>{amenity}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <button className="apply-filter-button">Áp dụng bộ lọc</button>
+            {/* Amenities Filter - REMOVED (Simplified UX) */}
+            {/* Utilities are displayed on field cards but not filterable */}
           </div>
         </aside>
 
@@ -237,9 +311,9 @@ const FieldListPage = () => {
               <span className="material-symbols-outlined search-icon">search</span>
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm theo tên sân..."
+                value={filters.searchText}
+                onChange={(e) => setFilters({...filters, searchText: e.target.value, page: 1})}
+                placeholder="Tìm kiếm theo tên sân, địa chỉ..."
                 className="search-input"
               />
             </label>
@@ -249,7 +323,13 @@ const FieldListPage = () => {
           <div className="results-header">
             <h1 className="results-title">Danh sách sân thể thao</h1>
             <div className="results-meta">
-              <p className="results-count">Tìm thấy <strong>{fields.length}</strong> sân</p>
+              <p className="results-count">
+                {loading ? (
+                  'Đang tải...'
+                ) : (
+                  <>Tìm thấy <strong>{pagination.total}</strong> sân</>
+                )}
+              </p>
               <div className="view-toggle">
                 <button className="view-button active">
                   <span className="material-symbols-outlined">grid_view</span>
@@ -258,85 +338,179 @@ const FieldListPage = () => {
                   <span className="material-symbols-outlined">view_list</span>
                 </button>
               </div>
-              <select className="sort-select">
-                <option>Mới nhất</option>
-                <option>Giá thấp nhất</option>
-                <option>Giá cao nhất</option>
-                <option>Đánh giá cao nhất</option>
+              <select 
+                className="sort-select"
+                value={filters.sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="name">Tên A-Z</option>
+                <option value="price-asc">Giá thấp nhất</option>
+                <option value="price-desc">Giá cao nhất</option>
               </select>
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Đang tải danh sách sân...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="error-container">
+              <span className="material-symbols-outlined error-icon">error</span>
+              <h3>Có lỗi xảy ra</h3>
+              <p>{error}</p>
+              <button onClick={() => setFilters({...filters})} className="retry-button">
+                Thử lại
+              </button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && fields.length === 0 && (
+            <div className="empty-container">
+              <span className="material-symbols-outlined empty-icon">search_off</span>
+              <h3>Không tìm thấy sân phù hợp</h3>
+              <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+              <button onClick={handleReset} className="reset-filters-button">
+                Đặt lại bộ lọc
+              </button>
+            </div>
+          )}
+
           {/* Fields Grid */}
-          <div className="fields-grid">
-            {fields.map(field => (
-              <Link to={`/fields/${field.id}`} key={field.id} className="field-card">
-                <div className="field-image" style={{ backgroundImage: `url(${field.image})` }}>
-                  <div className="field-badges">
-                    {field.verified && (
-                      <span className="badge badge-verified">
-                        <span className="material-symbols-outlined">verified</span>
-                        Đã xác thực
-                      </span>
-                    )}
-                    {field.quickBook && (
-                      <span className="badge badge-quick">
-                        <span className="material-symbols-outlined">bolt</span>
-                        Đặt nhanh
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="field-content">
-                  <div className="field-header">
-                    <h3 className="field-name">{field.name}</h3>
-                    <div className="field-rating">
-                      <span className="material-symbols-outlined rating-star">star</span>
-                      <span className="rating-value">{field.rating}</span>
-                      <span className="rating-count">({field.reviews})</span>
+          {!loading && !error && fields.length > 0 && (
+            <div className="fields-grid">
+              {fields.map(field => (
+                <Link to={`/fields/${field._id}`} key={field._id} className="field-card">
+                  <div 
+                    className="field-image" 
+                    style={{ 
+                      backgroundImage: `url(${field.image && field.image[0] ? field.image[0] : 'https://via.placeholder.com/400x300?text=No+Image'})`
+                    }}
+                  >
+                    <div className="field-badges">
+                      {field.status === 'Available' && (
+                        <span className="badge badge-verified">
+                          <span className="material-symbols-outlined">verified</span>
+                          Có sẵn
+                        </span>
+                      )}
+                      {field.manager?.verified && (
+                        <span className="badge badge-quick">
+                          <span className="material-symbols-outlined">bolt</span>
+                          Chủ sân xác thực
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="field-location">
-                    <span className="material-symbols-outlined">location_on</span>
-                    <span>{field.address}</span>
-                  </div>
-                  <div className="field-amenities">
-                    {field.amenities.slice(0, 4).map(amenity => (
-                      <span key={amenity} className="amenity-tag">{amenity}</span>
-                    ))}
-                    {field.amenities.length > 4 && (
-                      <span className="amenity-tag more">+{field.amenities.length - 4}</span>
-                    )}
-                  </div>
-                  <div className="field-footer">
-                    <div className="field-price">
-                      <span className="price-amount">{field.price.toLocaleString()}đ</span>
-                      <span className="price-unit">/giờ</span>
+                  <div className="field-content">
+                    <div className="field-header">
+                      <h3 className="field-name">{field.fieldName}</h3>
+                      <div className="field-rating">
+                        <span className="material-symbols-outlined rating-star">star</span>
+                        <span className="rating-value">
+                          {field.averageRating ? field.averageRating.toFixed(1) : '5.0'}
+                        </span>
+                      </div>
                     </div>
-                    <button className="book-button">
-                      Đặt ngay
-                      <span className="material-symbols-outlined">arrow_forward</span>
-                    </button>
+                    <div className="field-location">
+                      <span className="material-symbols-outlined">location_on</span>
+                      <span>{field.address}</span>
+                    </div>
+                    <div className="field-type-info">
+                      <span className="type-badge">
+                        {field.fieldType?.category?.categoryName || 'Sports'}
+                      </span>
+                      <span className="type-detail">
+                        {field.fieldType?.typeName || ''}
+                      </span>
+                    </div>
+                    <div className="field-amenities">
+                      {field.utilities?.slice(0, 4).map(utility => (
+                        <span key={utility} className="amenity-tag">{utility}</span>
+                      ))}
+                      {field.utilities && field.utilities.length > 4 && (
+                        <span className="amenity-tag more">+{field.utilities.length - 4}</span>
+                      )}
+                    </div>
+                    <div className="field-footer">
+                      <div className="field-price">
+                        <span className="price-amount">{field.hourlyPrice.toLocaleString()}đ</span>
+                        <span className="price-unit">/giờ</span>
+                      </div>
+                      <button className="book-button">
+                        Đặt ngay
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="pagination">
-            <button className="pagination-button" disabled>
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button className="pagination-button active">1</button>
-            <button className="pagination-button">2</button>
-            <button className="pagination-button">3</button>
-            <span className="pagination-dots">...</span>
-            <button className="pagination-button">10</button>
-            <button className="pagination-button">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+          {!loading && !error && fields.length > 0 && (
+            <div className="pagination">
+              <button 
+                className="pagination-button" 
+                disabled={filters.page === 1}
+                onClick={() => handlePageChange(filters.page - 1)}
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              
+              {/* Page numbers */}
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (filters.page <= 3) {
+                  pageNum = i + 1;
+                } else if (filters.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = filters.page - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    className={`pagination-button ${filters.page === pageNum ? 'active' : ''}`}
+                    onClick={() => handlePageChange(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              
+              {pagination.totalPages > 5 && filters.page < pagination.totalPages - 2 && (
+                <>
+                  <span className="pagination-dots">...</span>
+                  <button
+                    className="pagination-button"
+                    onClick={() => handlePageChange(pagination.totalPages)}
+                  >
+                    {pagination.totalPages}
+                  </button>
+                </>
+              )}
+              
+              <button 
+                className="pagination-button"
+                disabled={filters.page === pagination.totalPages}
+                onClick={() => handlePageChange(filters.page + 1)}
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          )}
         </main>
       </div>
     </div>

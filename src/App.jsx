@@ -5,9 +5,7 @@ import ManagerLayout from './components/layout/ManagerLayout';
 // Pages
 import HomePage from './pages/Home/HomePage';
 import TestTailwind from './pages/TestTailwind';
-import LoginPage from './pages/Auth/LoginPage';
-import RegisterPage from '../pages template/RegisterPage';
-import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import AuthPage from './pages/Auth/AuthPage'; // Unified Auth Interface
 import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -67,10 +65,15 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/test-tailwind" element={<TestTailwind />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          
+          {/* Auth Routes (inside MainLayout with Header/Footer) */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<AuthPage />} />
+          
+          {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
           <Route path="/profile" element={<CustomerProfilePage />} />
