@@ -1,15 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/TermsPage.css';
+import '../styles/TermsPage.css';
 
 const TermsPage = () => {
   const [activeSection, setActiveSection] = useState('general-terms');
+  const [navHidden, setNavHidden] = useState(false);
 
   useEffect(() => {
-    // Smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
 
-    // Intersection Observer for sidebar active state
+    // Watch navbar hidden state
+    const checkNavbar = () => {
+      const nav = document.querySelector('.header-nav');
+      if (nav) {
+        setNavHidden(nav.classList.contains('header-hidden'));
+      }
+    };
+
+    const navObserver = new MutationObserver(checkNavbar);
+    const nav = document.querySelector('.header-nav');
+    if (nav) {
+      navObserver.observe(nav, { attributes: true, attributeFilter: ['class'] });
+    }
+
     const observerOptions = {
       root: null,
       rootMargin: '-20% 0px -70% 0px',
@@ -30,6 +44,7 @@ const TermsPage = () => {
 
     return () => {
       observer.disconnect();
+      navObserver.disconnect();
     };
   }, []);
 
@@ -44,43 +59,47 @@ const TermsPage = () => {
   const sidebarLinks = [
     { id: 'general-terms', icon: 'gavel', label: 'Điều khoản chung' },
     { id: 'booking-policy', icon: 'event_available', label: 'Quy định đặt sân' },
-    { id: 'refund-policy', icon: 'payments', label: 'Hủy lịch & Hoàn tiền' },
-    { id: 'privacy-policy', icon: 'verified_user', label: 'Chính sách bảo mật' },
+    { id: 'refund-policy', icon: 'payments', label: 'Thanh toán & Hoàn phí' },
+    { id: 'privacy-policy', icon: 'verified_user', label: 'An toàn & Bảo mật' },
     { id: 'community-rules', icon: 'groups', label: 'Quy tắc cộng đồng' },
   ];
 
   return (
     <main className="terms-page">
+      
+
       {/* Page Header */}
       <div className="terms-header">
-        <h1 className="terms-title">
-          Điều khoản sử dụng
-        </h1>
+        <h1 className="terms-title" style={{ color: '#1e8d38ff' }}>Điều khoản sử dụng</h1>
         <p className="terms-meta">
+          <span className="material-symbols-outlined terms-meta-icon">calendar_today</span>
           Cập nhật lần cuối: 30 tháng 01, 2026
         </p>
       </div>
 
       <div className="terms-container">
         {/* Sidebar Navigation */}
-        <aside className="terms-sidebar">
+        <aside className={`terms-sidebar ${navHidden ? 'nav-hidden' : ''}`}>
           <div className="terms-sidebar-sticky">
-            {sidebarLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className={`terms-nav-link ${activeSection === link.id ? 'active' : ''}`}
-              >
-                <span className="material-icons-outlined">{link.icon}</span>
-                {link.label}
-              </button>
-            ))}
+            <p className="terms-sidebar-label">MỤC LỤC</p>
+            <nav className="terms-nav-list">
+              {sidebarLinks.map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollToSection(link.id)}
+                  className={`terms-nav-link ${activeSection === link.id ? 'active' : ''}`}
+                >
+                  <span className="material-symbols-outlined terms-nav-icon">{link.icon}</span>
+                  {link.label}
+                </button>
+              ))}
+            </nav>
           </div>
         </aside>
 
         {/* Main Content */}
         <article className="terms-content">
-          {/* Section 1: General Terms */}
+          {/* Section 1: Điều khoản chung */}
           <section id="general-terms" className="terms-section">
             <h2 className="terms-section-title">
               <span className="material-icons-outlined terms-section-icon">info</span>
@@ -107,13 +126,15 @@ const TermsPage = () => {
           {/* Section 2: Booking Policy */}
           <section id="booking-policy" className="terms-section">
             <h2 className="terms-section-title">
-              <span className="material-icons-outlined terms-section-icon">calendar_month</span>
+              <span className="terms-section-icon-wrapper green">
+                <span className="material-symbols-outlined">event_available</span>
+              </span>
               2. Quy định đặt sân
             </h2>
-            <div className="terms-section-content">
+            <div className="terms-section-body">
               <p>
-                Để đảm bảo trải nghiệm tốt nhất cho mọi người dùng, chúng tôi áp dụng các quy tắc
-                đặt sân sau:
+                Để đảm bảo công bằng cho tất cả các vận động viên và chủ sân, quy trình đặt sân được
+                quy định nghiêm ngặt như sau:
               </p>
 
               <h3 className="terms-subsection-title">
@@ -141,45 +162,49 @@ const TermsPage = () => {
             </div>
           </section>
 
-          <hr className="terms-section-divider" />
-
-          {/* Section 3: Refund Policy */}
+          {/* Section 3: Thanh toán & Hoàn phí */}
           <section id="refund-policy" className="terms-section">
             <h2 className="terms-section-title">
-              <span className="material-icons-outlined terms-section-icon">undo</span>
-              3. Hủy lịch & Hoàn tiền
+              <span className="terms-section-icon-wrapper orange">
+                <span className="material-symbols-outlined">payments</span>
+              </span>
+              3. Thanh toán & Hoàn phí
             </h2>
-            <div className="terms-section-content">
+            <div className="terms-section-body">
               <p>
-                Chính sách hủy lịch được thiết kế để bảo vệ quyền lợi của cả người chơi và chủ sân:
+                Sân Siêu Tốc hỗ trợ đa dạng phương thức thanh toán từ ví điện tử đến chuyển khoản
+                ngân hàng nhằm tối ưu hóa sự tiện lợi.
               </p>
-              <ul>
-                <li>
-                  <strong>Hủy trước 24 giờ:</strong> Hoàn lại 100% tiền cọc vào ví Sân Siêu Tốc.
-                </li>
-                <li>
-                  <strong>Hủy từ 12 - 24 giờ:</strong> Hoàn lại 50% tiền cọc.
-                </li>
-                <li>
-                  <strong>Hủy dưới 12 giờ:</strong> Không được hoàn lại tiền cọc.
-                </li>
-                <li>
-                  Trường hợp bất khả kháng (thiên tai, dịch bệnh): Hoàn trả toàn bộ phí theo quyết
-                  định của ban quản lý.
-                </li>
-              </ul>
+
+              <div className="terms-refund-cards">
+                <div className="terms-refund-card">
+                  <p className="terms-refund-time">Hủy trước 24h</p>
+                  <p className="terms-refund-percent green">Hoàn 100% tiền cọc</p>
+                </div>
+                <div className="terms-refund-card">
+                  <p className="terms-refund-time">Hủy từ 12h - 24h</p>
+                  <p className="terms-refund-percent orange">Hoàn 50% tiền cọc</p>
+                </div>
+              </div>
+
+              <p className="terms-note">
+                <em>
+                  Lưu ý: Các trường hợp bất khả kháng như thiên tai hoặc sự cố kỹ thuật từ phía chủ sân
+                  sẽ được hệ thống xem xét hoàn trả toàn bộ chi phí trong vòng 24-48 giờ làm việc.
+                </em>
+              </p>
             </div>
           </section>
 
-          <hr className="terms-section-divider" />
-
-          {/* Section 4: Privacy Policy */}
+          {/* Section 4: An toàn & Bảo mật */}
           <section id="privacy-policy" className="terms-section">
             <h2 className="terms-section-title">
-              <span className="material-icons-outlined terms-section-icon">security</span>
-              4. Chính sách bảo mật
+              <span className="terms-section-icon-wrapper purple">
+                <span className="material-symbols-outlined">verified_user</span>
+              </span>
+              4. An toàn & Bảo mật
             </h2>
-            <div className="terms-section-content">
+            <div className="terms-section-body">
               <p>
                 Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo tiêu chuẩn an toàn cao nhất.
               </p>
@@ -206,24 +231,23 @@ const TermsPage = () => {
             </div>
           </section>
 
-          <hr className="terms-section-divider" />
-
-          {/* Section 5: Community Rules */}
+          {/* Section 5: Quy tắc cộng đồng */}
           <section id="community-rules" className="terms-section">
             <h2 className="terms-section-title">
-              <span className="material-icons-outlined terms-section-icon">sentiment_satisfied</span>
+              <span className="terms-section-icon-wrapper teal">
+                <span className="material-symbols-outlined">groups</span>
+              </span>
               5. Quy tắc cộng đồng
             </h2>
-            <div className="terms-section-content">
+            <div className="terms-section-body">
               <p>
-                Xây dựng cộng đồng thể thao văn minh, chuyên nghiệp:
+                Chúng tôi mong muốn xây dựng một cộng đồng thể thao văn minh, nơi tinh thần fair-play
+                được đặt lên hàng đầu:
               </p>
-              <ul>
-                <li>Không gây gổ, mất trật tự tại các cơ sở thể thao.</li>
-                <li>Giữ gìn vệ sinh chung và bảo quản trang thiết bị của sân.</li>
-                <li>
-                  Nghiêm cấm các hành vi gian lận trong việc đặt lịch hoặc đánh giá dịch vụ.
-                </li>
+              <ul className="terms-bullet-list">
+                <li>Tôn trọng các vận động viên khác và nhân viên quản lý tại sân.</li>
+                <li>Giữ gìn vệ sinh chung, không mang chất cấm hoặc vật dụng nguy hiểm vào khu vực thi đấu.</li>
+                <li>Tuyệt đối không sử dụng phần mềm can thiệp (bots) để tranh giành lịch đặt sân.</li>
               </ul>
             </div>
           </section>

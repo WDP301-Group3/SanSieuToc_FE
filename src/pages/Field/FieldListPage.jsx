@@ -144,6 +144,40 @@ const FieldListPage = () => {
     });
   };
 
+  // Generate 30-minute time slots
+  const timeSlots = [];
+  for (let h = 5; h <= 23; h++) {
+    const hour = h.toString().padStart(2, '0');
+    timeSlots.push(`${hour}:00`);
+    if (h < 23) timeSlots.push(`${hour}:30`);
+  }
+
+  const adjustTime = (field, direction) => {
+    const currentIdx = timeSlots.indexOf(filters[field]);
+    const newIdx = currentIdx + direction;
+    if (newIdx >= 0 && newIdx < timeSlots.length) {
+      setFilters(prev => ({ ...prev, [field]: timeSlots[newIdx] }));
+    }
+  };
+
+  // Price range helpers
+  const PRICE_MIN = 0;
+  const PRICE_MAX = 1000000;
+  const PRICE_STEP = 50000;
+
+  const handlePriceMinChange = (e) => {
+    const val = Math.min(Number(e.target.value), filters.priceMax - PRICE_STEP);
+    setFilters(prev => ({ ...prev, priceMin: val }));
+  };
+
+  const handlePriceMaxChange = (e) => {
+    const val = Math.max(Number(e.target.value), filters.priceMin + PRICE_STEP);
+    setFilters(prev => ({ ...prev, priceMax: val }));
+  };
+
+  const fillLeft = ((filters.priceMin - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+  const fillRight = ((PRICE_MAX - filters.priceMax) / (PRICE_MAX - PRICE_MIN)) * 100;
+
   return (
     <div className="field-list-page">
       <div className="field-list-container">
@@ -279,6 +313,9 @@ const FieldListPage = () => {
                   value={filters.priceMin}
                   onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value), page: 1})}
                   className="price-input"
+                  step={PRICE_STEP}
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
                   placeholder="Min"
                   min={PRICE_RANGE.min}
                   max={filters.priceMax}
@@ -290,6 +327,9 @@ const FieldListPage = () => {
                   value={filters.priceMax}
                   onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value), page: 1})}
                   className="price-input"
+                  step={PRICE_STEP}
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
                   placeholder="Max"
                   min={filters.priceMin}
                   max={PRICE_RANGE.max}
@@ -331,10 +371,16 @@ const FieldListPage = () => {
                 )}
               </p>
               <div className="view-toggle">
-                <button className="view-button active">
+                <button
+                  className={`view-button ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                >
                   <span className="material-symbols-outlined">grid_view</span>
                 </button>
-                <button className="view-button">
+                <button
+                  className={`view-button ${viewMode === 'list' ? 'active' : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
                   <span className="material-symbols-outlined">view_list</span>
                 </button>
               </div>

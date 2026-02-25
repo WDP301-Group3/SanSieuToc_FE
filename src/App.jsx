@@ -13,20 +13,11 @@ import NotFoundPage from './pages/NotFoundPage';
 import FieldListPage from './pages/Field/FieldListPage';
 import FieldDetailPage from './pages/Field/FieldDetailPage';
 
-// Customer Pages (Placeholder)
-const CustomerProfilePage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Customer Profile</h1>
-    <p className="placeholder-text">Customer profile information and settings will be displayed here.</p>
-  </div>
-);
-
-const BookingHistoryPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Booking History</h1>
-    <p className="placeholder-text">Customer booking history will be displayed here.</p>
-  </div>
-);
+// Customer Pages
+import UserProfilePage from './pages/Customer/UserProfilePage';
+import BookingHistoryPage from './pages/Customer/BookingHistoryPage';
+import BookingDetailPage from './pages/Customer/BookingDetailPage';
+import UserSettingsPage from './pages/Customer/UserSettingsPage';
 
 // Manager Pages (Placeholder)
 const ManagerDashboardPage = () => (
@@ -76,8 +67,10 @@ function App() {
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<CustomerProfilePage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/booking-history" element={<BookingHistoryPage />} />
+          <Route path="/booking-history/:id" element={<BookingDetailPage />} />
+          <Route path="/settings" element={<UserSettingsPage />} />
         </Route>
 
         {/* Manager Routes with ManagerLayout */}

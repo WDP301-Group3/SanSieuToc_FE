@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,9 +8,26 @@ import '../../styles/Header.css';
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="header-nav">
+    <nav className={`header-nav ${hidden ? 'header-hidden' : ''}`}>
       <div className="header-container">
         <div className="header-inner">
           {/* Logo */}
@@ -20,9 +38,6 @@ const Header = () => {
                 className="header-logo-image"
                 src={logo}
               />
-              <span className="header-logo-text">
-                Sân Siêu Tốc
-              </span>
             </Link>
           </div>
 
