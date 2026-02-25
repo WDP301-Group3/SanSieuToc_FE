@@ -198,7 +198,12 @@ npm run preview
 - [React Router](https://reactrouter.com)
 - [Redux Toolkit](https://redux-toolkit.js.org)
 
-## 👥 Team
+## � Documentation
+
+- **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)** - Comprehensive project documentation
+- **[API_INTEGRATION_ROADMAP.md](./API_INTEGRATION_ROADMAP.md)** - API integration plan
+
+## �👥 Team
 
 WDP301 - Group 3
 

@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 .env
 
-# Documentation files (keep locally only)
+# Documentation files
+# Keep important docs, ignore local tracking
 *.md
 !README.md
+!PROJECT_DOCUMENTATION.md
+!API_INTEGRATION_ROADMAP.md
