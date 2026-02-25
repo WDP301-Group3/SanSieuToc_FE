@@ -144,7 +144,7 @@ const FieldListPage = () => {
             <div className="filter-group">
               <p className="filter-label">Môn thể thao</p>
               <div className="sport-chips">
-                {['Bóng đá', 'Cầu lông', 'Tennis', 'Bóng rổ'].map(sport => (
+                {['Bóng đá', 'Cầu lông', 'Tennis', 'Bóng rổ','Pickleball'].map(sport => (
                   <label key={sport} className="chip-label">
                     <input
                       type="radio"

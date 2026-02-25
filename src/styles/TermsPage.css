@@ -8,7 +8,8 @@
 }
 
 .dark .terms-page {
-  background-color: rgb(17 24 39);
+  /* Use global dark background so pages are consistent */
+  background-color: var(--bg-primary-dark);
 }
 
 @media (min-width: 768px) {
@@ -145,7 +146,7 @@
   }
 }
 
-.terms-sidebar-sticky {
+  .terms-sidebar-sticky {
   background-color: white;
   border-radius: 1rem;
   padding: 1.25rem;
@@ -154,8 +155,9 @@
 }
 
 .dark .terms-sidebar-sticky {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
+  /* Use the site's dark surface variable for consistency */
+  background-color: var(--surface-dark);
+  border-color: #2a2e2a;
 }
 
 .terms-sidebar-label {
@@ -211,7 +213,8 @@
 }
 
 .dark .terms-nav-link:hover {
-  background-color: rgb(55 65 81);
+  /* lighter hover surface in dark mode */
+  background-color: rgba(255,255,255,0.03);
   color: white;
 }
 
@@ -251,8 +254,9 @@
 }
 
 .dark .terms-section {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
+  /* match homepage surface color */
+  background-color: var(--surface-dark);
+  border-color: #2a2e2a;
 }
 
 .terms-section-title {
@@ -402,8 +406,8 @@
 }
 
 .dark .terms-refund-card {
-  background-color: rgb(30 41 59);
-  border-color: rgb(51 65 85);
+  background-color: var(--surface-dark);
+  border-color: #2a2e2a;
 }
 
 .terms-refund-time {
@@ -457,6 +461,11 @@
   text-align: center;
   color: white;
   margin-top: 0.5rem;
+}
+
+.dark .terms-support-cta {
+  /* slightly darker CTA in dark mode to preserve contrast */
+  background: linear-gradient(135deg, #14532d, #0f3e2a);
 }
 
 .terms-support-icon {

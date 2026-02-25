@@ -152,7 +152,8 @@
 }
 
 .dark .chip {
-  background: #1a2e1a;
+  /* use global dark surface for chips */
+  background: var(--surface-dark);
   color: #9ca3af;
 }
 
@@ -186,7 +187,7 @@
 }
 
 .dark .filter-select {
-  background: #1a2e1a;
+  background: var(--surface-dark);
   color: white;
 }
 
@@ -223,7 +224,7 @@
 }
 
 .dark .time-input {
-  background: #1a2e1a;
+  background: var(--surface-dark);
   color: white;
 }
 
@@ -256,7 +257,7 @@
 }
 
 .dark .time-spinner {
-  background: #1a2e1a;
+  background: var(--surface-dark);
 }
 
 .time-spinner .time-input.small {
@@ -321,7 +322,7 @@
 }
 
 .dark .range-track {
-  background: #1a2e1a;
+  background: var(--surface-dark);
 }
 
 .range-fill {
@@ -390,7 +391,7 @@
 }
 
 .dark .price-input {
-  background: #1a2e1a;
+  background: var(--surface-dark);
   color: white;
 }
 
@@ -452,7 +453,7 @@
 }
 
 .dark .amenity-item {
-  background: #1a2e1a;
+  background: var(--surface-dark);
   border-color: #2a2e2a;
 }
 
