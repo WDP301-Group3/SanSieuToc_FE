@@ -97,8 +97,6 @@ const AdminFeedbackPage = () => {
     currentPage * feedbacksPerPage
   );
 
-  const startItem = filteredFeedbacks.length === 0 ? 0 : (currentPage - 1) * feedbacksPerPage + 1;
-  const endItem = Math.min(currentPage * feedbacksPerPage, filteredFeedbacks.length);
 
   // Reset page when filters change
   const handleSearch = (value) => {
@@ -127,21 +125,6 @@ const AdminFeedbackPage = () => {
   };
 
   // Pagination helpers
-  const getPageNumbers = () => {
-    const pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (currentPage > 3) pages.push('...');
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (currentPage < totalPages - 2) pages.push('...');
-      pages.push(totalPages);
-    }
-    return pages;
-  };
 
   return (
     <div className="admin-feedback-page">
@@ -153,10 +136,7 @@ const AdminFeedbackPage = () => {
             Xem và quản lý các ý kiến phản hồi từ người dùng hệ thống
           </p>
         </div>
-        <button className="btn-export">
-          <span className="material-symbols-outlined">file_download</span>
-          Xuất báo cáo
-        </button>
+        
       </div>
 
       {/* Stats Summary */}
@@ -295,39 +275,42 @@ const AdminFeedbackPage = () => {
 
         {/* Pagination */}
         {filteredFeedbacks.length > 0 && (
-          <div className="feedback-pagination">
-            <p className="feedback-pagination-info">
-              Hiển thị {startItem}-{endItem} trong số {filteredFeedbacks.length} phản hồi
-            </p>
-            <div className="feedback-pagination-controls">
+          <div className="customers-pagination">
+            <div className="customers-pagination-info">
+              Hiển thị{' '}
+              <span className="customers-pagination-bold">
+                {filteredFeedbacks.length === 0
+                  ? 0
+                  : (currentPage - 1) * feedbacksPerPage + 1}
+                -{Math.min(currentPage * feedbacksPerPage, filteredFeedbacks.length)}
+              </span>{' '}
+              của{' '}
+              <span className="customers-pagination-bold">{filteredFeedbacks.length}</span>{' '}
+              phản hồi
+            </div>
+            <div className="customers-pagination-buttons">
               <button
-                className="btn-page-arrow"
+                className="customers-page-btn"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
+                onClick={() => setCurrentPage((p) => p - 1)}
               >
-                <span className="material-symbols-outlined">chevron_left</span>
+                Trước
               </button>
-              {getPageNumbers().map((page, idx) =>
-                page === '...' ? (
-                  <span key={`dots-${idx}`} className="page-dots">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    className={`btn-page-number ${currentPage === page ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`customers-page-btn ${currentPage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
               <button
-                className="btn-page-arrow"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
+                className="customers-page-btn"
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((p) => p + 1)}
               >
-                <span className="material-symbols-outlined">chevron_right</span>
+                Sau
               </button>
             </div>
           </div>
