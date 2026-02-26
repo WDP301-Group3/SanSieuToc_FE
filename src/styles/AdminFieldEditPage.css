@@ -426,6 +426,139 @@
   color: #94a3b8;
 }
 
+/* --- Dropzone (Create page) --- */
+.edit-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 12rem;
+  border: 2px dashed rgba(25, 230, 43, 0.3);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  background: rgba(25, 230, 43, 0.03);
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.edit-dropzone:hover {
+  border-color: rgba(25, 230, 43, 0.6);
+  background: rgba(25, 230, 43, 0.07);
+}
+
+.dark .edit-dropzone {
+  border-color: rgba(25, 230, 43, 0.2);
+  background: rgba(25, 230, 43, 0.04);
+}
+
+.dark .edit-dropzone:hover {
+  border-color: rgba(25, 230, 43, 0.5);
+  background: rgba(25, 230, 43, 0.08);
+}
+
+.edit-dropzone-icon {
+  font-size: 2.5rem;
+  color: #19e62b;
+  margin-bottom: 0.5rem;
+}
+
+.edit-dropzone-text {
+  font-size: 0.875rem;
+  color: #0f172a;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.dark .edit-dropzone-text {
+  color: #f1f5f9;
+}
+
+.edit-dropzone-highlight {
+  color: #19e62b;
+  font-weight: 700;
+}
+
+.edit-dropzone-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* --- Upload Preview List (Create page) --- */
+.edit-upload-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.edit-upload-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .edit-upload-item {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.edit-upload-thumb {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.375rem;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.edit-upload-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.edit-upload-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .edit-upload-name {
+  color: #f1f5f9;
+}
+
+.edit-upload-size {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.edit-upload-remove {
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.edit-upload-remove:hover {
+  color: #ef4444;
+}
+
+.edit-upload-remove .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
 /* --- Settings: Status Toggle --- */
 .edit-setting-row {
   display: flex;

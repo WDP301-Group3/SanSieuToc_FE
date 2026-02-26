@@ -5,6 +5,54 @@
   gap: 1.5rem;
 }
 
+/* --- Top Bar --- */
+.fields-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fields-page-title {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.fields-page-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.125rem;
+}
+
+.fields-btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #19e62b;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(25, 230, 43, 0.2);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.fields-btn-create:hover {
+  background: #15c926;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(25, 230, 43, 0.3);
+}
+
+.fields-btn-create .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
 /* --- Toolbar --- */
 .fields-toolbar {
   background: #fff;

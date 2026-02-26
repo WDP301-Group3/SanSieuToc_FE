@@ -109,6 +109,18 @@ const AdminFieldsPage = () => {
 
   return (
     <div className="admin-fields-page">
+      {/* Top Bar: Title + Create Button */}
+      <div className="fields-top-bar">
+        <div>
+          <h2 className="fields-page-title">Danh sách sân</h2>
+          <p className="fields-page-subtitle">Quản lý tất cả {allFields.length} sân trong hệ thống</p>
+        </div>
+        <Link to="/admin/fields/create" className="fields-btn-create">
+          <span className="material-symbols-outlined">add</span>
+          Tạo sân mới
+        </Link>
+      </div>
+
       {/* Toolbar: Search + Filters */}
       <div className="fields-toolbar">
         <div className="fields-search">
