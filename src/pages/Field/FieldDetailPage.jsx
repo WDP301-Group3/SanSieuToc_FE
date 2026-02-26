@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../../styles/FieldDetailPage.css';
+import bookingService from '../../services/bookingService';
+import fieldService from '../../services/fieldService';
+import tokenManager from '../../utils/tokenManager';
 
 const FieldDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState('2023-10-27');
-  const [selectedTime, setSelectedTime] = useState('');
+  
+  // State: Ngày được chọn (mặc định là hôm nay)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  
+  // State: Các khung giờ được chọn (hỗ trợ chọn nhiều khung)
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  
+  // State: Danh sách khung giờ từ backend (đã tính availability)
+  const [timeSlots, setTimeSlots] = useState([]);
+  
+  // State: Loading khi fetch data
+  const [loading, setLoading] = useState(false);
 
-  // Mock data
+  // Mock data (sẽ được thay thế bằng API call)
   const field = {
     id: 1,
     name: 'Sân bóng đá Mini 7 người - Khu A',
@@ -18,8 +34,11 @@ const FieldDetailPage = () => {
     reviewsCount: 128,
     verified: true,
     quickBook: true,
-    price: 250000,
-    lightingFee: 50000,
+    price: 250000, // Giá thuê sân (VNĐ)
+    // Time slot configuration from backend
+    startTime: '08:00', // Giờ mở cửa
+    endTime: '21:00',   // Giờ đóng cửa
+    slotDuration: 90,   // Thời lượng mỗi slot (phút)
     images: [
       'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800',
       'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800',
@@ -61,28 +80,208 @@ const FieldDetailPage = () => {
     ]
   };
 
-  const timeSlots = [
-    { time: '08:00 - 09:00', available: true },
-    { time: '09:00 - 10:00', available: true },
-    { time: '10:00 - 11:00', available: false },
-    { time: '11:00 - 12:00', available: true },
-    { time: '13:00 - 14:00', available: true },
-    { time: '14:00 - 15:00', available: true },
-    { time: '15:00 - 16:00', available: false },
-    { time: '16:00 - 17:00', available: true },
-    { time: '17:00 - 18:00', available: true },
-    { time: '18:00 - 19:00', available: true },
-    { time: '19:00 - 20:00', available: false },
-    { time: '20:00 - 21:00', available: true }
-  ];
+  /**
+   * Fetch time slots from backend for selected date
+   * Backend handles:
+   * - Generating slots based on field's startTime, endTime, slotDuration
+   * - Checking availability against existing bookings
+   * - Returning array of slots with availability status
+   */
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      // Validate: Không fetch nếu chưa chọn ngày
+      if (!selectedDate || !field.id) {
+        return;
+      }
 
-  const handleBooking = () => {
-    if (!selectedTime) {
-      alert('Vui lòng chọn khung giờ!');
+      try {
+        setLoading(true);
+        
+        // Gọi API để lấy danh sách slots (đã tính availability)
+        const slots = await fieldService.getTimeSlots(field.id, selectedDate);
+        setTimeSlots(slots);
+        
+        // Reset selected slots khi đổi ngày
+        setSelectedSlots([]);
+      } catch (error) {
+        console.error('Error fetching time slots:', error);
+        // Nếu API fail, hiển thị mảng rỗng
+        setTimeSlots([]);
+        setSelectedSlots([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTimeSlots();
+  }, [selectedDate, field.id]);
+
+  /**
+   * Validate date selection
+   * Ngày phải từ hôm nay trở đi (không cho chọn quá khứ)
+   */
+  const handleDateChange = (e) => {
+    const selectedDateValue = e.target.value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
+    
+    const selected = new Date(selectedDateValue);
+    
+    // Validate: Không cho chọn ngày trong quá khứ
+    if (selected < today) {
+      alert('Không thể chọn ngày trong quá khứ. Vui lòng chọn từ hôm nay trở đi.');
       return;
     }
-    // Navigate to booking confirmation
-    navigate('/booking/confirm', { state: { field, date: selectedDate, time: selectedTime } });
+    
+    setSelectedDate(selectedDateValue);
+  };
+
+  /**
+   * Handle slot selection
+   * Hỗ trợ chọn/bỏ chọn nhiều khung giờ
+   */
+  const handleSlotSelection = (slot) => {
+    // Không cho chọn slot đã được đặt
+    if (!slot.available) return;
+    
+    const slotIndex = selectedSlots.findIndex(s => s.time === slot.time);
+    
+    if (slotIndex > -1) {
+      // Bỏ chọn slot
+      setSelectedSlots(selectedSlots.filter(s => s.time !== slot.time));
+    } else {
+      // Chọn slot
+      setSelectedSlots([...selectedSlots, slot]);
+    }
+  };
+
+  /**
+   * Calculate total price for selected slots
+   * Chỉ tính tiền thuê sân (chưa có phụ phí)
+   */
+  const calculateTotalPrice = () => {
+    return field.price * selectedSlots.length;
+  };
+
+  /**
+   * Handle booking submission
+   * Validate và submit booking data đến backend
+   */
+  const handleBooking = async () => {
+    // Validate 1: Kiểm tra authentication
+    if (!tokenManager.isAuthenticated()) {
+      alert('Vui lòng đăng nhập để đặt sân');
+      navigate('/login', { state: { from: `/field/${id}` } });
+      return;
+    }
+
+    // Validate 2: Kiểm tra đã chọn ngày chưa
+    if (!selectedDate) {
+      alert('Vui lòng chọn ngày chơi');
+      return;
+    }
+
+    // Validate 3: Kiểm tra đã chọn slot chưa
+    if (selectedSlots.length === 0) {
+      alert('Vui lòng chọn ít nhất một khung giờ');
+      return;
+    }
+
+    // Validate 4: Kiểm tra ngày không phải quá khứ
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const bookingDate = new Date(selectedDate);
+    
+    if (bookingDate < today) {
+      alert('Không thể đặt sân cho ngày trong quá khứ');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Lấy thông tin user hiện tại
+      const currentUser = tokenManager.getUser();
+      if (!currentUser || !currentUser._id) {
+        alert('Không thể xác định thông tin người dùng. Vui lòng đăng nhập lại.');
+        navigate('/login');
+        return;
+      }
+
+      // Chuẩn bị booking details từ các slot đã chọn
+      const bookingDetails = selectedSlots.map(slot => {
+        // Kết hợp ngày đã chọn với giờ của slot
+        const [startHour, startMinute] = slot.startTime.split(':');
+        const [endHour, endMinute] = slot.endTime.split(':');
+        
+        const startDateTime = new Date(selectedDate);
+        startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
+        
+        const endDateTime = new Date(selectedDate);
+        endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+
+        return {
+          startTime: startDateTime.toISOString(), // Convert sang UTC
+          endTime: endDateTime.toISOString(),     // Convert sang UTC
+          priceSnapshot: field.price              // Lưu giá tại thời điểm đặt
+        };
+      });
+
+      // Tính tổng tiền (chỉ tiền sân, chưa có phụ phí)
+      const totalPrice = field.price * selectedSlots.length;
+      
+      // Tính tiền cọc (30% tổng tiền)
+      const depositAmount = Math.round(totalPrice * 0.3);
+
+      // Chuẩn bị data gửi lên backend
+      const bookingData = {
+        customerID: currentUser._id,
+        fieldID: field.id,
+        bookingDetails: bookingDetails,
+        totalPrice: totalPrice,
+        depositAmount: depositAmount,
+        statusPayment: 'Pending' // Trạng thái thanh toán ban đầu
+      };
+
+      console.log('Submitting booking:', bookingData);
+
+      // Gọi API tạo booking
+      const response = await bookingService.createBooking(bookingData);
+
+      if (response.success) {
+        alert(`Đặt sân thành công! Mã booking: ${response.bookingID}`);
+        
+        // Redirect đến trang thanh toán hoặc lịch sử booking
+        if (response.paymentUrl) {
+          window.location.href = response.paymentUrl;
+        } else {
+          navigate('/profile/bookings');
+        }
+      } else {
+        alert(response.message || 'Đặt sân thất bại. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      
+      // Xử lý các loại lỗi cụ thể
+      if (error.response?.status === 401) {
+        // Lỗi authentication
+        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        navigate('/login');
+      } else if (error.response?.status === 409) {
+        // Lỗi conflict (slot đã được đặt)
+        alert('Khung giờ đã được đặt. Vui lòng chọn khung giờ khác.');
+        // Refresh lại danh sách slots
+        const slots = await fieldService.getTimeSlots(field.id, selectedDate);
+        setTimeSlots(slots);
+        setSelectedSlots([]);
+      } else {
+        // Lỗi khác
+        alert(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -253,60 +452,100 @@ const FieldDetailPage = () => {
               <h3 className="booking-title">Chi tiết lịch đặt</h3>
 
               <div className="booking-form">
+                {/* Chọn ngày chơi */}
                 <div className="form-group">
                   <label className="form-label">Ngày chơi</label>
                   <input
                     type="date"
                     value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]} // Chỉ cho chọn từ hôm nay trở đi
+                    onChange={handleDateChange}
                     className="form-input"
                   />
                 </div>
 
+                {/* Chọn khung giờ */}
                 <div className="form-group">
-                  <label className="form-label">Chọn khung giờ</label>
+                  <label className="form-label">
+                    Chọn khung giờ {selectedSlots.length > 0 && `(${selectedSlots.length} khung)`}
+                  </label>
+                  
+                  {/* Hiển thị loading khi fetch slots */}
+                  {loading && <p className="loading-text">Đang tải khung giờ...</p>}
+                  
+                  {/* Hiển thị thông báo khi chưa có slots */}
+                  {!loading && timeSlots.length === 0 && (
+                    <p className="empty-slots-text">Vui lòng chọn ngày để xem khung giờ có sẵn</p>
+                  )}
+                  
+                  {/* Danh sách time slots */}
                   <div className="time-slots">
                     {timeSlots.map((slot, index) => (
                       <button
                         key={index}
-                        className={`time-slot ${!slot.available ? 'unavailable' : ''} ${selectedTime === slot.time ? 'selected' : ''}`}
-                        disabled={!slot.available}
-                        onClick={() => setSelectedTime(slot.time)}
+                        className={`time-slot ${!slot.available ? 'unavailable' : ''} ${selectedSlots.some(s => s.time === slot.time) ? 'selected' : ''}`}
+                        disabled={!slot.available || loading}
+                        onClick={() => handleSlotSelection(slot)}
                       >
                         {slot.time}
                         {!slot.available && <span className="slot-badge">Đã đặt</span>}
                       </button>
                     ))}
                   </div>
+                  
+                  {/* Hướng dẫn chọn slot */}
+                  <p className="form-hint">
+                    <span className="material-symbols-outlined">info</span>
+                    Bước 1: Chọn ngày → Bước 2: Chọn khung giờ (có thể chọn nhiều khung liên tiếp)
+                  </p>
                 </div>
 
+                {/* Loại sân */}
                 <div className="form-group">
                   <label className="form-label">Loại sân</label>
                   <p className="form-value">{field.fieldType}</p>
                 </div>
 
+                {/* Thời lượng mỗi khung */}
                 <div className="form-group">
                   <label className="form-label">Thời lượng</label>
-                  <p className="form-value">{field.duration}</p>
+                  <p className="form-value">{field.slotDuration} phút</p>
                 </div>
 
+                {/* Bảng giá */}
                 <div className="price-breakdown">
+                  {/* Giá thuê sân */}
                   <div className="price-row">
-                    <span>Giá thuê sân (90p)</span>
-                    <span>{field.price.toLocaleString()}đ</span>
+                    <span>Giá thuê sân ({field.slotDuration}p) × {selectedSlots.length || 1}</span>
+                    <span>{(field.price * (selectedSlots.length || 1)).toLocaleString()}đ</span>
                   </div>
-                  <div className="price-row">
-                    <span>Phụ phí đèn chiếu sáng</span>
-                    <span>{field.lightingFee.toLocaleString()}đ</span>
-                  </div>
+                  
+                  {/* Hiển thị tiền cọc khi đã chọn slot */}
+                  {selectedSlots.length > 0 && (
+                    <div className="price-row deposit">
+                      <span>Tiền cọc (30%)</span>
+                      <span>{Math.round(calculateTotalPrice() * 0.3).toLocaleString()}đ</span>
+                    </div>
+                  )}
+                  
+                  {/* Tổng tiền */}
                   <div className="price-total">
                     <span>Tổng cộng</span>
-                    <span className="total-amount">{(field.price + field.lightingFee).toLocaleString()}đ</span>
+                    <span className="total-amount">
+                      {selectedSlots.length > 0 
+                        ? calculateTotalPrice().toLocaleString() 
+                        : field.price.toLocaleString()}đ
+                    </span>
                   </div>
                 </div>
 
-                <button className="btn-book-now" onClick={handleBooking}>
-                  Đặt sân ngay
+                {/* Nút đặt sân */}
+                <button 
+                  className="btn-book-now" 
+                  onClick={handleBooking}
+                  disabled={loading || selectedSlots.length === 0}
+                >
+                  {loading ? 'Đang xử lý...' : selectedSlots.length > 0 ? 'Đặt sân ngay' : 'Chọn khung giờ'}
                 </button>
 
                 <div className="booking-note">

@@ -563,6 +563,87 @@ const getDistrictCounts = (fields) => {
   }));
 };
 
+/**
+ * Get available time slots for a field on a specific date
+ * Backend calculates slots based on field's startTime, endTime, and slotDuration
+ * and checks availability against existing bookings
+ * 
+ * @async
+ * @param {string} fieldId - Field ID
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @returns {Promise<Array>} Array of time slot objects
+ * @example
+ * Response: [
+ *   { time: "08:00 - 09:30", startTime: "08:00", endTime: "09:30", available: true },
+ *   { time: "09:30 - 11:00", startTime: "09:30", endTime: "11:00", available: false },
+ * ]
+ */
+const getTimeSlots = async (fieldId, date) => {
+  try {
+    // TODO: Replace with actual API call when backend is ready
+    // const response = await axiosInstance.get(
+    //   `/manager/field/${fieldId}/time-slots`,
+    //   { params: { date } }
+    // );
+    // return response.data;
+
+    // Mock implementation for now
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const field = mockFields.find(f => f.id === parseInt(fieldId));
+    if (!field) {
+      throw new Error('Field not found');
+    }
+
+    // Get field's time configuration (from backend)
+    const { startTime = '08:00', endTime = '21:00', slotDuration = 90 } = field;
+
+    // Backend generates time slots
+    const slots = [];
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    let currentMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    while (currentMinutes + slotDuration <= endMinutes) {
+      const slotStartHour = Math.floor(currentMinutes / 60);
+      const slotStartMinute = currentMinutes % 60;
+      const slotEndMinutes = currentMinutes + slotDuration;
+      const slotEndHour = Math.floor(slotEndMinutes / 60);
+      const slotEndMinute = slotEndMinutes % 60;
+      
+      const timeStart = `${slotStartHour.toString().padStart(2, '0')}:${slotStartMinute.toString().padStart(2, '0')}`;
+      const timeEnd = `${slotEndHour.toString().padStart(2, '0')}:${slotEndMinute.toString().padStart(2, '0')}`;
+      
+      // Check availability against existing bookings
+      const isBooked = mockBookingDetails.some(booking => {
+        if (booking.fieldId !== parseInt(fieldId)) return false;
+        
+        const bookingDate = new Date(booking.date).toISOString().split('T')[0];
+        if (bookingDate !== date) return false;
+        
+        return booking.timeSlot.startTime === timeStart && booking.timeSlot.endTime === timeEnd;
+      });
+      
+      slots.push({
+        time: `${timeStart} - ${timeEnd}`,
+        startTime: timeStart,
+        endTime: timeEnd,
+        available: !isBooked
+      });
+      
+      currentMinutes += slotDuration;
+    }
+    
+    return slots;
+  } catch (error) {
+    console.error('Error fetching time slots:', error);
+    throw error;
+  }
+};
+
 // ============================================================================
 // EXPORTS
 // ============================================================================
@@ -570,5 +651,6 @@ const getDistrictCounts = (fields) => {
 export default {
   searchFields,
   getFieldById,
-  getFieldAvailability
+  getFieldAvailability,
+  getTimeSlots
 };

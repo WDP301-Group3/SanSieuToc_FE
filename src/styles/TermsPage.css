@@ -55,6 +55,7 @@
 
 .terms-breadcrumb-sep {
   color: rgb(156 163 175);
+  -webkit-user-select: none;
   user-select: none;
 }
 

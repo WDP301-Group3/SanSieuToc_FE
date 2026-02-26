@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { searchFields } from '../../services/fieldService';
 import { ALL_DISTRICTS, PRICE_RANGE } from '../../data/mockData';
 import '../../styles/FieldListPage.css';
-
 /**
  * FieldListPage Component
  * Displays searchable and filterable list of sports fields
@@ -40,6 +39,7 @@ const FieldListPage = () => {
 
   // UI state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   
   // Data state
   const [fields, setFields] = useState([]);
@@ -313,13 +313,10 @@ const FieldListPage = () => {
                   value={filters.priceMin}
                   onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value), page: 1})}
                   className="price-input"
-                  step={PRICE_STEP}
-                  min={PRICE_MIN}
-                  max={PRICE_MAX}
-                  placeholder="Min"
+                  step={10000}
                   min={PRICE_RANGE.min}
                   max={filters.priceMax}
-                  step={10000}
+                  placeholder="Min"
                 />
                 <span>-</span>
                 <input
@@ -327,13 +324,10 @@ const FieldListPage = () => {
                   value={filters.priceMax}
                   onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value), page: 1})}
                   className="price-input"
-                  step={PRICE_STEP}
-                  min={PRICE_MIN}
-                  max={PRICE_MAX}
-                  placeholder="Max"
+                  step={10000}
                   min={filters.priceMin}
                   max={PRICE_RANGE.max}
-                  step={10000}
+                  placeholder="Max"
                 />
               </div>
             </div>

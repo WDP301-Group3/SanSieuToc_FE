@@ -4,7 +4,6 @@ import ManagerLayout from './components/layout/ManagerLayout';
 
 // Pages
 import HomePage from './pages/Home/HomePage';
-import TestTailwind from './pages/TestTailwind';
 import AuthPage from './pages/Auth/AuthPage'; // Unified Auth Interface
 import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -55,7 +54,6 @@ function App() {
         {/* Public Routes with MainLayout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/test-tailwind" element={<TestTailwind />} />
           <Route path="/terms" element={<TermsPage />} />
           
           {/* Auth Routes (inside MainLayout with Header/Footer) */}
