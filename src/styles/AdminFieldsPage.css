@@ -53,6 +53,74 @@
   font-size: 1.25rem;
 }
 
+/* --- Stats Cards --- */
+.fields-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.field-stat-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.field-stat-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.field-stat-icon .material-symbols-outlined {
+  font-size: 1.375rem;
+}
+
+.field-stat-icon.total {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.field-stat-icon.active {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.field-stat-icon.maintenance {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.field-stat-icon.closed {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.field-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.field-stat-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 /* --- Toolbar --- */
 .fields-toolbar {
   background: #fff;
@@ -483,6 +551,12 @@
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .fields-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .fields-toolbar {
     flex-direction: column;
@@ -495,6 +569,10 @@
 
   .fields-filters {
     flex-direction: column;
+  }
+
+  .fields-stats {
+    grid-template-columns: 1fr;
   }
 
   .fields-pagination {

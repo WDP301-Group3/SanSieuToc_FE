@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { mockFields, mockUsers, mockBookingDetails } from '../../data/mockData';
+import { mockFields, mockUsers, mockBookingDetails, mockFeedbacks } from '../../data/mockData';
 import '../../styles/AdminDashboard.css';
 
 const AdminDashboardPage = () => {
@@ -13,14 +13,16 @@ const AdminDashboardPage = () => {
 
   const totalUsers = mockUsers.length;
   const customerCount = mockUsers.filter((u) => u.role === 'customer').length;
+  const adminCount = totalUsers - customerCount;
 
   const totalBookings = mockBookingDetails.length;
   const activeBookings = mockBookingDetails.filter((b) => b.status === 'Active').length;
-  const cancelledBookings = mockBookingDetails.filter((b) => b.status === 'Cancelled').length;
 
   const totalRevenue = mockBookingDetails
     .filter((b) => b.status === 'Active')
     .reduce((sum, b) => sum + b.priceSnapshot, 0);
+
+  const totalFeedbacks = mockFeedbacks?.length || 0;
 
   const formatPrice = (price) => price.toLocaleString('vi-VN') + 'đ';
 
@@ -30,30 +32,30 @@ const AdminDashboardPage = () => {
       iconBg: 'green',
       label: 'Tổng số sân',
       value: totalFields,
-      trend: `${availableFields} hoạt động`,
+      trendText: '+5%',
       trendUp: true,
-      sparkline: 'M0 28 L10 24 L20 26 L30 18 L40 20 L50 10 L60 14 L70 4 L80 8',
-      note: `${maintenanceFields} sân đang bảo trì`,
+      note: `2 sân đang bảo trì`,
+      dotColor: 'green',
     },
     {
       icon: 'person',
       iconBg: 'blue',
-      label: 'Tổng tài khoản',
+      label: 'Tổng số tài khoản',
       value: totalUsers,
-      trend: `${customerCount} khách hàng`,
-      trendUp: true,
-      sparkline: 'M0 4 L10 8 L20 6 L30 14 L40 12 L50 22 L60 18 L70 28 L80 24',
-      note: `${totalUsers - customerCount} quản trị viên`,
+      trendText: '-2%',
+      trendUp: false,
+      note: '1 tài khoản quản lý',
+      dotColor: 'red',
     },
     {
-      icon: 'calendar_month',
+      icon: 'reviews',
       iconBg: 'amber',
-      label: 'Tổng lượt đặt sân',
-      value: totalBookings,
-      trend: `${activeBookings} đang hoạt động`,
-      trendUp: cancelledBookings === 0,
-      sparkline: 'M0 30 L10 28 L20 20 L30 24 L40 16 L50 18 L60 8 L70 12 L80 2',
-      note: `Doanh thu: ${formatPrice(totalRevenue)}`,
+      label: 'Tổng feedback',
+      value: totalFeedbacks,
+      trendText: '+12%',
+      trendUp: true,
+      note: 'Phản hồi tích cực đạt 94%',
+      dotColor: 'green',
     },
   ];
 
@@ -64,21 +66,21 @@ const AdminDashboardPage = () => {
   const shortcuts = [
     {
       icon: 'stadium',
-      title: 'Quản lý sân',
-      desc: `${totalFields} sân · ${availableFields} đang hoạt động`,
+      title: 'Manage Fields',
+      desc: 'Cập nhật thông tin & trạng thái sân',
       link: '/admin/fields',
       image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&q=80',
     },
     {
       icon: 'people_alt',
-      title: 'Quản lý khách hàng',
-      desc: `${customerCount} khách hàng đã đăng ký`,
+      title: 'Manage Customers',
+      desc: 'Quản lý người dùng & lịch sử đặt',
       link: '/admin/customers',
       image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80',
     },
     {
       icon: 'rate_review',
-      title: 'Xem phản hồi',
+      title: 'View Feedback',
       desc: 'Xem và trả lời góp ý từ khách hàng',
       link: '/admin/feedback',
       image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80',
@@ -86,20 +88,17 @@ const AdminDashboardPage = () => {
   ];
 
   // ============================================================================
-  // RECENT ACTIVITIES - derived from bookingDetails + fields + users
+  // RECENT ACTIVITIES
   // ============================================================================
 
-  // Build field lookup map
   const fieldMap = {};
   mockFields.forEach((f) => { fieldMap[f._id] = f; });
 
-  // Create recent activities from booking details (sorted newest first)
   const recentActivities = [...mockBookingDetails]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5)
     .map((booking) => {
       const field = fieldMap[booking.fieldID];
-      // Pick a customer from mockUsers for display
       const customer = mockUsers.find((u) => u.role === 'customer') || mockUsers[0];
       const initials = customer.name
         .split(' ')
@@ -117,7 +116,6 @@ const AdminDashboardPage = () => {
         name: customer.name,
         field: field?.fieldName || 'N/A',
         time: `${startHour} - ${dateStr}`,
-        price: formatPrice(booking.priceSnapshot),
         status: booking.status === 'Active' ? 'confirmed' : 'cancelled',
         statusLabel: booking.status === 'Active' ? 'Đã xác nhận' : 'Đã hủy',
       };
@@ -133,27 +131,17 @@ const AdminDashboardPage = () => {
               <div className={`stat-icon ${stat.iconBg}`}>
                 <span className="material-symbols-outlined">{stat.icon}</span>
               </div>
-              <div className="stat-trend-wrapper">
-                <span className={`stat-trend ${stat.trendUp ? 'up' : 'down'}`}>
-                  <span className="material-symbols-outlined">
-                    {stat.trendUp ? 'trending_up' : 'trending_down'}
-                  </span>
-                  {stat.trend}
+              <span className={`stat-trend ${stat.trendUp ? 'up' : 'down'}`}>
+                <span className="material-symbols-outlined">
+                  {stat.trendUp ? 'trending_up' : 'trending_down'}
                 </span>
-                <div className="stat-sparkline">
-                  <svg viewBox="0 0 80 32">
-                    <path
-                      d={stat.sparkline}
-                      className={stat.trendUp ? 'sparkline-up' : 'sparkline-down'}
-                    />
-                  </svg>
-                </div>
-              </div>
+                {stat.trendText}
+              </span>
             </div>
             <p className="stat-label">{stat.label}</p>
             <h3 className="stat-value">{stat.value}</h3>
             <p className="stat-note">
-              <span className={`stat-dot ${stat.trendUp ? 'green' : 'red'}`} />
+              <span className={`stat-dot ${stat.dotColor}`} />
               {stat.note}
             </p>
           </div>
@@ -199,7 +187,6 @@ const AdminDashboardPage = () => {
                 <th>Khách hàng</th>
                 <th>Sân</th>
                 <th>Thời gian</th>
-                <th>Giá</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
@@ -214,7 +201,6 @@ const AdminDashboardPage = () => {
                   </td>
                   <td className="field-cell">{act.field}</td>
                   <td className="time-cell">{act.time}</td>
-                  <td className="price-cell">{act.price}</td>
                   <td>
                     <span className={`status-badge ${act.status}`}>
                       {act.statusLabel}

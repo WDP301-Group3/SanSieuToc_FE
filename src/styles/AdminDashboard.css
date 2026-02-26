@@ -1,9 +1,6 @@
 /* ===== Admin Dashboard Page ===== */
+/* Matches: home_dashboard_admin.html */
 .admin-dashboard {
-  padding: 2rem;
-  max-width: 80rem;
-  margin: 0 auto;
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -32,7 +29,7 @@
 .stat-card-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
@@ -63,25 +60,19 @@
   font-size: 1.5rem;
 }
 
-.stat-trend-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
-}
-
 .stat-trend {
   font-size: 0.875rem;
   font-weight: 700;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  white-space: nowrap;
 }
 
 .stat-trend .material-symbols-outlined {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .stat-trend.up {
@@ -94,31 +85,6 @@
   color: #e11d48;
   background: #fff1f2;
   border: 1px solid #fecdd3;
-}
-
-.stat-sparkline {
-  width: 80px;
-  height: 32px;
-  margin-top: 0.25rem;
-}
-
-.stat-sparkline svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.stat-sparkline .sparkline-up {
-  stroke: #10b981;
-  fill: none;
-}
-
-.stat-sparkline .sparkline-down {
-  stroke: #f43f5e;
-  fill: none;
 }
 
 .stat-label {
@@ -424,7 +390,6 @@
 
 @media (max-width: 640px) {
   .admin-dashboard {
-    padding: 1rem;
     gap: 1.5rem;
   }
 

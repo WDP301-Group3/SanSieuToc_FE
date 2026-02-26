@@ -91,6 +91,14 @@ const AdminFieldsPage = () => {
     };
   });
 
+  // Stats
+  const stats = {
+    total: allFields.length,
+    active: allFields.filter((f) => f.statusKey === 'active').length,
+    maintenance: allFields.filter((f) => f.statusKey === 'maintenance').length,
+    closed: allFields.filter((f) => f.statusKey === 'closed').length,
+  };
+
   // Filter logic
   const filteredFields = allFields.filter((field) => {
     const matchSearch = field.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -119,6 +127,46 @@ const AdminFieldsPage = () => {
           <span className="material-symbols-outlined">add</span>
           Tạo sân mới
         </Link>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="fields-stats">
+        <div className="field-stat-card">
+          <div className="field-stat-icon total">
+            <span className="material-symbols-outlined">sports_soccer</span>
+          </div>
+          <div>
+            <div className="field-stat-value">{stats.total}</div>
+            <div className="field-stat-label">Tổng số sân</div>
+          </div>
+        </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon active">
+            <span className="material-symbols-outlined">check_circle</span>
+          </div>
+          <div>
+            <div className="field-stat-value">{stats.active}</div>
+            <div className="field-stat-label">Đang hoạt động</div>
+          </div>
+        </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon maintenance">
+            <span className="material-symbols-outlined">build</span>
+          </div>
+          <div>
+            <div className="field-stat-value">{stats.maintenance}</div>
+            <div className="field-stat-label">Đang bảo trì</div>
+          </div>
+        </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon closed">
+            <span className="material-symbols-outlined">cancel</span>
+          </div>
+          <div>
+            <div className="field-stat-value">{stats.closed}</div>
+            <div className="field-stat-label">Ngưng hoạt động</div>
+          </div>
+        </div>
       </div>
 
       {/* Toolbar: Search + Filters */}
