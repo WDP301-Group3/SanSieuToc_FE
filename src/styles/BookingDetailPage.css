@@ -615,3 +615,124 @@
 .bh-support-phone:hover {
   color: #00E536;
 }
+
+/* ============================
+   Status Banner Variants
+   ============================ */
+.bh-status-banner.confirmed {
+  background-color: #16a34a;
+}
+
+.bh-status-banner.completed {
+  background-color: #4b5563;
+}
+
+.bh-status-banner.cancelled {
+  background-color: #dc2626;
+}
+
+.bh-status-banner.pending {
+  background-color: #d97706;
+}
+
+/* ============================
+   Not Found State
+   ============================ */
+.bh-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.bh-not-found-icon {
+  font-size: 4rem;
+  color: #d1d5db;
+}
+
+.dark .bh-not-found-icon {
+  color: #4b5563;
+}
+
+.bh-not-found h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dark .bh-not-found h2 {
+  color: #ffffff;
+}
+
+.bh-not-found p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.dark .bh-not-found p {
+  color: #9ca3af;
+}
+
+.bh-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #00E536;
+  color: #111811;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.bh-btn-back:hover {
+  background-color: #00c92e;
+}
+
+/* ============================
+   Clickable Field Name
+   ============================ */
+.bh-field-name.clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.bh-field-name.clickable:hover {
+  color: #00E536;
+}
+
+/* ============================
+   Rebook Button
+   ============================ */
+.bh-btn-rebook {
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: 2px solid #00E536;
+  background-color: transparent;
+  color: #00E536;
+  transition: all 0.2s;
+}
+
+.bh-btn-rebook:hover {
+  background-color: #00E536;
+  color: #111811;
+}
+
+.dark .bh-btn-rebook {
+  border-color: #00E536;
+  color: #86efac;
+}
+
+.dark .bh-btn-rebook:hover {
+  background-color: #00E536;
+  color: #111811;
+}

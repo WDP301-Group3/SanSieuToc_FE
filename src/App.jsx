@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import ManagerLayout from './components/layout/ManagerLayout';
+import AdminLayout from './components/layout/AdminLayout';
 
 // Pages
 import HomePage from './pages/Home/HomePage';
@@ -18,34 +18,15 @@ import BookingHistoryPage from './pages/Customer/BookingHistoryPage';
 import BookingDetailPage from './pages/Customer/BookingDetailPage';
 import UserSettingsPage from './pages/Customer/UserSettingsPage';
 
-// Manager Pages (Placeholder)
-const ManagerDashboardPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Manager Dashboard</h1>
-    <p className="placeholder-text">Statistics and overview will be displayed here.</p>
-  </div>
-);
-
-const ManagerCustomersPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Customer Management</h1>
-    <p className="placeholder-text">Customer list and management tools will be displayed here.</p>
-  </div>
-);
-
-const ManagerFieldsPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Field Management</h1>
-    <p className="placeholder-text">Field list and management tools will be displayed here.</p>
-  </div>
-);
-
-const ManagerBookingsPage = () => (
-  <div className="placeholder-container">
-    <h1 className="placeholder-title">Booking Management</h1>
-    <p className="placeholder-text">Booking list and management tools will be displayed here.</p>
-  </div>
-);
+// Admin Pages
+import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
+import AdminFieldsPage from './pages/Admin/Field/AdminFieldsPage';
+import AdminFieldDetailPage from './pages/Admin/Field/AdminFieldDetailPage';
+import AdminFieldCreatePage from './pages/Admin/Field/AdminFieldCreatePage';
+import AdminFieldEditPage from './pages/Admin/Field/AdminFieldEditPage';
+import AdminCustomersPage from './pages/Admin/Customer/AdminCustomersPage';
+import AdminCustomerDetailPage from './pages/Admin/Customer/AdminCustomerDetailPage';
+import AdminFeedbackPage from './pages/Admin/Feedback/AdminFeedbackPage';
 
 function App() {
   return (
@@ -71,13 +52,17 @@ function App() {
           <Route path="/settings" element={<UserSettingsPage />} />
         </Route>
 
-        {/* Manager Routes with ManagerLayout */}
-        <Route path="/manager" element={<ManagerLayout />}>
-          <Route index element={<Navigate to="/manager/dashboard" replace />} />
-          <Route path="dashboard" element={<ManagerDashboardPage />} />
-          <Route path="customers" element={<ManagerCustomersPage />} />
-          <Route path="fields" element={<ManagerFieldsPage />} />
-          <Route path="bookings" element={<ManagerBookingsPage />} />
+        {/* Admin Routes with AdminLayout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="fields" element={<AdminFieldsPage />} />
+          <Route path="fields/create" element={<AdminFieldCreatePage />} />
+          <Route path="fields/:id" element={<AdminFieldDetailPage />} />
+          <Route path="fields/:id/edit" element={<AdminFieldEditPage />} />
+          <Route path="customers" element={<AdminCustomersPage />} />
+          <Route path="customers/:id" element={<AdminCustomerDetailPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
         </Route>
 
         {/* 404 Not Found */}

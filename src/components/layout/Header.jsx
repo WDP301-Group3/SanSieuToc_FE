@@ -90,9 +90,12 @@ const Header = () => {
             </button>
 
             {/* Notifications */}
-            <button className="header-icon-btn">
+            <button className="header-icon-btn header-notification-btn">
               <span className="material-icons-outlined">notifications</span>
+              <span className="header-notification-dot" />
             </button>
+
+            <div className="header-divider" />
 
             {isAuthenticated ? (
               <div className="header-avatar-wrapper" ref={dropdownRef}>
@@ -109,6 +112,11 @@ const Header = () => {
 
                 {showDropdown && (
                   <div className="header-dropdown">
+                    <div className="header-dropdown-header">
+                      <p className="header-dropdown-name">{user?.name || 'User'}</p>
+                      <p className="header-dropdown-email">{user?.email || ''}</p>
+                    </div>
+                    <div className="header-dropdown-divider" />
                     <Link
                       to="/profile"
                       className="header-dropdown-item"
@@ -118,7 +126,7 @@ const Header = () => {
                       Profile
                     </Link>
                     <Link
-                      to="/manager"
+                      to="/admin"
                       className="header-dropdown-item"
                       onClick={() => setShowDropdown(false)}
                     >

@@ -1,120 +1,157 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { mockFields, mockBookingDetails, getFeedbacksByFieldID, getFieldRating } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/FieldDetailPage.css';
-import bookingService from '../../services/bookingService';
-import fieldService from '../../services/fieldService';
-import tokenManager from '../../utils/tokenManager';
+
+/**
+ * Map utility name from mockData to Material icon + Vietnamese label
+ */
+const utilityMap = {
+  'Wifi': { icon: 'wifi', name: 'Wifi miễn phí' },
+  'Parking': { icon: 'local_parking', name: 'Bãi giữ xe' },
+  'Shower': { icon: 'shower', name: 'Phòng tắm' },
+  'Changing Room': { icon: 'checkroom', name: 'Phòng thay đồ' },
+  'Water': { icon: 'local_drink', name: 'Nước uống' },
+  'First Aid': { icon: 'medical_services', name: 'Y tế' },
+  'Equipment Rental': { icon: 'sports', name: 'Cho thuê dụng cụ' },
+  'Coaching': { icon: 'school', name: 'Huấn luyện viên' },
+  'Cafe': { icon: 'local_cafe', name: 'Quán cà phê' },
+  'Air Conditioning': { icon: 'ac_unit', name: 'Điều hòa' },
+  'Snack Bar': { icon: 'restaurant', name: 'Căn tin' },
+  'Scoreboard': { icon: 'scoreboard', name: 'Bảng điểm' },
+};
+
+/**
+ * Generate time slots from field's opening/closing time and slot duration
+ * Then check availability against mockBookingDetails
+ */
+const generateTimeSlots = (field, selectedDate) => {
+  if (!field || !selectedDate) return [];
+
+  const [openH, openM] = field.openingTime.split(':').map(Number);
+  const [closeH, closeM] = field.closingTime.split(':').map(Number);
+  const duration = field.slotDuration; // minutes
+
+  const slots = [];
+  let currentMinutes = openH * 60 + openM;
+  const endMinutes = closeH * 60 + closeM;
+
+  // Get bookings for this field on the selected date
+  const dateStr = selectedDate; // 'YYYY-MM-DD'
+  const fieldBookings = mockBookingDetails.filter((b) => {
+    if (b.fieldID !== field._id || b.status !== 'Active') return false;
+    const bookingDate = new Date(b.startTime).toISOString().split('T')[0];
+    return bookingDate === dateStr;
+  });
+
+  while (currentMinutes + duration <= endMinutes) {
+    const startH = Math.floor(currentMinutes / 60);
+    const startM = currentMinutes % 60;
+    const endSlotMinutes = currentMinutes + duration;
+    const endSlotH = Math.floor(endSlotMinutes / 60);
+    const endSlotM = endSlotMinutes % 60;
+
+    const startTime = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+    const endTime = `${String(endSlotH).padStart(2, '0')}:${String(endSlotM).padStart(2, '0')}`;
+    const time = `${startTime} - ${endTime}`;
+
+    // Check if this slot is booked
+    const isBooked = fieldBookings.some((b) => {
+      const bStart = new Date(b.startTime);
+      const bEnd = new Date(b.endTime);
+      const slotStart = new Date(`${dateStr}T${startTime}:00`);
+      const slotEnd = new Date(`${dateStr}T${endTime}:00`);
+      return slotStart < bEnd && slotEnd > bStart;
+    });
+
+    // Check if slot is in the past (for today)
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    let isPast = false;
+    if (dateStr === today) {
+      const slotStartDate = new Date(`${dateStr}T${startTime}:00`);
+      isPast = slotStartDate <= now;
+    }
+
+    slots.push({
+      time,
+      startTime,
+      endTime,
+      available: !isBooked && !isPast,
+    });
+
+    currentMinutes += duration;
+  }
+
+  return slots;
+};
 
 const FieldDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  // State: Ngày được chọn (mặc định là hôm nay)
+  const { user, isAuthenticated } = useAuth();
+
+  // Find field from mockData
+  const field = mockFields.find((f) => f._id === id);
+
+  // State
   const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
   });
-  
-  // State: Các khung giờ được chọn (hỗ trợ chọn nhiều khung)
   const [selectedSlots, setSelectedSlots] = useState([]);
-  
-  // State: Danh sách khung giờ từ backend (đã tính availability)
-  const [timeSlots, setTimeSlots] = useState([]);
-  
-  // State: Loading khi fetch data
-  const [loading, setLoading] = useState(false);
 
-  // Mock data (sẽ được thay thế bằng API call)
-  const field = {
-    id: 1,
-    name: 'Sân bóng đá Mini 7 người - Khu A',
-    address: '123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh',
-    phone: '0987 654 321',
-    rating: 4.8,
-    reviewsCount: 128,
-    verified: true,
-    quickBook: true,
-    price: 250000, // Giá thuê sân (VNĐ)
-    // Time slot configuration from backend
-    startTime: '08:00', // Giờ mở cửa
-    endTime: '21:00',   // Giờ đóng cửa
-    slotDuration: 90,   // Thời lượng mỗi slot (phút)
-    images: [
-      'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800',
-      'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800',
-      'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800',
-      'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800',
-      'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800'
-    ],
-    amenities: [
-      { icon: 'wifi', name: 'Wifi miễn phí' },
-      { icon: 'local_parking', name: 'Bãi giữ xe' },
-      { icon: 'shower', name: 'Phòng tắm' },
-      { icon: 'light_mode', name: 'Đèn chiếu sáng' },
-      { icon: 'local_drink', name: 'Nước uống' },
-      { icon: 'chair', name: 'Khán đài' }
-    ],
-    description: 'Sân bóng đá Mini 7 người Khu A nằm trong tổ hợp thể thao cao cấp Quận 7. Sân được trang bị mặt cỏ nhân tạo tiêu chuẩn FIFA mới nhất năm 2024, đảm bảo độ nảy bóng tốt và giảm thiểu chấn thương cho cầu thủ. Hệ thống đèn chiếu sáng LED hiện đại cho phép thi đấu ban đêm với chất lượng ánh sáng hoàn hảo.',
-    description2: 'Ngoài ra, chúng tôi có khu vực canteen phục vụ nước giải khát và đồ ăn nhẹ, phòng thay đồ sạch sẽ và tủ khóa an toàn. Phù hợp cho các giải đấu phong trào, giao hữu công ty hoặc tập luyện đội nhóm.',
-    fieldType: 'Cỏ nhân tạo (7 người)',
-    duration: '90 phút',
-    reviews: [
-      {
-        id: 1,
-        author: 'Nguyễn Văn A',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-        rating: 5,
-        date: '2023-10-15',
-        content: 'Sân rất đẹp và sạch sẽ. Hệ thống đèn chiếu sáng tốt, mặt cỏ êm ái. Nhân viên thân thiện. Sẽ quay lại đặt sân!',
-        helpful: 12
-      },
-      {
-        id: 2,
-        author: 'Trần Thị B',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-        rating: 4,
-        date: '2023-10-10',
-        content: 'Sân tốt, giá hợp lý. Bãi đỗ xe rộng rãi. Chỉ có điều đôi khi hơi đông người vào cuối tuần.',
-        helpful: 8
-      }
-    ]
-  };
+  // Generate time slots from field config + check availability against bookings
+  const timeSlots = useMemo(() => {
+    if (!field || !selectedDate) return [];
+    return generateTimeSlots(field, selectedDate);
+  }, [field, selectedDate]);
 
-  /**
-   * Fetch time slots from backend for selected date
-   * Backend handles:
-   * - Generating slots based on field's startTime, endTime, slotDuration
-   * - Checking availability against existing bookings
-   * - Returning array of slots with availability status
-   */
-  useEffect(() => {
-    const fetchTimeSlots = async () => {
-      // Validate: Không fetch nếu chưa chọn ngày
-      if (!selectedDate || !field.id) {
-        return;
-      }
+  // Feedbacks from mockData
+  const feedbacks = useMemo(() => {
+    return field ? getFeedbacksByFieldID(field._id) : [];
+  }, [field]);
+  const { averageRating, totalReviews } = field ? getFieldRating(field._id) : { averageRating: 0, totalReviews: 0 };
 
-      try {
-        setLoading(true);
-        
-        // Gọi API để lấy danh sách slots (đã tính availability)
-        const slots = await fieldService.getTimeSlots(field.id, selectedDate);
-        setTimeSlots(slots);
-        
-        // Reset selected slots khi đổi ngày
-        setSelectedSlots([]);
-      } catch (error) {
-        console.error('Error fetching time slots:', error);
-        // Nếu API fail, hiển thị mảng rỗng
-        setTimeSlots([]);
-        setSelectedSlots([]);
-      } finally {
-        setLoading(false);
-      }
+  // Rating breakdown (percentage for each star level)
+  const ratingBreakdown = useMemo(() => {
+    if (feedbacks.length === 0) return { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    feedbacks.forEach((fb) => {
+      counts[fb.rating] = (counts[fb.rating] || 0) + 1;
+    });
+    const total = feedbacks.length;
+    return {
+      5: Math.round((counts[5] / total) * 100),
+      4: Math.round((counts[4] / total) * 100),
+      3: Math.round((counts[3] / total) * 100),
+      2: Math.round((counts[2] / total) * 100),
+      1: Math.round((counts[1] / total) * 100),
     };
+  }, [feedbacks]);
 
-    fetchTimeSlots();
-  }, [selectedDate, field.id]);
+  // If field not found, show 404
+  if (!field) {
+    return (
+      <div className="field-detail-page">
+        <div className="field-detail-container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '4rem', color: 'var(--text-muted)' }}>search_off</span>
+          <h2 style={{ margin: '1rem 0 0.5rem' }}>Không tìm thấy sân</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Sân bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+          <Link to="/fields" className="btn-book-now" style={{ display: 'inline-block', textDecoration: 'none' }}>
+            Quay lại danh sách sân
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Derived data from field
+  const amenities = (field.utilities || []).map((u) => utilityMap[u] || { icon: 'check_circle', name: u });
+  const images = field.image?.length > 0
+    ? field.image
+    : ['https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800'];
+  const managerPhone = field.manager?.phone || '0900 000 000';
 
   /**
    * Validate date selection
@@ -134,6 +171,7 @@ const FieldDetailPage = () => {
     }
     
     setSelectedDate(selectedDateValue);
+    setSelectedSlots([]); // Reset slots when date changes
   };
 
   /**
@@ -157,131 +195,60 @@ const FieldDetailPage = () => {
 
   /**
    * Calculate total price for selected slots
-   * Chỉ tính tiền thuê sân (chưa có phụ phí)
    */
   const calculateTotalPrice = () => {
-    return field.price * selectedSlots.length;
+    return field.hourlyPrice * selectedSlots.length;
   };
 
   /**
-   * Handle booking submission
-   * Validate và submit booking data đến backend
+   * Handle booking submission (mock)
    */
-  const handleBooking = async () => {
-    // Validate 1: Kiểm tra authentication
-    if (!tokenManager.isAuthenticated()) {
+  const handleBooking = () => {
+    // Validate: authentication
+    if (!isAuthenticated) {
       alert('Vui lòng đăng nhập để đặt sân');
       navigate('/login', { state: { from: `/field/${id}` } });
       return;
     }
 
-    // Validate 2: Kiểm tra đã chọn ngày chưa
     if (!selectedDate) {
       alert('Vui lòng chọn ngày chơi');
       return;
     }
 
-    // Validate 3: Kiểm tra đã chọn slot chưa
     if (selectedSlots.length === 0) {
       alert('Vui lòng chọn ít nhất một khung giờ');
       return;
     }
 
-    // Validate 4: Kiểm tra ngày không phải quá khứ
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const bookingDate = new Date(selectedDate);
-    
-    if (bookingDate < today) {
+    if (new Date(selectedDate) < today) {
       alert('Không thể đặt sân cho ngày trong quá khứ');
       return;
     }
 
-    try {
-      setLoading(true);
+    const totalPrice = calculateTotalPrice();
+    const depositAmount = Math.round(totalPrice * 0.3);
 
-      // Lấy thông tin user hiện tại
-      const currentUser = tokenManager.getUser();
-      if (!currentUser || !currentUser._id) {
-        alert('Không thể xác định thông tin người dùng. Vui lòng đăng nhập lại.');
-        navigate('/login');
-        return;
-      }
+    // Mock booking success
+    alert(
+      `Đặt sân thành công!\n\n` +
+      `Sân: ${field.fieldName}\n` +
+      `Ngày: ${selectedDate}\n` +
+      `Khung giờ: ${selectedSlots.map((s) => s.time).join(', ')}\n` +
+      `Tổng tiền: ${totalPrice.toLocaleString('vi-VN')}đ\n` +
+      `Tiền cọc (30%): ${depositAmount.toLocaleString('vi-VN')}đ`
+    );
 
-      // Chuẩn bị booking details từ các slot đã chọn
-      const bookingDetails = selectedSlots.map(slot => {
-        // Kết hợp ngày đã chọn với giờ của slot
-        const [startHour, startMinute] = slot.startTime.split(':');
-        const [endHour, endMinute] = slot.endTime.split(':');
-        
-        const startDateTime = new Date(selectedDate);
-        startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
-        
-        const endDateTime = new Date(selectedDate);
-        endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
-
-        return {
-          startTime: startDateTime.toISOString(), // Convert sang UTC
-          endTime: endDateTime.toISOString(),     // Convert sang UTC
-          priceSnapshot: field.price              // Lưu giá tại thời điểm đặt
-        };
-      });
-
-      // Tính tổng tiền (chỉ tiền sân, chưa có phụ phí)
-      const totalPrice = field.price * selectedSlots.length;
-      
-      // Tính tiền cọc (30% tổng tiền)
-      const depositAmount = Math.round(totalPrice * 0.3);
-
-      // Chuẩn bị data gửi lên backend
-      const bookingData = {
-        customerID: currentUser._id,
-        fieldID: field.id,
-        bookingDetails: bookingDetails,
-        totalPrice: totalPrice,
-        depositAmount: depositAmount,
-        statusPayment: 'Pending' // Trạng thái thanh toán ban đầu
-      };
-
-      console.log('Submitting booking:', bookingData);
-
-      // Gọi API tạo booking
-      const response = await bookingService.createBooking(bookingData);
-
-      if (response.success) {
-        alert(`Đặt sân thành công! Mã booking: ${response.bookingID}`);
-        
-        // Redirect đến trang thanh toán hoặc lịch sử booking
-        if (response.paymentUrl) {
-          window.location.href = response.paymentUrl;
-        } else {
-          navigate('/profile/bookings');
-        }
-      } else {
-        alert(response.message || 'Đặt sân thất bại. Vui lòng thử lại.');
-      }
-    } catch (error) {
-      console.error('Booking error:', error);
-      
-      // Xử lý các loại lỗi cụ thể
-      if (error.response?.status === 401) {
-        // Lỗi authentication
-        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-        navigate('/login');
-      } else if (error.response?.status === 409) {
-        // Lỗi conflict (slot đã được đặt)
-        alert('Khung giờ đã được đặt. Vui lòng chọn khung giờ khác.');
-        // Refresh lại danh sách slots
-        const slots = await fieldService.getTimeSlots(field.id, selectedDate);
-        setTimeSlots(slots);
-        setSelectedSlots([]);
-      } else {
-        // Lỗi khác
-        alert(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
-      }
-    } finally {
-      setLoading(false);
-    }
+    console.log('Booking data:', {
+      customerID: user?.id,
+      fieldID: field._id,
+      selectedDate,
+      selectedSlots,
+      totalPrice,
+      depositAmount,
+    });
   };
 
   return (
@@ -293,7 +260,7 @@ const FieldDetailPage = () => {
           <span className="material-symbols-outlined breadcrumb-separator">chevron_right</span>
           <Link to="/fields" className="breadcrumb-link">Tìm kiếm</Link>
           <span className="material-symbols-outlined breadcrumb-separator">chevron_right</span>
-          <span className="breadcrumb-current">{field.name}</span>
+          <span className="breadcrumb-current">{field.fieldName}</span>
         </nav>
 
         {/* Page Layout */}
@@ -302,7 +269,7 @@ const FieldDetailPage = () => {
           <div className="detail-content">
             {/* Header */}
             <div className="detail-header">
-              <h1 className="field-title">{field.name}</h1>
+              <h1 className="field-title">{field.fieldName}</h1>
               <div className="field-location-row">
                 <span className="material-symbols-outlined">location_on</span>
                 <p>{field.address}</p>
@@ -311,15 +278,23 @@ const FieldDetailPage = () => {
               <div className="field-badges-row">
                 <div className="badge badge-rating">
                   <span className="material-symbols-outlined">star</span>
-                  {field.rating} ({field.reviewsCount} đánh giá)
+                  {averageRating > 0 ? `${averageRating} (${totalReviews} đánh giá)` : 'Chưa có đánh giá'}
                 </div>
-                <div className="badge badge-verified">
-                  <span className="material-symbols-outlined">verified</span>
-                  Đã xác thực
-                </div>
+                {field.status === 'Available' && (
+                  <div className="badge badge-verified">
+                    <span className="material-symbols-outlined">verified</span>
+                    Đang hoạt động
+                  </div>
+                )}
+                {field.status === 'Maintenance' && (
+                  <div className="badge badge-quick" style={{ background: '#fef3c7', color: '#d97706' }}>
+                    <span className="material-symbols-outlined">construction</span>
+                    Đang bảo trì
+                  </div>
+                )}
                 <div className="badge badge-quick">
                   <span className="material-symbols-outlined">bolt</span>
-                  Đặt nhanh
+                  {field.fieldType?.typeName}
                 </div>
               </div>
             </div>
@@ -328,32 +303,33 @@ const FieldDetailPage = () => {
             <div className="image-gallery">
               <div
                 className="gallery-main"
-                style={{ backgroundImage: `url(${field.images[0]})` }}
+                style={{ backgroundImage: `url(${images[0]})` }}
               />
-              <div
-                className="gallery-thumb"
-                style={{ backgroundImage: `url(${field.images[1]})` }}
-              />
-              <div
-                className="gallery-thumb"
-                style={{ backgroundImage: `url(${field.images[2]})` }}
-              />
-              <div
-                className="gallery-thumb"
-                style={{ backgroundImage: `url(${field.images[3]})` }}
-              />
-              <div className="gallery-thumb gallery-more" style={{ backgroundImage: `url(${field.images[4]})` }}>
-                <div className="gallery-overlay">
-                  <span>+5 ảnh</span>
+              {images.slice(1, 4).map((img, idx) => (
+                <div
+                  key={idx}
+                  className="gallery-thumb"
+                  style={{ backgroundImage: `url(${img})` }}
+                />
+              ))}
+              {images.length > 4 ? (
+                <div className="gallery-thumb gallery-more" style={{ backgroundImage: `url(${images[4]})` }}>
+                  <div className="gallery-overlay">
+                    <span>+{images.length - 4} ảnh</span>
+                  </div>
                 </div>
-              </div>
+              ) : images.length <= 1 ? (
+                <div className="gallery-thumb" style={{ background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>image</span>
+                </div>
+              ) : null}
             </div>
 
             {/* Amenities */}
             <div className="detail-section">
               <h3 className="section-title">Tiện ích sân</h3>
               <div className="amenities-grid">
-                {field.amenities.map((amenity, index) => (
+                {amenities.map((amenity, index) => (
                   <div key={index} className="amenity-item">
                     <span className="material-symbols-outlined">{amenity.icon}</span>
                     <span>{amenity.name}</span>
@@ -367,7 +343,32 @@ const FieldDetailPage = () => {
               <h3 className="section-title">Thông tin chi tiết</h3>
               <div className="field-description">
                 <p>{field.description}</p>
-                <p>{field.description2}</p>
+                <div className="field-info-grid">
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">category</span>
+                    <span><strong>Thể loại:</strong> {field.fieldType?.category?.categoryName}</span>
+                  </div>
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">sports</span>
+                    <span><strong>Loại sân:</strong> {field.fieldType?.typeName}</span>
+                  </div>
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">schedule</span>
+                    <span><strong>Giờ mở cửa:</strong> {field.openingTime} - {field.closingTime}</span>
+                  </div>
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">timer</span>
+                    <span><strong>Thời lượng slot:</strong> {field.slotDuration} phút</span>
+                  </div>
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">location_on</span>
+                    <span><strong>Khu vực:</strong> {field.district}</span>
+                  </div>
+                  <div className="field-info-item">
+                    <span className="material-symbols-outlined">person</span>
+                    <span><strong>Quản lý:</strong> {field.manager?.name}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -379,69 +380,90 @@ const FieldDetailPage = () => {
               </div>
 
               {/* Review Summary */}
-              <div className="review-summary">
-                <div className="summary-rating">
-                  <span className="rating-number">{field.rating}</span>
-                  <div className="rating-stars">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <span key={star} className="material-symbols-outlined star-filled">
-                        {star <= Math.floor(field.rating) ? 'star' : star === Math.ceil(field.rating) ? 'star_half' : 'star'}
-                      </span>
+              {totalReviews > 0 ? (
+                <div className="review-summary">
+                  <div className="summary-rating">
+                    <span className="rating-number">{averageRating}</span>
+                    <div className="rating-stars">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <span key={star} className="material-symbols-outlined star-filled">
+                          {star <= Math.floor(averageRating) ? 'star' : star === Math.ceil(averageRating) && averageRating % 1 !== 0 ? 'star_half' : 'star'}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="rating-count">{totalReviews} đánh giá</span>
+                  </div>
+
+                  <div className="rating-breakdown">
+                    {[5, 4, 3, 2, 1].map(star => (
+                      <div key={star} className="rating-row">
+                        <span className="rating-label">{star} sao</span>
+                        <div className="rating-bar">
+                          <div
+                            className="rating-fill"
+                            style={{ width: `${ratingBreakdown[star]}%` }}
+                          />
+                        </div>
+                        <span className="rating-percent">{ratingBreakdown[star]}%</span>
+                      </div>
                     ))}
                   </div>
-                  <span className="rating-count">{field.reviewsCount} đánh giá</span>
                 </div>
-
-                <div className="rating-breakdown">
-                  {[5, 4, 3, 2, 1].map(star => (
-                    <div key={star} className="rating-row">
-                      <span className="rating-label">{star} sao</span>
-                      <div className="rating-bar">
-                        <div
-                          className="rating-fill"
-                          style={{ width: star === 5 ? '70%' : star === 4 ? '20%' : '10%' }}
-                        />
-                      </div>
-                      <span className="rating-percent">{star === 5 ? 70 : star === 4 ? 20 : 10}%</span>
-                    </div>
-                  ))}
+              ) : (
+                <div className="review-summary" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: 'var(--text-muted)' }}>rate_review</span>
+                  <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
                 </div>
-              </div>
+              )}
 
               {/* Review List */}
               <div className="reviews-list">
-                {field.reviews.map(review => (
-                  <div key={review.id} className="review-item">
-                    <div className="review-avatar" style={{ backgroundImage: `url(${review.avatar})` }} />
+                {feedbacks.length > 0 ? feedbacks.map(feedback => (
+                  <div key={feedback._id} className="review-item">
+                    <div className="review-avatar" style={{ backgroundImage: `url(${feedback.userImage})` }} />
                     <div className="review-content">
                       <div className="review-header">
                         <div>
-                          <h4 className="review-author">{review.author}</h4>
+                          <h4 className="review-author">{feedback.userName}</h4>
                           <div className="review-meta">
                             <div className="review-stars">
                               {[1, 2, 3, 4, 5].map(star => (
                                 <span
                                   key={star}
-                                  className={`material-symbols-outlined ${star <= review.rating ? 'star-filled' : 'star-empty'}`}
+                                  className={`material-symbols-outlined ${star <= feedback.rating ? 'star-filled' : 'star-empty'}`}
                                 >
                                   star
                                 </span>
                               ))}
                             </div>
-                            <span className="review-date">{review.date}</span>
+                            <span className="review-date">
+                              {new Date(feedback.createdAt).toLocaleDateString('vi-VN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <p className="review-text">{review.content}</p>
+                      <p className="review-text">{feedback.comment}</p>
                       <div className="review-actions">
                         <button className="btn-helpful">
                           <span className="material-symbols-outlined">thumb_up</span>
-                          Hữu ích ({review.helpful})
+                          Hữu ích
+                        </button>
+                        <button className="btn-helpful">
+                          <span className="material-symbols-outlined">flag</span>
+                          Báo cáo
                         </button>
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1rem 0' }}>
+                    Chưa có đánh giá nào cho sân này.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -470,12 +492,9 @@ const FieldDetailPage = () => {
                     Chọn khung giờ {selectedSlots.length > 0 && `(${selectedSlots.length} khung)`}
                   </label>
                   
-                  {/* Hiển thị loading khi fetch slots */}
-                  {loading && <p className="loading-text">Đang tải khung giờ...</p>}
-                  
                   {/* Hiển thị thông báo khi chưa có slots */}
-                  {!loading && timeSlots.length === 0 && (
-                    <p className="empty-slots-text">Vui lòng chọn ngày để xem khung giờ có sẵn</p>
+                  {timeSlots.length === 0 && (
+                    <p className="empty-slots-text">Không có khung giờ khả dụng cho ngày này</p>
                   )}
                   
                   {/* Danh sách time slots */}
@@ -484,7 +503,7 @@ const FieldDetailPage = () => {
                       <button
                         key={index}
                         className={`time-slot ${!slot.available ? 'unavailable' : ''} ${selectedSlots.some(s => s.time === slot.time) ? 'selected' : ''}`}
-                        disabled={!slot.available || loading}
+                        disabled={!slot.available}
                         onClick={() => handleSlotSelection(slot)}
                       >
                         {slot.time}
@@ -503,7 +522,7 @@ const FieldDetailPage = () => {
                 {/* Loại sân */}
                 <div className="form-group">
                   <label className="form-label">Loại sân</label>
-                  <p className="form-value">{field.fieldType}</p>
+                  <p className="form-value">{field.fieldType?.typeName} ({field.fieldType?.category?.categoryName})</p>
                 </div>
 
                 {/* Thời lượng mỗi khung */}
@@ -517,14 +536,14 @@ const FieldDetailPage = () => {
                   {/* Giá thuê sân */}
                   <div className="price-row">
                     <span>Giá thuê sân ({field.slotDuration}p) × {selectedSlots.length || 1}</span>
-                    <span>{(field.price * (selectedSlots.length || 1)).toLocaleString()}đ</span>
+                    <span>{(field.hourlyPrice * (selectedSlots.length || 1)).toLocaleString('vi-VN')}đ</span>
                   </div>
                   
                   {/* Hiển thị tiền cọc khi đã chọn slot */}
                   {selectedSlots.length > 0 && (
                     <div className="price-row deposit">
                       <span>Tiền cọc (30%)</span>
-                      <span>{Math.round(calculateTotalPrice() * 0.3).toLocaleString()}đ</span>
+                      <span>{Math.round(calculateTotalPrice() * 0.3).toLocaleString('vi-VN')}đ</span>
                     </div>
                   )}
                   
@@ -533,8 +552,8 @@ const FieldDetailPage = () => {
                     <span>Tổng cộng</span>
                     <span className="total-amount">
                       {selectedSlots.length > 0 
-                        ? calculateTotalPrice().toLocaleString() 
-                        : field.price.toLocaleString()}đ
+                        ? calculateTotalPrice().toLocaleString('vi-VN') 
+                        : field.hourlyPrice.toLocaleString('vi-VN')}đ
                     </span>
                   </div>
                 </div>
@@ -543,9 +562,9 @@ const FieldDetailPage = () => {
                 <button 
                   className="btn-book-now" 
                   onClick={handleBooking}
-                  disabled={loading || selectedSlots.length === 0}
+                  disabled={selectedSlots.length === 0 || field.status === 'Maintenance'}
                 >
-                  {loading ? 'Đang xử lý...' : selectedSlots.length > 0 ? 'Đặt sân ngay' : 'Chọn khung giờ'}
+                  {field.status === 'Maintenance' ? 'Sân đang bảo trì' : selectedSlots.length > 0 ? 'Đặt sân ngay' : 'Chọn khung giờ'}
                 </button>
 
                 <div className="booking-note">
@@ -565,9 +584,9 @@ const FieldDetailPage = () => {
                 Liên hệ hotline hoặc chat với chúng tôi để được hỗ trợ nhanh nhất.
               </p>
               <div className="contact-actions">
-                <a href={`tel:${field.phone}`} className="btn-contact">
+                <a href={`tel:${managerPhone}`} className="btn-contact">
                   <span className="material-symbols-outlined">phone</span>
-                  {field.phone}
+                  {managerPhone}
                 </a>
                 <button className="btn-contact">
                   <span className="material-symbols-outlined">chat</span>

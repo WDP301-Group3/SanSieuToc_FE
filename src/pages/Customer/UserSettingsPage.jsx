@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getUserMemberTier } from '../../data/mockData';
 import '../../styles/UserSettingsPage.css';
 
 const UserSettingsPage = () => {
   const { user, logout } = useAuth();
+
+  const memberTier = useMemo(() => {
+    if (!user?.id) return { name: 'Thành viên Đồng', color: '#cd7f32' };
+    return getUserMemberTier(user.id);
+  }, [user]);
 
   const [notifications, setNotifications] = useState({
     email: true,
@@ -33,7 +39,7 @@ const UserSettingsPage = () => {
   const menuItems = [
     { key: 'profile', icon: 'person', label: 'Thông tin cá nhân', to: '/profile' },
     { key: 'bookings', icon: 'calendar_month', label: 'Lịch sử đặt sân', to: '/booking-history' },
-    { key: 'payment', icon: 'credit_card', label: 'Phương thức thanh toán', to: '#' },
+    
     { key: 'settings', icon: 'settings', label: 'Cài đặt', to: '/settings' },
   ];
 
@@ -110,7 +116,12 @@ const UserSettingsPage = () => {
                 </button>
               </div>
               <h1 className="settings-user-name">{user?.name || 'Nguyen Van A'}</h1>
-              <span className="settings-user-badge">Thành viên Vàng</span>
+              <span
+                className="settings-user-badge"
+                style={{ backgroundColor: memberTier.color, color: '#fff' }}
+              >
+                {memberTier.name}
+              </span>
             </div>
 
             {/* Navigation */}

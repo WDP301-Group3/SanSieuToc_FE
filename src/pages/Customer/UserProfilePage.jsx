@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import {
+  getBookingsByUserID,
+  getUserMemberTier,
+  BOOKING_ORDER_STATUS,
+} from '../../data/mockData';
 import '../../styles/UserProfilePage.css';
 
 const UserProfilePage = () => {
@@ -10,47 +15,58 @@ const UserProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || 'Nguyen Van A',
-    phone: user?.phone || '0912 345 678',
-    email: user?.email || 'nguyenvana@example.com',
+    name: user?.name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
     address: user?.address || 'TP. Hồ Chí Minh, Việt Nam',
   });
+
+  // Get real data from mockData
+  const allBookings = useMemo(() => {
+    if (!user?.id) return [];
+    return getBookingsByUserID(user.id);
+  }, [user]);
+
+  const memberTier = useMemo(() => {
+    if (!user?.id) return { name: 'Thành viên Đồng', color: '#cd7f32' };
+    return getUserMemberTier(user.id);
+  }, [user]);
+
+  // Upcoming bookings = confirmed + pending only
+  const upcomingBookings = useMemo(() => {
+    return allBookings
+      .filter((b) => b.status === BOOKING_ORDER_STATUS.CONFIRMED || b.status === BOOKING_ORDER_STATUS.PENDING)
+      .slice(0, 4);
+  }, [allBookings]);
 
   const menuItems = [
     { key: 'profile', icon: 'person', label: 'Thông tin cá nhân', to: '/profile' },
     { key: 'bookings', icon: 'calendar_month', label: 'Lịch sử đặt sân', to: '/booking-history' },
-    { key: 'payment', icon: 'credit_card', label: 'Phương thức thanh toán', to: '#' },
+    
     { key: 'settings', icon: 'settings', label: 'Cài đặt', to: '/settings' },
   ];
 
-  const upcomingBookings = [
-    {
-      id: 'BK-8821',
-      name: 'Sân Bóng Đá Mini 7 Người - Khu A',
-      date: '12/10/2023',
-      time: '18:00 - 19:30',
-      price: '300.000đ',
-      status: 'confirmed',
-      statusText: 'Đã xác nhận',
-      image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400',
-    },
-    {
-      id: 'BK-7742',
-      name: 'Sân Cầu Lông Số 3',
-      date: '05/10/2023',
-      time: '09:00 - 11:00',
-      price: '150.000đ',
-      status: 'completed',
-      statusText: 'Đã hoàn thành',
-      image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400',
-    },
-  ];
+  // Format helpers
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
+  };
 
-  const stats = [
-    { icon: 'sports_soccer', label: 'Tổng số trận', value: '24' },
-    { icon: 'loyalty', label: 'Điểm tích lũy', value: '1,250' },
-    { icon: 'savings', label: 'Tiết kiệm được', value: '500k' },
-  ];
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case BOOKING_ORDER_STATUS.CONFIRMED:
+        return { className: 'confirmed', label: 'Đã xác nhận' };
+      case BOOKING_ORDER_STATUS.COMPLETED:
+        return { className: 'completed', label: 'Đã hoàn thành' };
+      case BOOKING_ORDER_STATUS.CANCELLED:
+        return { className: 'cancelled', label: 'Đã hủy' };
+      case BOOKING_ORDER_STATUS.PENDING:
+        return { className: 'pending', label: 'Chờ xác nhận' };
+      default:
+        return { className: '', label: status };
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,9 +81,9 @@ const UserProfilePage = () => {
 
   const handleCancel = () => {
     setFormData({
-      name: user?.name || 'Nguyen Van A',
-      phone: user?.phone || '0912 345 678',
-      email: user?.email || 'nguyenvana@example.com',
+      name: user?.name || '',
+      phone: user?.phone || '',
+      email: user?.email || '',
       address: user?.address || 'TP. Hồ Chí Minh, Việt Nam',
     });
     setIsEditing(false);
@@ -92,7 +108,12 @@ const UserProfilePage = () => {
                 </button>
               </div>
               <h1 className="profile-user-name">{formData.name}</h1>
-              <span className="profile-user-badge">Thành viên Vàng</span>
+              <span
+                className="profile-user-badge"
+                style={{ backgroundColor: memberTier.color, color: '#fff' }}
+              >
+                {memberTier.name}
+              </span>
             </div>
 
             {/* Navigation Menu */}
@@ -218,66 +239,54 @@ const UserProfilePage = () => {
             </div>
 
             <div className="profile-bookings-list">
-              {upcomingBookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className={`profile-booking-card ${booking.status === 'completed' ? 'completed' : ''}`}
-                >
-                  <div
-                    className={`profile-booking-image ${booking.status === 'completed' ? 'grayscale' : ''}`}
-                    style={{ backgroundImage: `url(${booking.image})` }}
-                  />
-                  <div className="profile-booking-info">
-                    <div className="profile-booking-badges">
-                      <span className={`profile-booking-status ${booking.status}`}>
-                        {booking.statusText}
-                      </span>
-                      <span className="profile-booking-code">Mã: #{booking.id}</span>
-                    </div>
-                    <h4 className="profile-booking-name">{booking.name}</h4>
-                    <div className="profile-booking-meta">
-                      <div className="profile-booking-meta-item">
-                        <span className="material-symbols-outlined">calendar_today</span>
-                        <span>{booking.date}</span>
-                      </div>
-                      <div className="profile-booking-meta-item">
-                        <span className="material-symbols-outlined">schedule</span>
-                        <span>{booking.time}</span>
-                      </div>
-                      {booking.price && (
-                        <div className="profile-booking-meta-item price">
-                          <span className="material-symbols-outlined">payments</span>
-                          <span>{booking.price}</span>
+              {upcomingBookings.length === 0 ? (
+                <div className="profile-bookings-empty">
+                  <span className="material-symbols-outlined">event_busy</span>
+                  <p>Chưa có lịch đặt sân nào</p>
+                </div>
+              ) : (
+                upcomingBookings.map((booking) => {
+                  const statusInfo = getStatusInfo(booking.status);
+                  return (
+                    <div
+                      key={booking._id}
+                      className="profile-booking-card"
+                    >
+                      <div
+                        className="profile-booking-image"
+                        style={{ backgroundImage: `url(${booking.fieldImage})` }}
+                      />
+                      <div className="profile-booking-info">
+                        <div className="profile-booking-badges">
+                          <span className={`profile-booking-status ${statusInfo.className}`}>
+                            {statusInfo.label}
+                          </span>
+                          <span className="profile-booking-code">Mã: #{booking.bookingCode}</span>
                         </div>
-                      )}
+                        <h4 className="profile-booking-name">{booking.fieldName}</h4>
+                        <div className="profile-booking-meta">
+                          <div className="profile-booking-meta-item">
+                            <span className="material-symbols-outlined">calendar_today</span>
+                            <span>{formatDate(booking.date)}</span>
+                          </div>
+                          <div className="profile-booking-meta-item">
+                            <span className="material-symbols-outlined">schedule</span>
+                            <span>{booking.startTime} - {booking.endTime}</span>
+                          </div>
+                          <div className="profile-booking-meta-item price">
+                            <span className="material-symbols-outlined">payments</span>
+                            <span>{booking.totalPrice.toLocaleString('vi-VN')}đ</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="profile-booking-actions">
+                        <button className="btn-detail" onClick={() => navigate(`/booking-history/${booking._id}`)}>Chi tiết</button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="profile-booking-actions">
-                    {booking.status === 'confirmed' ? (
-                      <button className="btn-detail" onClick={() => navigate(`/booking-history/${booking.id}`)}>Chi tiết</button>
-
-                    ) : (
-                      <button className="btn-rebook">Đặt lại</button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
-          </section>
-
-          {/* Statistics Section */}
-          <section className="profile-stats-grid">
-            {stats.map((stat, index) => (
-              <div key={index} className="profile-stat-card">
-                <div className="profile-stat-icon">
-                  <span className="material-symbols-outlined">{stat.icon}</span>
-                </div>
-                <div>
-                  <p className="profile-stat-label">{stat.label}</p>
-                  <p className="profile-stat-value">{stat.value}</p>
-                </div>
-              </div>
-            ))}
           </section>
         </main>
       </div>

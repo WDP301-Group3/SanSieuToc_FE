@@ -22,21 +22,8 @@
 }
 
 .header-container {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-@media (min-width: 640px) {
-  .header-container {
-    padding: 0 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .header-container {
-    padding: 0 2rem;
-  }
+  width: 100%;
+  padding: 0 2rem;
 }
 
 .header-inner {
@@ -86,7 +73,9 @@
 .header-nav-links {
   display: none;
   align-items: center;
+  justify-content: center;
   gap: 2rem;
+  flex: 1;
 }
 
 @media (min-width: 768px) {
@@ -140,6 +129,37 @@
   background-color: rgb(31 41 55);
 }
 
+/* Notification Button */
+.header-notification-btn {
+  position: relative;
+}
+
+.header-notification-dot {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dark .header-notification-dot {
+  border-color: var(--bg-primary-dark, #1a1a2e);
+}
+
+/* Divider */
+.header-divider {
+  width: 1px;
+  height: 2rem;
+  background: #e2e8f0;
+}
+
+.dark .header-divider {
+  background: rgb(55 65 81);
+}
+
 /* Avatar */
 .header-avatar-wrapper {
   position: relative;
@@ -172,25 +192,59 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  min-width: 200px;
+  width: 14rem;
   background: white;
   border-radius: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  border: 1px solid #e5e7eb;
-  padding: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0;
   z-index: 100;
-  animation: dropdownFadeIn 0.15s ease;
+  animation: dropdownFadeIn 0.15s ease-out;
 }
 
 .dark .header-dropdown {
   background: var(--surface-dark, #1a2e1a);
   border-color: #2a2e2a;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.header-dropdown-header {
+  padding: 0.75rem 1rem;
+}
+
+.header-dropdown-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dark .header-dropdown-name {
+  color: #f1f5f9;
+}
+
+.header-dropdown-email {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.125rem;
+}
+
+.dark .header-dropdown-email {
+  color: #94a3b8;
+}
+
+.header-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0.25rem 0;
+}
+
+.dark .header-dropdown-divider {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .header-dropdown-item {
@@ -198,16 +252,15 @@
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: rgb(55 65 81);
+  color: #334155;
   text-decoration: none;
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .dark .header-dropdown-item {
@@ -215,7 +268,8 @@
 }
 
 .header-dropdown-item:hover {
-  background: rgb(243 244 246);
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 .dark .header-dropdown-item:hover {
@@ -223,34 +277,49 @@
 }
 
 .header-dropdown-item .material-icons-outlined {
-  font-size: 1.2rem;
-  color: rgb(107 114 128);
+  font-size: 1.25rem;
+  color: #64748b;
 }
 
 .dark .header-dropdown-item .material-icons-outlined {
   color: rgb(156 163 175);
 }
 
+.header-dropdown-item:hover .material-icons-outlined {
+  color: #334155;
+}
+
+.dark .header-dropdown-item:hover .material-icons-outlined {
+  color: rgb(229 231 235);
+}
+
 .header-dropdown-item.logout {
-  color: rgb(220 38 38);
+  color: #ef4444;
 }
 
 .dark .header-dropdown-item.logout {
   color: rgb(248 113 113);
 }
 
+.header-dropdown-item.logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.dark .header-dropdown-item.logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .header-dropdown-item.logout .material-icons-outlined {
-  color: rgb(220 38 38);
+  color: #ef4444;
 }
 
 .dark .header-dropdown-item.logout .material-icons-outlined {
   color: rgb(248 113 113);
 }
 
-.header-dropdown-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 0.25rem 0;
+.header-dropdown-item.logout:hover .material-icons-outlined {
+  color: #dc2626;
 }
 
 .dark .header-dropdown-divider {

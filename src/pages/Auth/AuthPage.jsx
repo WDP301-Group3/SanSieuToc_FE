@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { mockUsers } from '../../data/mockData';
 import '../../styles/AuthPage.css';
 
 /**
@@ -10,7 +11,7 @@ import '../../styles/AuthPage.css';
  * Features:
  * - Tab-based navigation between auth modes (Login/Register/Forgot Password)
  * - Automatic mode detection based on URL path
- * - Role-based login (Customer/Manager) with separate tabs
+ * - Role-based login (Customer/Admin) with credential validation
  * - Form validation with error handling
  * - Password visibility toggle
  * - Success/Error state management
@@ -40,12 +41,6 @@ const AuthPage = () => {
    * @type {'login' | 'register' | 'forgot-password'}
    */
   const [authMode, setAuthMode] = useState(getInitialAuthMode());
-  
-  /**
-   * User role selection for login (Customer or Manager)
-   * @type {'customer' | 'manager'}
-   */
-  const [loginRole, setLoginRole] = useState('customer');
   
   /**
    * Password visibility toggles
@@ -245,38 +240,79 @@ const AuthPage = () => {
   
   /**
    * Handle login form submission
+   * Validates credentials against mockUsers
    * @param {Event} e - Form submit event
    */
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrors({});
 
+    // Basic field validation
+    const newErrors = {};
+    if (!loginData.email.trim()) {
+      newErrors.email = 'Vui lòng nhập email';
+    }
+    if (!loginData.password) {
+      newErrors.password = 'Vui lòng nhập mật khẩu';
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // TODO: Replace with actual API call based on loginRole
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Mock successful login based on role
-      const mockUser = {
-        id: '1',
-        name: loginRole === 'customer' ? 'Nguyen Van A' : 'Manager Nguyen',
-        email: loginData.email,
-        image: 'https://via.placeholder.com/100',
-        role: loginRole, // 'customer' or 'manager'
+      // Find user by email
+      const foundUser = mockUsers.find(
+        (account) => account.email === loginData.email.trim()
+      );
+
+      // Validate email exists
+      if (!foundUser) {
+        setErrors({ submit: 'Email không tồn tại trong hệ thống.' });
+        setLoading(false);
+        return;
+      }
+
+      // Validate password
+      if (foundUser.password !== loginData.password) {
+        setErrors({ submit: 'Mật khẩu không chính xác.' });
+        setLoading(false);
+        return;
+      }
+
+      // Validate account is active (if applicable)
+      if (foundUser.isActive === false) {
+        setErrors({ submit: 'Tài khoản đã bị vô hiệu hóa.' });
+        setLoading(false);
+        return;
+      }
+
+      // Build user object for context
+      const userData = {
+        id: foundUser._id,
+        name: foundUser.name,
+        email: foundUser.email,
+        phone: foundUser.phone || '',
+        image: foundUser.image || 'https://via.placeholder.com/100',
+        role: foundUser.role,
       };
-      const mockToken = 'mock-jwt-token-123';
+      const mockToken = 'mock-jwt-token-' + foundUser._id;
 
-      login(mockUser, mockToken);
-      
+      login(userData, mockToken);
+
       // Redirect based on role
-      if (loginRole === 'manager') {
-        navigate('/manager/dashboard');
+      if (foundUser.role === 'admin') {
+        navigate('/admin/dashboard');
       } else {
         navigate('/');
       }
     } catch (err) {
-      setErrors({ submit: 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.' });
+      setErrors({ submit: 'Đăng nhập thất bại. Vui lòng thử lại.' });
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -370,28 +406,6 @@ const AuthPage = () => {
         </p>
       </div>
 
-      {/* Role Selection Tabs */}
-      <div className="role-tabs-wrapper">
-        <div className="role-tabs">
-          <button
-            type="button"
-            onClick={() => setLoginRole('customer')}
-            className={`role-tab ${loginRole === 'customer' ? 'active' : ''}`}
-          >
-            <span className="material-icons-outlined">person</span>
-            Khách hàng
-          </button>
-          <button
-            type="button"
-            onClick={() => setLoginRole('manager')}
-            className={`role-tab ${loginRole === 'manager' ? 'active' : ''}`}
-          >
-            <span className="material-icons-outlined">admin_panel_settings</span>
-            Chủ sân
-          </button>
-        </div>
-      </div>
-
       {/* Login Form */}
       <form onSubmit={handleLoginSubmit} className="auth-form">
         {/* Error Message */}
@@ -418,6 +432,7 @@ const AuthPage = () => {
               required
             />
           </div>
+          {errors.email && <span className="error-text">{errors.email}</span>}
         </div>
 
         {/* Password Field */}
@@ -447,6 +462,7 @@ const AuthPage = () => {
               </span>
             </button>
           </div>
+          {errors.password && <span className="error-text">{errors.password}</span>}
         </div>
 
         {/* Forgot Password Link */}
