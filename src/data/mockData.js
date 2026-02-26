@@ -898,6 +898,218 @@ export const mockFields = [
     createdAt: "2026-02-05T14:49:04.655Z",
     updatedAt: "2026-02-05T14:49:04.655Z",
   },
+
+  // ==================== ADDITIONAL FIELDS (5 more) ====================
+
+  // Football 11 người — Manager 1: Nguyễn Văn Manager (Quận 7)
+  {
+    _id: "6984ade0031fcdd6b5e7871f",
+    fieldName: "Sân Bóng Đá A5",
+    address: "123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM",
+    description:
+      "Sân 11 người tiêu chuẩn, mặt cỏ nhân tạo thế hệ 4, hệ thống chiếu sáng LED 500W cho thi đấu ban đêm. Khán đài 100 chỗ ngồi.",
+    hourlyPrice: 500000,
+    slotDuration: 120,
+    openingTime: "06:00",
+    closingTime: "23:00",
+    status: "Available",
+    utilities: [
+      "Wifi",
+      "Parking",
+      "Shower",
+      "Changing Room",
+      "Water",
+      "First Aid",
+      "Scoreboard",
+    ],
+    image: [
+      "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800",
+      "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800",
+    ],
+    fieldType: {
+      _id: "6984ade0031fcdd6b5e7870c",
+      typeName: "Sân 11 người",
+      category: {
+        _id: "6984ade0031fcdd6b5e78704",
+        categoryName: "Football",
+      },
+    },
+    manager: {
+      _id: "6984ade0031fcdd6b5e786fa",
+      name: "Nguyễn Văn Manager",
+      phone: "0901234567",
+      image: "https://i.pravatar.cc/300?img=1",
+    },
+    district: "Quận 7",
+    createdAt: "2026-02-10T09:00:00.000Z",
+    updatedAt: "2026-02-10T09:00:00.000Z",
+  },
+
+  // Tennis 3 — Manager 2: Trần Thị Quản Lý (Quận 1)
+  {
+    _id: "6984ade0031fcdd6b5e78720",
+    fieldName: "Sân Tennis Elite 3",
+    address: "456 Đường Võ Văn Kiệt, Quận 1, TP.HCM",
+    description:
+      "Sân tennis mặt đất nện (clay court), tiêu chuẩn Roland Garros. Lưới chính hãng Wilson, ghế trọng tài có mái che.",
+    hourlyPrice: 250000,
+    slotDuration: 90,
+    openingTime: "05:00",
+    closingTime: "22:00",
+    status: "Available",
+    utilities: [
+      "Wifi",
+      "Parking",
+      "Shower",
+      "Equipment Rental",
+      "Coaching",
+      "Cafe",
+      "Water",
+    ],
+    image: [
+      "https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?w=800",
+      "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800",
+    ],
+    fieldType: {
+      _id: "6984ade0031fcdd6b5e7870d",
+      typeName: "Sân Tiêu Chuẩn",
+      category: {
+        _id: "6984ade0031fcdd6b5e78705",
+        categoryName: "Tennis",
+      },
+    },
+    manager: {
+      _id: "6984ade0031fcdd6b5e786fb",
+      name: "Trần Thị Quản Lý",
+      phone: "0902345678",
+      image: "https://i.pravatar.cc/300?img=2",
+    },
+    district: "Quận 1",
+    createdAt: "2026-02-12T10:00:00.000Z",
+    updatedAt: "2026-02-12T10:00:00.000Z",
+  },
+
+  // Basketball 2 — Manager 3: Lê Văn Giám Đốc (Quận Bình Thạnh)
+  {
+    _id: "6984ade0031fcdd6b5e78721",
+    fieldName: "Sân Bóng Rổ Champions 2",
+    address: "321 Đường Đinh Tiên Hoàng, Quận Bình Thạnh, TP.HCM",
+    description:
+      "Sân bóng rổ trong nhà có mái che, sàn gỗ chuyên dụng. Bảng rổ kính cường lực tiêu chuẩn FIBA, hệ thống điều hòa.",
+    hourlyPrice: 300000,
+    slotDuration: 90,
+    openingTime: "07:00",
+    closingTime: "23:00",
+    status: "Available",
+    utilities: [
+      "Air Conditioning",
+      "Parking",
+      "Shower",
+      "Water",
+      "Scoreboard",
+      "Snack Bar",
+    ],
+    image: [
+      "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800",
+      "https://images.unsplash.com/photo-1505666287802-931dc83948e5?w=800",
+    ],
+    fieldType: {
+      _id: "6984ade0031fcdd6b5e78711",
+      typeName: "Sân Tiêu Chuẩn",
+      category: {
+        _id: "6984ade0031fcdd6b5e78707",
+        categoryName: "Basketball",
+      },
+    },
+    manager: {
+      _id: "6984ade0031fcdd6b5e786fc",
+      name: "Lê Văn Giám Đốc",
+      phone: "0903456789",
+      image: "https://i.pravatar.cc/300?img=3",
+    },
+    district: "Quận Bình Thạnh",
+    createdAt: "2026-02-14T08:30:00.000Z",
+    updatedAt: "2026-02-14T08:30:00.000Z",
+  },
+
+  // Badminton 3 — Manager 3: Lê Văn Giám Đốc (Quận 9)
+  {
+    _id: "6984ade0031fcdd6b5e78722",
+    fieldName: "Sân Cầu Lông Star",
+    address: "654 Đường Lê Văn Việt, Quận 9, TP.HCM",
+    description:
+      "Sân cầu lông trong nhà cao cấp, sàn thể thao Yonex chính hãng. Hệ thống quạt thông gió không ảnh hưởng cầu, đèn LED chống chói.",
+    hourlyPrice: 90000,
+    slotDuration: 60,
+    openingTime: "06:00",
+    closingTime: "22:00",
+    status: "Available",
+    utilities: [
+      "Air Conditioning",
+      "Parking",
+      "Shower",
+      "Equipment Rental",
+      "Water",
+      "Changing Room",
+    ],
+    image: [
+      "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+    ],
+    fieldType: {
+      _id: "6984ade0031fcdd6b5e7870f",
+      typeName: "Sân Tiêu Chuẩn",
+      category: {
+        _id: "6984ade0031fcdd6b5e78706",
+        categoryName: "Badminton",
+      },
+    },
+    manager: {
+      _id: "6984ade0031fcdd6b5e786fc",
+      name: "Lê Văn Giám Đốc",
+      phone: "0903456789",
+      image: "https://i.pravatar.cc/300?img=3",
+    },
+    district: "Quận 9",
+    createdAt: "2026-02-16T11:00:00.000Z",
+    updatedAt: "2026-02-16T11:00:00.000Z",
+  },
+
+  // Football 7 người — Manager 2: Trần Thị Quản Lý (Quận Phú Nhuận)
+  {
+    _id: "6984ade0031fcdd6b5e78723",
+    fieldName: "Sân Bóng Đá Phú Nhuận",
+    address: "789 Đường Phan Xích Long, Quận Phú Nhuận, TP.HCM",
+    description:
+      "Sân bóng đá 7 người nằm trong khu thể thao Phú Nhuận, mặt cỏ nhân tạo chất lượng cao. Có mái che một phần cho khán giả.",
+    hourlyPrice: 300000,
+    slotDuration: 90,
+    openingTime: "06:00",
+    closingTime: "22:00",
+    status: "Maintenance",
+    utilities: ["Wifi", "Parking", "Shower", "Water", "First Aid"],
+    image: [
+      "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=800",
+      "https://images.unsplash.com/photo-1624880357913-a8539238245b?w=800",
+    ],
+    fieldType: {
+      _id: "6984ade0031fcdd6b5e7870b",
+      typeName: "Sân 7 người",
+      category: {
+        _id: "6984ade0031fcdd6b5e78704",
+        categoryName: "Football",
+      },
+    },
+    manager: {
+      _id: "6984ade0031fcdd6b5e786fb",
+      name: "Trần Thị Quản Lý",
+      phone: "0902345678",
+      image: "https://i.pravatar.cc/300?img=2",
+    },
+    district: "Quận Phú Nhuận",
+    createdAt: "2026-02-18T14:00:00.000Z",
+    updatedAt: "2026-02-18T14:00:00.000Z",
+  },
 ];
 
 // ============================================================================
@@ -2120,7 +2332,7 @@ export const ALL_DISTRICTS = [
  */
 export const PRICE_RANGE = {
   min: 80000,
-  max: 350000,
+  max: 500000,
 };
 
 /**

@@ -574,6 +574,28 @@ const FieldDetailPage = () => {
               </div>
             </div>
 
+            {/* Manager Info Card */}
+            <div className="manager-info-card">
+              <h4 className="manager-info-title">
+                <span className="material-symbols-outlined">badge</span>
+                Thông tin chủ sân
+              </h4>
+              <div className="manager-info-body">
+                <img
+                  src={field.manager?.image || 'https://via.placeholder.com/56'}
+                  alt={field.manager?.name}
+                  className="manager-info-avatar"
+                />
+                <div className="manager-info-details">
+                  <p className="manager-info-name">{field.manager?.name || 'Chưa cập nhật'}</p>
+                  <a href={`tel:${field.manager?.phone}`} className="manager-info-phone">
+                    <span className="material-symbols-outlined">phone</span>
+                    {field.manager?.phone || 'Chưa cập nhật'}
+                  </a>
+                </div>
+              </div>
+            </div>
+
             {/* Contact Card */}
             <div className="contact-card">
               <div className="contact-header">

@@ -899,6 +899,89 @@
   line-height: 1.4;
 }
 
+/* Manager Info Card */
+.manager-info-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.dark .manager-info-card {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+}
+
+.manager-info-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.dark .manager-info-title {
+  color: #fff;
+}
+
+.manager-info-title .material-symbols-outlined {
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.manager-info-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.manager-info-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  flex-shrink: 0;
+}
+
+.manager-info-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.manager-info-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dark .manager-info-name {
+  color: #fff;
+}
+
+.manager-info-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.manager-info-phone:hover {
+  opacity: 0.8;
+}
+
+.manager-info-phone .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
 /* Contact Card */
 .contact-card {
   background: rgba(19, 236, 19, 0.05);

@@ -114,8 +114,8 @@
   color: #64748b;
 }
 
-.fields-th-checkbox {
-  width: 4rem;
+.fields-th-icon {
+  width: 3.5rem;
   text-align: center !important;
 }
 
@@ -142,17 +142,52 @@
   vertical-align: middle;
 }
 
-.fields-td-checkbox {
+.fields-td-icon {
   text-align: center;
 }
 
-.fields-checkbox {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid #cbd5e1;
-  accent-color: #19e62b;
-  cursor: pointer;
+/* --- Sport Icon --- */
+.field-sport-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+}
+
+.field-sport-icon .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.field-sport-icon.icon-football {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.field-sport-icon.icon-tennis {
+  background: #fefce8;
+  color: #ca8a04;
+}
+
+.field-sport-icon.icon-badminton {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.field-sport-icon.icon-basketball {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.field-sport-icon.icon-volleyball {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.field-sport-icon.icon-default {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 /* --- Field Name Cell --- */
@@ -234,6 +269,12 @@
   background: #fff7ed;
   color: #c2410c;
   border: 1px solid #fed7aa;
+}
+
+.type-badge.teal {
+  background: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
 }
 
 /* --- Status Badge --- */

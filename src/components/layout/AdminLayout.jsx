@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/images/logo.png';
@@ -8,7 +8,7 @@ import '../../styles/AdminLayout.css';
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -23,6 +23,11 @@ const AdminLayout = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Redirect non-admin users
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   const menuItems = [
     { path: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },

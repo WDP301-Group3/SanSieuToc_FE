@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockFields, mockCategories } from '../../../data/mockData';
+import { mockFields, mockCategories, mockManagers } from '../../../data/mockData';
 import '../../../styles/AdminFieldsPage.css';
 
 /**
@@ -31,11 +31,39 @@ const getTypeBadgeVariant = (typeName) => {
   return 'teal';
 };
 
+/**
+ * Map category name to Material icon
+ */
+const getCategoryIcon = (categoryName) => {
+  switch (categoryName) {
+    case 'Football': return 'sports_soccer';
+    case 'Tennis': return 'sports_tennis';
+    case 'Badminton': return 'sports_tennis'; // closest icon
+    case 'Basketball': return 'sports_basketball';
+    case 'Volleyball': return 'sports_volleyball';
+    default: return 'sports';
+  }
+};
+
+/**
+ * Map category name to icon color class
+ */
+const getCategoryIconClass = (categoryName) => {
+  switch (categoryName) {
+    case 'Football': return 'icon-football';
+    case 'Tennis': return 'icon-tennis';
+    case 'Badminton': return 'icon-badminton';
+    case 'Basketball': return 'icon-basketball';
+    case 'Volleyball': return 'icon-volleyball';
+    default: return 'icon-default';
+  }
+};
+
 const AdminFieldsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [managerFilter, setManagerFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const fieldsPerPage = 6;
@@ -56,6 +84,7 @@ const AdminFieldsPage = () => {
       statusKey: status.key,
       statusLabel: status.label,
       image: field.image?.[0] || null,
+      managerId: field.manager?._id || '',
       manager: field.manager?.name || '',
       openingTime: field.openingTime,
       closingTime: field.closingTime,
@@ -66,8 +95,9 @@ const AdminFieldsPage = () => {
   const filteredFields = allFields.filter((field) => {
     const matchSearch = field.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCategory = !categoryFilter || field.categoryId === categoryFilter;
+    const matchManager = !managerFilter || field.managerId === managerFilter;
     const matchStatus = !statusFilter || field.statusKey === statusFilter;
-    return matchSearch && matchCategory && matchStatus;
+    return matchSearch && matchCategory && matchManager && matchStatus;
   });
 
   // Pagination
@@ -76,22 +106,6 @@ const AdminFieldsPage = () => {
     (currentPage - 1) * fieldsPerPage,
     currentPage * fieldsPerPage
   );
-
-  // Select all toggle
-  const isAllSelected = paginatedFields.length > 0 && paginatedFields.every((f) => selectedIds.includes(f.id));
-  const toggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds(selectedIds.filter((id) => !paginatedFields.find((f) => f.id === id)));
-    } else {
-      const newIds = paginatedFields.map((f) => f.id);
-      setSelectedIds([...new Set([...selectedIds, ...newIds])]);
-    }
-  };
-  const toggleSelect = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
 
   return (
     <div className="admin-fields-page">
@@ -120,6 +134,16 @@ const AdminFieldsPage = () => {
           </select>
           <select
             className="fields-select"
+            value={managerFilter}
+            onChange={(e) => { setManagerFilter(e.target.value); setCurrentPage(1); }}
+          >
+            <option value="">Tất cả chủ sân</option>
+            {mockManagers.map((mgr) => (
+              <option key={mgr._id} value={mgr._id}>{mgr.name}</option>
+            ))}
+          </select>
+          <select
+            className="fields-select"
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
           >
@@ -136,14 +160,7 @@ const AdminFieldsPage = () => {
           <table className="fields-table">
             <thead>
               <tr>
-                <th className="fields-th-checkbox">
-                  <input
-                    type="checkbox"
-                    className="fields-checkbox"
-                    checked={isAllSelected}
-                    onChange={toggleSelectAll}
-                  />
-                </th>
+                <th className="fields-th-icon"></th>
                 <th>Tên sân</th>
                 <th>Thể loại</th>
                 <th>Giá / Giờ</th>
@@ -154,13 +171,10 @@ const AdminFieldsPage = () => {
             <tbody>
               {paginatedFields.map((field) => (
                 <tr key={field.id} className="fields-row">
-                  <td className="fields-td-checkbox">
-                    <input
-                      type="checkbox"
-                      className="fields-checkbox"
-                      checked={selectedIds.includes(field.id)}
-                      onChange={() => toggleSelect(field.id)}
-                    />
+                  <td className="fields-td-icon">
+                    <span className={`field-sport-icon ${getCategoryIconClass(field.categoryName)}`}>
+                      <span className="material-symbols-outlined">{getCategoryIcon(field.categoryName)}</span>
+                    </span>
                   </td>
                   <td>
                     <div className="field-name-cell">

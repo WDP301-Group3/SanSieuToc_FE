@@ -125,14 +125,16 @@ const Header = () => {
                       <span className="material-icons-outlined">person</span>
                       Profile
                     </Link>
-                    <Link
-                      to="/admin"
-                      className="header-dropdown-item"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      <span className="material-icons-outlined">dashboard</span>
-                      Dashboard
-                    </Link>
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="header-dropdown-item"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <span className="material-icons-outlined">dashboard</span>
+                        Dashboard
+                      </Link>
+                    )}
                     <div className="header-dropdown-divider" />
                     <button
                       className="header-dropdown-item logout"
