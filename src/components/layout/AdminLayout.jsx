@@ -30,10 +30,13 @@ const AdminLayout = () => {
   }
 
   const menuItems = [
+    
     { path: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
     { path: '/admin/fields', icon: 'stadium', label: 'Manage Fields' },
     { path: '/admin/customers', icon: 'group', label: 'Manage Customers' },
     { path: '/admin/feedback', icon: 'chat_bubble', label: 'Manage Feedback' },
+    { path: '/settings', icon: 'settings', label: 'Settings' },
+    
   ];
 
   const isActive = (path) => location.pathname.startsWith(path);

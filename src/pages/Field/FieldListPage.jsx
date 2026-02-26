@@ -254,7 +254,7 @@ const FieldListPage = () => {
 
             {/* Location Filter */}
             <div className="filter-group">
-              <p className="filter-label">Khu vực</p>
+              <p className="filter-label">Quận/Huyện</p>
               <div className="select-wrapper">
                 <select
                   value={filters.district}

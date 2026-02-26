@@ -229,15 +229,15 @@ const AdminFieldEditPage = () => {
                   />
                 </div>
 
-                {/* Khu vực */}
+                {/* Quận/Huyện */}
                 <div className="edit-form-group">
-                  <label className="edit-label">Khu vực</label>
+                  <label className="edit-label">Quận/Huyện</label>
                   <select
                     className="edit-select"
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
                   >
-                    <option value="">-- Chọn khu vực --</option>
+                    <option value="">-- Chọn quận/huyện --</option>
                     {ALL_DISTRICTS.map((d) => (
                       <option key={d} value={d}>{d}</option>
                     ))}

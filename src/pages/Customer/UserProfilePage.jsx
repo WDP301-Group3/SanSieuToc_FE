@@ -18,7 +18,7 @@ const UserProfilePage = () => {
     name: user?.name || '',
     phone: user?.phone || '',
     email: user?.email || '',
-    address: user?.address || 'TP. Hồ Chí Minh, Việt Nam',
+    address: user?.address || 'Hà Nội, Việt Nam',
   });
 
   // Get real data from mockData
@@ -84,7 +84,7 @@ const UserProfilePage = () => {
       name: user?.name || '',
       phone: user?.phone || '',
       email: user?.email || '',
-      address: user?.address || 'TP. Hồ Chí Minh, Việt Nam',
+      address: user?.address || 'Hà Nội, Việt Nam',
     });
     setIsEditing(false);
   };
