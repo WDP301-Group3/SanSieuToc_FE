@@ -11,6 +11,34 @@
   background-color: var(--bg-primary-dark);
 }
 
+/* Page Header - full width above sidebar+content */
+.field-list-page-header {
+  max-width: 1440px;
+  margin: 0 auto 1.5rem;
+}
+
+.field-list-page-header .page-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.dark .field-list-page-header .page-title {
+  color: white;
+}
+
+.field-list-page-header .page-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 768px) {
+  .field-list-page-header .page-title {
+    font-size: 2.75rem;
+  }
+}
+
 .field-list-container {
   max-width: 1440px;
   margin: 0 auto;
@@ -317,39 +345,92 @@
   color: var(--primary);
 }
 
+/* ===== Dual-range price slider ===== */
 .price-range-slider {
-  margin-bottom: 1rem;
+  position: relative;
+  height: 8px;
+  margin: 0.75rem 0 1.25rem;
 }
 
 .range-track {
-  position: relative;
+  position: absolute;
+  inset: 0;
   height: 8px;
-  background: #f3f4f6;
+  background: #e5e7eb;
   border-radius: 999px;
 }
 
 .dark .range-track {
-  background: #1a2e1a;
+  background: var(--surface-dark);
 }
 
 .range-fill {
   position: absolute;
-  height: 100%;
+  top: 0;
+  height: 8px;
   background: var(--primary);
   border-radius: 999px;
+  pointer-events: none;
 }
 
-.range-thumb {
+/* Native range inputs overlaid on the track */
+.range-input {
   position: absolute;
-  top: 50%;
-  width: 16px;
+  top: -4px;
+  left: 0;
+  width: 100%;
   height: 16px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Webkit (Chrome / Edge / Safari) thumb */
+.range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
   background: white;
-  border: 2px solid var(--primary);
+  border: 3px solid var(--primary);
   border-radius: 50%;
-  transform: translate(-50%, -50%);
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  pointer-events: all;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Firefox thumb */
+.range-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 3px solid var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Remove Firefox track styling */
+.range-input::-moz-range-track {
+  background: transparent;
+}
+
+/* Unused legacy class kept for compat */
+.range-thumb {
+  display: none;
+}
+
+/* Price range labels below slider */
+.price-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
 }
 
 .price-inputs {
@@ -487,18 +568,7 @@
 
 /* Results Header */
 .results-header {
-  margin-bottom: 2rem;
-}
-
-.results-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.dark .results-title {
-  color: white;
+  margin-bottom: 1.5rem;
 }
 
 .results-meta {
@@ -568,6 +638,56 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
+}
+
+/* ===== List View ===== */
+.fields-grid.list-view {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.fields-grid.list-view .field-card-list {
+  flex-direction: row;
+}
+
+.fields-grid.list-view .field-card-list .field-image {
+  width: 260px;
+  height: auto;
+  min-height: 180px;
+  flex-shrink: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.fields-grid.list-view .field-card-list .field-content {
+  padding: 1.25rem;
+  flex: 1;
+}
+
+.fields-grid.list-view .field-card-list .field-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fields-grid.list-view .field-card-list .field-name {
+  font-size: 1.1rem;
+}
+
+.fields-grid.list-view .field-card-list:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 640px) {
+  .fields-grid.list-view .field-card-list .field-image {
+    width: 120px;
+    min-height: 140px;
+  }
+
+  .fields-grid.list-view .field-card-list .field-content {
+    padding: 0.75rem;
+  }
 }
 
 .field-card {

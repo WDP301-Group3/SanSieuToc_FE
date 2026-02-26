@@ -9,7 +9,9 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [hidden, setHidden] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const lastScrollY = useRef(0);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +26,17 @@ const Header = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -82,23 +95,47 @@ const Header = () => {
             </button>
 
             {isAuthenticated ? (
-              <>
-                <Link to="/profile">
-                  <div className="header-avatar">
-                    <img
-                      src={user?.image || 'https://via.placeholder.com/40'}
-                      alt={user?.name || 'User Avatar'}
-                      className="header-avatar-image"
-                    />
-                  </div>
-                </Link>
+              <div className="header-avatar-wrapper" ref={dropdownRef}>
                 <button
-                  onClick={logout}
-                  className="header-logout-btn"
+                  className="header-avatar"
+                  onClick={() => setShowDropdown(!showDropdown)}
                 >
-                  <span className="material-icons-outlined">logout</span>
+                  <img
+                    src={user?.image || 'https://via.placeholder.com/40'}
+                    alt={user?.name || 'User Avatar'}
+                    className="header-avatar-image"
+                  />
                 </button>
-              </>
+
+                {showDropdown && (
+                  <div className="header-dropdown">
+                    <Link
+                      to="/profile"
+                      className="header-dropdown-item"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span className="material-icons-outlined">person</span>
+                      Profile
+                    </Link>
+                    <Link
+                      to="/manager"
+                      className="header-dropdown-item"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span className="material-icons-outlined">dashboard</span>
+                      Dashboard
+                    </Link>
+                    <div className="header-dropdown-divider" />
+                    <button
+                      className="header-dropdown-item logout"
+                      onClick={() => { logout(); setShowDropdown(false); }}
+                    >
+                      <span className="material-icons-outlined">logout</span>
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link to="/login">
                 <button className="header-login-btn">

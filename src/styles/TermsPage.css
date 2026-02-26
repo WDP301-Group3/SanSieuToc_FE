@@ -20,13 +20,13 @@
 
 @media (min-width: 1024px) {
   .terms-page {
-    padding: 2rem 3rem 4rem;
+    padding: 2rem 2rem 4rem;
   }
 }
 
 /* Breadcrumbs */
 .terms-breadcrumbs {
-  max-width: 75rem;
+  max-width: 90rem;
   margin: 0 auto 1.5rem;
   display: flex;
   align-items: center;
@@ -70,7 +70,7 @@
 
 /* Page Header */
 .terms-header {
-  max-width: 75rem;
+  max-width: 90rem;
   margin: 0 auto 2rem;
   text-align: center;
   padding-bottom: 1.5rem;
@@ -112,7 +112,7 @@
 
 /* Container (sidebar + content) */
 .terms-container {
-  max-width: 75rem;
+  max-width: 90rem;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
@@ -122,7 +122,7 @@
 
 @media (min-width: 1024px) {
   .terms-container {
-    grid-template-columns: 17rem 1fr;
+    grid-template-columns: 18rem 1fr;
   }
 }
 

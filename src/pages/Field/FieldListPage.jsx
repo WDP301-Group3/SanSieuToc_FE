@@ -34,7 +34,9 @@ const FieldListPage = () => {
     endTime: '',
     status: 'Available', // Filter only available fields
     sortBy: 'newest', // 'name' | 'price-asc' | 'price-desc' | 'newest'
-    page: 1
+    page: 1,
+    limit: 6
+    
   });
 
   // UI state
@@ -43,7 +45,7 @@ const FieldListPage = () => {
   
   // Data state
   const [fields, setFields] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: 9, total: 0, totalPages: 1 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 6, total: 0, totalPages: 1 });
   const [facets, setFacets] = useState({ categories: [], districts: [], priceRange: PRICE_RANGE });
   
   // Loading & error state
@@ -140,7 +142,8 @@ const FieldListPage = () => {
       endTime: '',
       status: 'Available',
       sortBy: 'newest',
-      page: 1
+      page: 1,
+      limit: 6
     });
   };
 
@@ -152,27 +155,23 @@ const FieldListPage = () => {
     if (h < 23) timeSlots.push(`${hour}:30`);
   }
 
-  const adjustTime = (field, direction) => {
-    const currentIdx = timeSlots.indexOf(filters[field]);
-    const newIdx = currentIdx + direction;
-    if (newIdx >= 0 && newIdx < timeSlots.length) {
-      setFilters(prev => ({ ...prev, [field]: timeSlots[newIdx] }));
-    }
-  };
+  
 
   // Price range helpers
-  const PRICE_MIN = 0;
+  const PRICE_MIN = 50000;
   const PRICE_MAX = 1000000;
   const PRICE_STEP = 50000;
 
   const handlePriceMinChange = (e) => {
-    const val = Math.min(Number(e.target.value), filters.priceMax - PRICE_STEP);
-    setFilters(prev => ({ ...prev, priceMin: val }));
+    const raw = Number(e.target.value);
+    const val = Math.max(PRICE_MIN, Math.min(raw, filters.priceMax - PRICE_STEP));
+    setFilters(prev => ({ ...prev, priceMin: val, page: 1 }));
   };
 
   const handlePriceMaxChange = (e) => {
-    const val = Math.max(Number(e.target.value), filters.priceMin + PRICE_STEP);
-    setFilters(prev => ({ ...prev, priceMax: val }));
+    const raw = Number(e.target.value);
+    const val = Math.min(PRICE_MAX, Math.max(raw, filters.priceMin + PRICE_STEP));
+    setFilters(prev => ({ ...prev, priceMax: val, page: 1 }));
   };
 
   const fillLeft = ((filters.priceMin - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
@@ -180,6 +179,12 @@ const FieldListPage = () => {
 
   return (
     <div className="field-list-page">
+      {/* Page Title - full width, above sidebar+content */}
+      <div className="field-list-page-header">
+        <h1 className="page-title" >Danh sách sân thể thao</h1>
+        <p className="page-subtitle">Tìm và đặt sân thể thao phù hợp với bạn</p>
+      </div>
+
       <div className="field-list-container">
         {/* Sidebar Filters */}
         <aside className={`field-list-sidebar ${showMobileFilters ? 'show' : ''}`}>
@@ -307,14 +312,50 @@ const FieldListPage = () => {
                   {(filters.priceMin / 1000).toLocaleString()}k - {(filters.priceMax / 1000).toLocaleString()}k
                 </p>
               </div>
+
+              {/* Dual-range slider */}
+              <div className="price-range-slider">
+                <div className="range-track" />
+                <div
+                  className="range-fill"
+                  style={{ left: `${fillLeft}%`, right: `${fillRight}%` }}
+                />
+
+                <input
+                  type="range"
+                  className="range-input"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={filters.priceMin}
+                  onChange={handlePriceMinChange}
+                />
+
+                <input
+                  type="range"
+                  className="range-input"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={filters.priceMax}
+                  onChange={handlePriceMaxChange}
+                />
+              </div>
+
+              <div className="price-labels">
+                <span>50.000</span>
+                <span>1.000.000</span>
+              </div>
+
+              {/* Numeric inputs (kept for precision) */}
               <div className="price-inputs">
                 <input
                   type="number"
                   value={filters.priceMin}
                   onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value), page: 1})}
                   className="price-input"
-                  step={10000}
-                  min={PRICE_RANGE.min}
+                  step={PRICE_STEP}
+                  min={PRICE_MIN}
                   max={filters.priceMax}
                   placeholder="Min"
                 />
@@ -324,9 +365,9 @@ const FieldListPage = () => {
                   value={filters.priceMax}
                   onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value), page: 1})}
                   className="price-input"
-                  step={10000}
+                  step={PRICE_STEP}
                   min={filters.priceMin}
-                  max={PRICE_RANGE.max}
+                  max={PRICE_MAX}
                   placeholder="Max"
                 />
               </div>
@@ -355,7 +396,6 @@ const FieldListPage = () => {
 
           {/* Results Header */}
           <div className="results-header">
-            <h1 className="results-title">Danh sách sân thể thao</h1>
             <div className="results-meta">
               <p className="results-count">
                 {loading ? (
@@ -425,9 +465,9 @@ const FieldListPage = () => {
 
           {/* Fields Grid */}
           {!loading && !error && fields.length > 0 && (
-            <div className="fields-grid">
+            <div className={`fields-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
               {fields.map(field => (
-                <Link to={`/fields/${field._id}`} key={field._id} className="field-card">
+                <Link to={`/fields/${field._id}`} key={field._id} className={`field-card ${viewMode === 'list' ? 'field-card-list' : ''}`}>
                   <div 
                     className="field-image" 
                     style={{ 
