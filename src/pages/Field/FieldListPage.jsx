@@ -1,181 +1,457 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { searchFields } from '../../services/fieldService';
-import { ALL_DISTRICTS, PRICE_RANGE } from '../../data/mockData';
+/**
+ * @fileoverview FieldListPage - Trang danh sách sân thể thao
+ * 
+ * Trang này hiển thị danh sách sân với các tính năng:
+ * - Tìm kiếm theo tên, địa chỉ
+ * - Lọc theo category, field type, quận, giá, thời gian
+ * - Sắp xếp theo tên, giá, mới nhất
+ * - Phân trang
+ * - Responsive (mobile filters)
+ * 
+ * @uses AppContext - Global state và search functions
+ * @uses useFieldFilter - Hook quản lý filter state
+ * 
+ * @author San Sieu Toc Team
+ * @date 2026-02-27
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+
+// Context & Hooks
+import { useApp } from '../../context/AppContext';
+
+// Styles
 import '../../styles/FieldListPage.css';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/**
+ * Price range constants
+ * @constant
+ */
+const PRICE_CONFIG = {
+  MIN: 0,
+  MAX: 2000000,
+  STEP: 50000,
+  DEFAULT_MAX: 1000000 // Giá mặc định khi chưa nhập
+};
+
+/**
+ * Default filter values
+ * @constant
+ */
+const DEFAULT_FILTERS = {
+  searchText: '',
+  categoryName: '',
+  fieldTypeName: '',
+  district: '',
+  priceMax: PRICE_CONFIG.DEFAULT_MAX, // Chỉ cần priceMax, filter từ 0 đến giá này
+  date: '',
+  startTime: '',
+  endTime: '',
+  status: 'Available',
+  sortBy: 'newest',
+  page: 1,
+  limit: 6
+};
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
 /**
  * FieldListPage Component
+ * 
  * Displays searchable and filterable list of sports fields
  * 
  * Features:
+ * - Nhận search params từ HomePage (search query + date)
  * - 6 filter types (text search, category, field type, location, price range, date/time)
  * - Field type filter dynamically shown only for Football category
  * - 4 sort options (name, price asc/desc, newest)
- * - Pagination (9 items per page)
+ * - Pagination (6 items per page)
  * - Responsive design with mobile filters
  * - Loading, error, and empty states
- * 
- * Note: Utilities are displayed on cards but NOT filterable (simplified UX)
- * Note: Field type filter (Sân 5/7/11 người) only appears when Football is selected
  * 
  * @component
  */
 const FieldListPage = () => {
-  // Filter state matching fieldService API
-  const [filters, setFilters] = useState({
-    searchText: '',
-    categoryName: '', // 'Football', 'Tennis', 'Badminton', 'Basketball', 'Volleyball'
-    fieldTypeName: '', // Only used when categoryName === 'Football'
-    district: '',
-    priceMin: PRICE_RANGE.min,
-    priceMax: PRICE_RANGE.max,
-    date: '',
-    startTime: '',
-    endTime: '',
-    status: 'Available', // Filter only available fields
-    sortBy: 'newest', // 'name' | 'price-asc' | 'price-desc' | 'newest'
-    page: 1,
-    limit: 6
-    
-  });
-
-  // UI state
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  // ==========================================
+  // CONTEXT & HOOKS
+  // ==========================================
   
-  // Data state
-  const [fields, setFields] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: 6, total: 0, totalPages: 1 });
-  const [facets, setFacets] = useState({ categories: [], districts: [], priceRange: PRICE_RANGE });
-  
-  // Loading & error state
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  /**
+   * AppContext - Global state và API functions
+   */
+  const { 
+    searchFields,           // Search function từ context
+    globalData,             // { categories, districts, priceRange, fieldTypes }
+    isLoading,              // Loading state checker
+    getError,               // Error state getter
+    clearError,             // Clear error function
+    getFieldTypesByCategory // Get field types by category
+  } = useApp();
 
   /**
-   * Fetch fields from service based on current filters
-   * Called on mount and when filters change
+   * URL Search Params - Nhận params từ HomePage
+   */
+  const [searchParams] = useSearchParams();
+
+  // ==========================================
+  // STATE DECLARATIONS
+  // ==========================================
+
+  /**
+   * Filter state - Quản lý tất cả filter criteria
+   */
+  const [filters, setFilters] = useState({
+    ...DEFAULT_FILTERS,
+    searchText: searchParams.get('search') || '',
+    date: searchParams.get('date') || ''
+  });
+
+  /**
+   * Debounced search text - Không dùng cho auto-search nữa
+   * Chỉ giữ lại để tránh lỗi nếu có component khác reference
+   */
+  // const debouncedSearchText = useDebounce(filters.searchText, 300);
+
+  /**
+   * Search text input - Giá trị tạm khi user đang nhập
+   * Chỉ cập nhật filters.searchText khi user click "Tìm kiếm"
+   */
+  const [searchInputText, setSearchInputText] = useState(
+    searchParams.get('search') || ''
+  );
+
+  /**
+   * UI state
+   */
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
+  const [navHidden, setNavHidden] = useState(false); // Track khi header ẩn để điều chỉnh sticky sidebar
+  
+  /**
+   * Data state - Results từ search
+   */
+  const [fields, setFields] = useState([]);
+  const [pagination, setPagination] = useState({ 
+    page: 1, 
+    limit: 6, 
+    total: 0, 
+    totalPages: 1 
+  });
+  const [facets, setFacets] = useState({ 
+    categories: [], 
+    districts: [], 
+    priceRange: { min: 0, max: PRICE_CONFIG.MAX }
+  });
+
+  /**
+   * Price input display - Giá trị hiển thị trên input (có thể khác filters khi đang nhập)
+   */
+  const [priceInputValue, setPriceInputValue] = useState(
+    DEFAULT_FILTERS.priceMax.toLocaleString('vi-VN')
+  );
+
+  // ==========================================
+  // COMPUTED VALUES
+  // ==========================================
+
+  /**
+   * Loading state từ context
+   */
+  const loading = isLoading('searchFields');
+
+  /**
+   * Error state từ context
+   */
+  const error = getError('searchFields');
+
+  /**
+   * Field types cho Football category
+   */
+  const footballFieldTypes = getFieldTypesByCategory('Football');
+
+  // ==========================================
+  // API CALLS
+  // ==========================================
+
+  /**
+   * fetchFields - Gọi API search fields
+   * Sử dụng searchFields từ AppContext
+   */
+  const fetchFields = useCallback(async () => {
+    clearError('searchFields');
+
+    const result = await searchFields({
+      ...filters
+    });
+    
+    if (result.success) {
+      setFields(result.data.fields);
+      setPagination(result.data.pagination);
+      if (result.data.facets) {
+        setFacets(result.data.facets);
+      }
+    }
+  }, [filters, searchFields, clearError]);
+
+  // ==========================================
+  // EFFECTS
+  // ==========================================
+
+  /**
+   * Effect: Fetch fields khi filters thay đổi
    */
   useEffect(() => {
-    const fetchFields = async () => {
-      setLoading(true);
-      setError(null);
+    fetchFields();
+  }, [fetchFields]);
 
-      try {
-        const result = await searchFields(filters);
-        
-        if (result.success) {
-          setFields(result.data.fields);
-          setPagination(result.data.pagination);
-          setFacets(result.data.facets);
-        } else {
-          setError(result.error || 'Không thể tải danh sách sân');
-        }
-      } catch (err) {
-        setError('Đã xảy ra lỗi khi tải dữ liệu');
-        console.error('Error fetching fields:', err);
-      } finally {
-        setLoading(false);
+  /**
+   * Effect: Observe header visibility để điều chỉnh sticky sidebar
+   * Khi header ẩn (scroll down), sidebar sẽ di chuyển lên cao hơn
+   */
+  useEffect(() => {
+    const checkNavbar = () => {
+      const nav = document.querySelector('.header-nav');
+      if (nav) {
+        setNavHidden(nav.classList.contains('header-hidden'));
       }
     };
 
-    fetchFields();
-  }, [filters]);
+    // Initial check
+    checkNavbar();
+
+    // Observe class changes on header
+    const nav = document.querySelector('.header-nav');
+    if (nav) {
+      const navObserver = new MutationObserver(checkNavbar);
+      navObserver.observe(nav, { attributes: true, attributeFilter: ['class'] });
+      
+      return () => navObserver.disconnect();
+    }
+  }, []);
 
   /**
-   * Handle category filter change
-   * @param {string} category - Category name to toggle
+   * Effect: Update filters từ URL params (khi navigate từ HomePage)
    */
-  const handleCategoryChange = (category) => {
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    const dateFromUrl = searchParams.get('date');
+    
+    if (searchFromUrl || dateFromUrl) {
+      setFilters(prev => ({
+        ...prev,
+        searchText: searchFromUrl || prev.searchText,
+        date: dateFromUrl || prev.date
+      }));
+      // Cũng cập nhật search input text
+      if (searchFromUrl) {
+        setSearchInputText(searchFromUrl);
+      }
+    }
+  }, [searchParams]);
+
+  // ==========================================
+  // FILTER HANDLERS
+  // ==========================================
+
+  /**
+   * handleFilterChange - Generic filter change handler
+   * @param {string} key - Filter key
+   * @param {*} value - Filter value
+   */
+  const handleFilterChange = useCallback((key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      page: 1 // Reset to page 1 when filter changes
+    }));
+  }, []);
+
+  /**
+   * handleCategoryChange - Toggle category filter
+   * @param {string} category - Category name
+   */
+  const handleCategoryChange = useCallback((category) => {
     setFilters(prev => ({
       ...prev,
       categoryName: prev.categoryName === category ? '' : category,
       fieldTypeName: '', // Reset field type when category changes
-      page: 1 // Reset to page 1 when filter changes
+      page: 1
     }));
-  };
+  }, []);
 
   /**
-   * Handle field type filter change (only for Football)
+   * handleFieldTypeChange - Toggle field type filter (only for Football)
    * @param {string} typeName - Field type name
    */
-  const handleFieldTypeChange = (typeName) => {
+  const handleFieldTypeChange = useCallback((typeName) => {
     setFilters(prev => ({
       ...prev,
       fieldTypeName: prev.fieldTypeName === typeName ? '' : typeName,
       page: 1
     }));
-  };
+  }, []);
 
   /**
-   * Handle sort change
-   * @param {string} sortValue - Sort option value
+   * handleSortChange - Change sort option
+   * @param {string} sortValue - Sort value
    */
-  const handleSortChange = (sortValue) => {
+  const handleSortChange = useCallback((sortValue) => {
     setFilters(prev => ({ ...prev, sortBy: sortValue, page: 1 }));
-  };
+  }, []);
 
   /**
-   * Handle page change
-   * @param {number} newPage - Page number to navigate to
+   * handlePageChange - Navigate to different page
+   * @param {number} newPage - Page number
    */
-  const handlePageChange = (newPage) => {
+  const handlePageChange = useCallback((newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setFilters(prev => ({ ...prev, page: newPage }));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [pagination.totalPages]);
 
   /**
-   * Reset all filters to default values
+   * handleReset - Reset all filters to default
    */
-  const handleReset = () => {
-    setFilters({
-      searchText: '',
-      categoryName: '',
-      fieldTypeName: '',
-      district: '',
-      priceMin: PRICE_RANGE.min,
-      priceMax: PRICE_RANGE.max,
-      date: '',
-      startTime: '',
-      endTime: '',
-      status: 'Available',
-      sortBy: 'newest',
-      page: 1,
-      limit: 6
-    });
-  };
+  const handleReset = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+    setSearchInputText('');
+    setPriceInputValue(DEFAULT_FILTERS.priceMax.toLocaleString('vi-VN'));
+    clearError('searchFields');
+  }, [clearError]);
 
-  // Generate 30-minute time slots
-  const timeSlots = [];
-  for (let h = 5; h <= 23; h++) {
-    const hour = h.toString().padStart(2, '0');
-    timeSlots.push(`${hour}:00`);
-    if (h < 23) timeSlots.push(`${hour}:30`);
-  }
+  // ==========================================
+  // PRICE HANDLERS
+  // ==========================================
 
-  
+  /**
+   * handlePriceInputChange - Handle khi user đang nhập giá (chưa apply filter)
+   * Format số với dấu phẩy ngăn cách hàng nghìn
+   * @param {Event} e - Input event
+   */
+  const handlePriceInputChange = useCallback((e) => {
+    // Chỉ cho phép số
+    const rawValue = e.target.value.replace(/[^\d]/g, '');
+    
+    if (rawValue === '') {
+      setPriceInputValue('');
+      return;
+    }
+    
+    // Format với dấu phẩy
+    const numericValue = parseInt(rawValue, 10);
+    setPriceInputValue(numericValue.toLocaleString('vi-VN'));
+  }, []);
 
-  // Price range helpers
-  const PRICE_MIN = 50000;
-  const PRICE_MAX = 1000000;
-  const PRICE_STEP = 50000;
+  /**
+   * handlePriceInputBlur - Apply filter khi user blur khỏi input
+   * @param {Event} e - Blur event
+   */
+  const handlePriceInputBlur = useCallback(() => {
+    // Parse giá trị từ input (bỏ dấu phẩy)
+    const rawValue = priceInputValue.replace(/[^\d]/g, '');
+    let numericValue = parseInt(rawValue, 10) || PRICE_CONFIG.DEFAULT_MAX;
+    
+    // Giới hạn trong khoảng cho phép
+    numericValue = Math.max(0, Math.min(numericValue, PRICE_CONFIG.MAX));
+    
+    // Cập nhật cả display và filter
+    setPriceInputValue(numericValue.toLocaleString('vi-VN'));
+    handleFilterChange('priceMax', numericValue);
+  }, [priceInputValue, handleFilterChange]);
 
-  const handlePriceMinChange = (e) => {
-    const raw = Number(e.target.value);
-    const val = Math.max(PRICE_MIN, Math.min(raw, filters.priceMax - PRICE_STEP));
-    setFilters(prev => ({ ...prev, priceMin: val, page: 1 }));
-  };
+  /**
+   * handlePriceKeyPress - Apply filter khi user nhấn Enter
+   * @param {KeyboardEvent} e - Keyboard event
+   */
+  const handlePriceKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handlePriceInputBlur();
+    }
+  }, [handlePriceInputBlur]);
 
-  const handlePriceMaxChange = (e) => {
-    const raw = Number(e.target.value);
-    const val = Math.min(PRICE_MAX, Math.max(raw, filters.priceMin + PRICE_STEP));
-    setFilters(prev => ({ ...prev, priceMax: val, page: 1 }));
-  };
+  /**
+   * clearSearch - Clear search text
+   */
+  const clearSearch = useCallback(() => {
+    setSearchInputText('');
+    handleFilterChange('searchText', '');
+  }, [handleFilterChange]);
 
-  const fillLeft = ((filters.priceMin - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
-  const fillRight = ((PRICE_MAX - filters.priceMax) / (PRICE_MAX - PRICE_MIN)) * 100;
+  /**
+   * handleSearchSubmit - Submit search khi user click button hoặc Enter
+   * Cập nhật filters.searchText từ searchInputText
+   */
+  const handleSearchSubmit = useCallback(() => {
+    setFilters(prev => ({
+      ...prev,
+      searchText: searchInputText.trim(),
+      page: 1
+    }));
+  }, [searchInputText]);
+
+  /**
+   * handleSearchKeyPress - Handle Enter key trong search input
+   * @param {KeyboardEvent} e - Keyboard event
+   */
+  const handleSearchKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  }, [handleSearchSubmit]);
+
+  // ==========================================
+  // RENDER HELPERS
+  // ==========================================
+
+  /**
+   * renderLoading - Render loading state
+   */
+  const renderLoading = () => (
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+      <p>Đang tải danh sách sân...</p>
+    </div>
+  );
+
+  /**
+   * renderError - Render error state
+   */
+  const renderError = () => (
+    <div className="error-container">
+      <span className="material-symbols-outlined error-icon">error</span>
+      <h3>Có lỗi xảy ra</h3>
+      <p>{error}</p>
+      <button onClick={fetchFields} className="retry-button">
+        Thử lại
+      </button>
+    </div>
+  );
+
+  /**
+   * renderEmpty - Render empty state
+   */
+  const renderEmpty = () => (
+    <div className="empty-container">
+      <span className="material-symbols-outlined empty-icon">search_off</span>
+      <h3>Không tìm thấy sân phù hợp</h3>
+      <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+      <button onClick={handleReset} className="reset-filters-button">
+        Đặt lại bộ lọc
+      </button>
+    </div>
+  );
+
+  // ==========================================
+  // MAIN RENDER
+  // ==========================================
 
   return (
     <div className="field-list-page">
@@ -187,7 +463,7 @@ const FieldListPage = () => {
 
       <div className="field-list-container">
         {/* Sidebar Filters */}
-        <aside className={`field-list-sidebar ${showMobileFilters ? 'show' : ''}`}>
+        <aside className={`field-list-sidebar ${showMobileFilters ? 'show' : ''} ${navHidden ? 'nav-hidden' : ''}`}>
           {/* Mobile Filter Toggle */}
           <div 
             className="mobile-filter-toggle"
@@ -208,6 +484,40 @@ const FieldListPage = () => {
                 Bộ lọc tìm kiếm
               </h3>
               <button onClick={handleReset} className="reset-button">Đặt lại</button>
+            </div>
+
+            {/* Search Input trong Bộ lọc */}
+            <div className="filter-group search-filter-group">
+              <p className="filter-label">Tìm kiếm</p>
+              <div className="search-box">
+                <div className="search-input-container">
+                  <input
+                    type="text"
+                    value={searchInputText}
+                    onChange={(e) => setSearchInputText(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
+                    placeholder="Tên sân, địa chỉ..."
+                    className="search-input"
+                  />
+                  {searchInputText && (
+                    <button 
+                      className="clear-search-btn"
+                      onClick={clearSearch}
+                      aria-label="Xóa tìm kiếm"
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  )}
+                </div>
+                <button 
+                  className="search-submit-btn"
+                  onClick={handleSearchSubmit}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined">search</span>
+                </button>
+              </div>
             </div>
 
             {/* Sport Type Filter */}
@@ -231,20 +541,20 @@ const FieldListPage = () => {
             </div>
 
             {/* Field Type Filter - Only for Football */}
-            {filters.categoryName === 'Football' && (
+            {filters.categoryName === 'Football' && footballFieldTypes.length > 0 && (
               <div className="filter-group">
                 <p className="filter-label">Loại sân</p>
                 <div className="sport-chips">
-                  {['Sân 5 người', 'Sân 7 người', 'Sân 11 người'].map((typeName) => (
-                    <label key={typeName} className="chip-label">
+                  {footballFieldTypes.map((fieldType) => (
+                    <label key={fieldType._id || fieldType.typeName} className="chip-label">
                       <input
                         type="checkbox"
-                        checked={filters.fieldTypeName === typeName}
-                        onChange={() => handleFieldTypeChange(typeName)}
+                        checked={filters.fieldTypeName === fieldType.typeName}
+                        onChange={() => handleFieldTypeChange(fieldType.typeName)}
                         className="chip-input"
                       />
                       <div className="chip">
-                        {typeName}
+                        {fieldType.typeName}
                       </div>
                     </label>
                   ))}
@@ -258,11 +568,11 @@ const FieldListPage = () => {
               <div className="select-wrapper">
                 <select
                   value={filters.district}
-                  onChange={(e) => setFilters({...filters, district: e.target.value, page: 1})}
+                  onChange={(e) => handleFilterChange('district', e.target.value)}
                   className="filter-select"
                 >
                   <option value="">Tất cả Quận/Huyện</option>
-                  {ALL_DISTRICTS.map(district => (
+                  {globalData.districts.map(district => (
                     <option key={district} value={district}>
                       {district}
                       {facets.districts.find(d => d.name === district) && 
@@ -282,7 +592,7 @@ const FieldListPage = () => {
                 <input
                   type="date"
                   value={filters.date}
-                  onChange={(e) => setFilters({...filters, date: e.target.value, page: 1})}
+                  onChange={(e) => handleFilterChange('date', e.target.value)}
                   className="time-input"
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -290,86 +600,39 @@ const FieldListPage = () => {
                   <input
                     type="time"
                     value={filters.startTime}
-                    onChange={(e) => setFilters({...filters, startTime: e.target.value, page: 1})}
+                    onChange={(e) => handleFilterChange('startTime', e.target.value)}
                     className="time-input small"
                   />
                   <span className="time-separator">-</span>
                   <input
                     type="time"
                     value={filters.endTime}
-                    onChange={(e) => setFilters({...filters, endTime: e.target.value, page: 1})}
+                    onChange={(e) => handleFilterChange('endTime', e.target.value)}
                     className="time-input small"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Price Range Filter */}
+            {/* Price Filter - Đơn giản hóa: chỉ nhập giá tối đa */}
             <div className="filter-group">
-              <div className="price-header">
-                <p className="filter-label">Khoảng giá</p>
-                <p className="price-display">
-                  {(filters.priceMin / 1000).toLocaleString()}k - {(filters.priceMax / 1000).toLocaleString()}k
+              <p className="filter-label">Giá tối đa</p>
+              <div className="price-filter-simple">
+                <div className="price-input-wrapper">
+                  <span className="price-currency">₫</span>
+                  <input
+                    type="text"
+                    value={priceInputValue}
+                    onChange={handlePriceInputChange}
+                    onBlur={handlePriceInputBlur}
+                    onKeyPress={handlePriceKeyPress}
+                    className="price-input-field"
+                    placeholder="Nhập giá tối đa..."
+                  />
+                </div>
+                <p className="price-hint">
+                  Hiển thị sân có giá từ <strong>0đ</strong> đến <strong>{filters.priceMax.toLocaleString('vi-VN')}đ</strong>
                 </p>
-              </div>
-
-              {/* Dual-range slider */}
-              <div className="price-range-slider">
-                <div className="range-track" />
-                <div
-                  className="range-fill"
-                  style={{ left: `${fillLeft}%`, right: `${fillRight}%` }}
-                />
-
-                <input
-                  type="range"
-                  className="range-input"
-                  min={PRICE_MIN}
-                  max={PRICE_MAX}
-                  step={PRICE_STEP}
-                  value={filters.priceMin}
-                  onChange={handlePriceMinChange}
-                />
-
-                <input
-                  type="range"
-                  className="range-input"
-                  min={PRICE_MIN}
-                  max={PRICE_MAX}
-                  step={PRICE_STEP}
-                  value={filters.priceMax}
-                  onChange={handlePriceMaxChange}
-                />
-              </div>
-
-              <div className="price-labels">
-                <span>50.000</span>
-                <span>1.000.000</span>
-              </div>
-
-              {/* Numeric inputs (kept for precision) */}
-              <div className="price-inputs">
-                <input
-                  type="number"
-                  value={filters.priceMin}
-                  onChange={(e) => setFilters({...filters, priceMin: Number(e.target.value), page: 1})}
-                  className="price-input"
-                  step={PRICE_STEP}
-                  min={PRICE_MIN}
-                  max={filters.priceMax}
-                  placeholder="Min"
-                />
-                <span>-</span>
-                <input
-                  type="number"
-                  value={filters.priceMax}
-                  onChange={(e) => setFilters({...filters, priceMax: Number(e.target.value), page: 1})}
-                  className="price-input"
-                  step={PRICE_STEP}
-                  min={filters.priceMin}
-                  max={PRICE_MAX}
-                  placeholder="Max"
-                />
               </div>
             </div>
 
@@ -382,16 +645,37 @@ const FieldListPage = () => {
         <main className="field-list-main">
           {/* Search Bar (Mobile) */}
           <div className="mobile-search">
-            <label className="search-input-wrapper">
-              <span className="material-symbols-outlined search-icon">search</span>
-              <input
-                type="text"
-                value={filters.searchText}
-                onChange={(e) => setFilters({...filters, searchText: e.target.value, page: 1})}
-                placeholder="Tìm kiếm theo tên sân, địa chỉ..."
-                className="search-input"
-              />
-            </label>
+            <div className="search-box">
+              <div className="search-input-container">
+                <span className="material-symbols-outlined search-icon">search</span>
+                <input
+                  type="text"
+                  value={searchInputText}
+                  onChange={(e) => setSearchInputText(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  placeholder="Tìm kiếm theo tên sân, địa chỉ..."
+                  className="search-input"
+                />
+                {searchInputText && (
+                  <button 
+                    className="clear-search-btn"
+                    onClick={clearSearch}
+                    aria-label="Xóa tìm kiếm"
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                )}
+              </div>
+              <button 
+                className="search-submit-btn"
+                onClick={handleSearchSubmit}
+                type="button"
+              >
+                <span className="material-symbols-outlined">search</span>
+                Tìm
+              </button>
+            </div>
           </div>
 
           {/* Results Header */}
@@ -400,6 +684,11 @@ const FieldListPage = () => {
               <p className="results-count">
                 {loading ? (
                   'Đang tải...'
+                ) : filters.searchText ? (
+                  <>
+                    Tìm thấy <strong>{pagination.total}</strong> sân cho từ khóa{' '}
+                    <strong className="search-keyword">"{filters.searchText}"</strong>
+                  </>
                 ) : (
                   <>Tìm thấy <strong>{pagination.total}</strong> sân</>
                 )}
@@ -432,36 +721,13 @@ const FieldListPage = () => {
           </div>
 
           {/* Loading State */}
-          {loading && (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>Đang tải danh sách sân...</p>
-            </div>
-          )}
+          {loading && renderLoading()}
 
           {/* Error State */}
-          {error && !loading && (
-            <div className="error-container">
-              <span className="material-symbols-outlined error-icon">error</span>
-              <h3>Có lỗi xảy ra</h3>
-              <p>{error}</p>
-              <button onClick={() => setFilters({...filters})} className="retry-button">
-                Thử lại
-              </button>
-            </div>
-          )}
+          {error && !loading && renderError()}
 
           {/* Empty State */}
-          {!loading && !error && fields.length === 0 && (
-            <div className="empty-container">
-              <span className="material-symbols-outlined empty-icon">search_off</span>
-              <h3>Không tìm thấy sân phù hợp</h3>
-              <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác</p>
-              <button onClick={handleReset} className="reset-filters-button">
-                Đặt lại bộ lọc
-              </button>
-            </div>
-          )}
+          {!loading && !error && fields.length === 0 && renderEmpty()}
 
           {/* Fields Grid */}
           {!loading && !error && fields.length > 0 && (

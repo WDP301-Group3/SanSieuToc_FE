@@ -100,6 +100,41 @@ const FieldDetailPage = () => {
     return new Date().toISOString().split('T')[0];
   });
   const [selectedSlots, setSelectedSlots] = useState([]);
+  const [recurringType, setRecurringType] = useState('none'); // 'none' | 'weekly' | 'monthly'
+  const [recurringEndDate, setRecurringEndDate] = useState('');
+
+  // Calculate max end date (3 months from start date)
+  const calculateMaxEndDate = (startDate) => {
+    if (!startDate) return '';
+    const start = new Date(startDate);
+    const maxEnd = new Date(start);
+    maxEnd.setMonth(maxEnd.getMonth() + 3);
+    return maxEnd.toISOString().split('T')[0];
+  };
+
+  // Calculate all recurring dates based on pattern
+  const calculateRecurringDates = useMemo(() => {
+    if (recurringType === 'none' || !selectedDate || !recurringEndDate) {
+      return [selectedDate];
+    }
+
+    const dates = [];
+    const start = new Date(selectedDate);
+    const end = new Date(recurringEndDate);
+    let current = new Date(start);
+
+    while (current <= end) {
+      dates.push(current.toISOString().split('T')[0]);
+      
+      if (recurringType === 'weekly') {
+        current.setDate(current.getDate() + 7);
+      } else if (recurringType === 'monthly') {
+        current.setMonth(current.getMonth() + 1);
+      }
+    }
+
+    return dates;
+  }, [selectedDate, recurringEndDate, recurringType]);
 
   // Generate time slots from field config + check availability against bookings
   const timeSlots = useMemo(() => {
@@ -172,6 +207,7 @@ const FieldDetailPage = () => {
     
     setSelectedDate(selectedDateValue);
     setSelectedSlots([]); // Reset slots when date changes
+    setRecurringEndDate(''); // Reset recurring end date when start date changes
   };
 
   /**
@@ -194,10 +230,11 @@ const FieldDetailPage = () => {
   };
 
   /**
-   * Calculate total price for selected slots
+   * Calculate total price for selected slots (including recurring dates)
    */
   const calculateTotalPrice = () => {
-    return field.hourlyPrice * selectedSlots.length;
+    const numOccurrences = calculateRecurringDates.length;
+    return field.hourlyPrice * selectedSlots.length * numOccurrences;
   };
 
   /**
@@ -228,24 +265,51 @@ const FieldDetailPage = () => {
       return;
     }
 
+    // Validate recurring end date
+    if (recurringType !== 'none') {
+      if (!recurringEndDate) {
+        alert('Vui lòng chọn ngày kết thúc cho lịch lặp lại');
+        return;
+      }
+      
+      const maxEnd = new Date(selectedDate);
+      maxEnd.setMonth(maxEnd.getMonth() + 3);
+      if (new Date(recurringEndDate) > maxEnd) {
+        alert('Lịch lặp lại không được vượt quá 3 tháng');
+        return;
+      }
+    }
+
     const totalPrice = calculateTotalPrice();
     const depositAmount = Math.round(totalPrice * 0.3);
 
-    // Mock booking success
-    alert(
-      `Đặt sân thành công!\n\n` +
-      `Sân: ${field.fieldName}\n` +
-      `Ngày: ${selectedDate}\n` +
-      `Khung giờ: ${selectedSlots.map((s) => s.time).join(', ')}\n` +
+    // Build booking message
+    let bookingMessage = `Đặt sân thành công!\n\n` +
+      `Sân: ${field.fieldName}\n`;
+    
+    if (recurringType !== 'none') {
+      const recurringLabel = recurringType === 'weekly' ? 'Hàng tuần' : 'Hàng tháng';
+      bookingMessage += `Lịch: ${recurringLabel} từ ${selectedDate} đến ${recurringEndDate}\n` +
+        `Số lần: ${calculateRecurringDates.length} ngày\n`;
+    } else {
+      bookingMessage += `Ngày: ${selectedDate}\n`;
+    }
+    
+    bookingMessage += `Khung giờ: ${selectedSlots.map((s) => s.time).join(', ')}\n` +
       `Tổng tiền: ${totalPrice.toLocaleString('vi-VN')}đ\n` +
-      `Tiền cọc (30%): ${depositAmount.toLocaleString('vi-VN')}đ`
-    );
+      `Tiền cọc (30%): ${depositAmount.toLocaleString('vi-VN')}đ`;
+
+    // Mock booking success
+    alert(bookingMessage);
 
     console.log('Booking data:', {
       customerID: user?.id,
       fieldID: field._id,
       selectedDate,
       selectedSlots,
+      recurringType,
+      recurringEndDate,
+      recurringDates: calculateRecurringDates,
       totalPrice,
       depositAmount,
     });
@@ -486,6 +550,50 @@ const FieldDetailPage = () => {
                   />
                 </div>
 
+                {/* Chọn lịch lặp lại */}
+                <div className="form-group">
+                  <label className="form-label">Lặp lại</label>
+                  <select
+                    value={recurringType}
+                    onChange={(e) => {
+                      setRecurringType(e.target.value);
+                      if (e.target.value === 'none') {
+                        setRecurringEndDate('');
+                      }
+                    }}
+                    className="form-input"
+                  >
+                    <option value="none">Không lặp lại</option>
+                    <option value="weekly">Hàng tuần</option>
+                    <option value="monthly">Hàng tháng</option>
+                  </select>
+                  <p className="form-hint">
+                    <span className="material-symbols-outlined">info</span>
+                    Đặt lịch lặp lại cố định trong khoảng thời gian (tối đa 3 tháng)
+                  </p>
+                </div>
+
+                {/* Ngày kết thúc lịch lặp */}
+                {recurringType !== 'none' && (
+                  <div className="form-group">
+                    <label className="form-label">Ngày kết thúc lặp lại</label>
+                    <input
+                      type="date"
+                      value={recurringEndDate}
+                      min={selectedDate}
+                      max={calculateMaxEndDate(selectedDate)}
+                      onChange={(e) => setRecurringEndDate(e.target.value)}
+                      className="form-input"
+                    />
+                    <p className="form-hint">
+                      <span className="material-symbols-outlined">info</span>
+                      {calculateRecurringDates.length > 1 
+                        ? `Sẽ đặt ${calculateRecurringDates.length} lần: ${calculateRecurringDates.slice(0, 3).join(', ')}${calculateRecurringDates.length > 3 ? '...' : ''}`
+                        : 'Chọn ngày kết thúc để xem số lần đặt'}
+                    </p>
+                  </div>
+                )}
+
                 {/* Chọn khung giờ */}
                 <div className="form-group">
                   <label className="form-label">
@@ -538,6 +646,14 @@ const FieldDetailPage = () => {
                     <span>Giá thuê sân ({field.slotDuration}p) × {selectedSlots.length || 1}</span>
                     <span>{(field.hourlyPrice * (selectedSlots.length || 1)).toLocaleString('vi-VN')}đ</span>
                   </div>
+                  
+                  {/* Hiển thị số lần lặp lại nếu có */}
+                  {recurringType !== 'none' && calculateRecurringDates.length > 1 && (
+                    <div className="price-row">
+                      <span>Số lần lặp lại × {calculateRecurringDates.length}</span>
+                      <span>{(field.hourlyPrice * selectedSlots.length * calculateRecurringDates.length).toLocaleString('vi-VN')}đ</span>
+                    </div>
+                  )}
                   
                   {/* Hiển thị tiền cọc khi đã chọn slot */}
                   {selectedSlots.length > 0 && (

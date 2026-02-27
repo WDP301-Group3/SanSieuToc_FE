@@ -2,6 +2,12 @@
 
 Hệ thống đặt sân thể thao trực tuyến - Frontend Application
 
+**Last Updated**: February 27, 2026  
+**Status**: ✅ Core Features Complete | 🔄 API Integration In Progress  
+**Branch**: quoc_minh
+
+---
+
 ## 🚀 Tech Stack
 
 - **React 19** - UI Framework
@@ -124,17 +130,16 @@ npm run preview
 
 ## 🔧 Development Progress
 
-### Phase 1: Core Features ✅ COMPLETED
+### Phase 1: Core Features ✅ COMPLETED (Jan 2026)
 - ✅ Setup project structure
 - ✅ Create layouts (MainLayout, AdminLayout)
 - ✅ Setup routing with React Router
 - ✅ Create HomePage with modern UI
 - ✅ Create Auth pages (Login, Register, ForgotPassword)
 - ✅ Create Field List page with advanced filters
-- ✅ Create Field Detail page
 - ✅ Implement responsive design (mobile/desktop)
 
-### Phase 2: UI/UX Enhancements ✅ COMPLETED
+### Phase 2: UI/UX Enhancements ✅ COMPLETED (Feb 24, 2026)
 - ✅ Sticky sidebar for Field List filters
 - ✅ Custom scrollbar styling
 - ✅ Filter simplification (removed utilities filter)
@@ -145,49 +150,97 @@ npm run preview
 - ✅ Neon glow effects
 - ✅ Smooth animations and transitions
 
-### Phase 3: Data Layer & Services ✅ COMPLETED
-- ✅ Setup mock data structure
-- ✅ Create fieldService with 6 filter criteria
-- ✅ Implement search/filter logic
-- ✅ Add pagination support
-- ✅ Create data models (Field, FieldType, Category, etc.)
-- ✅ Service layer validation
+### Phase 3: Field Detail & Booking ✅ COMPLETED (Feb 27, 2026)
+- ✅ FieldDetailPage UI (image gallery, reviews, amenities)
+- ✅ Booking sidebar with date picker
+- ✅ Time slot selection (multi-slot support)
+- ✅ Date validation (không cho chọn quá khứ)
+- ✅ Booking flow (Chọn ngày → Chọn slot → Đặt sân)
+- ✅ Price calculation (tiền sân + tiền cọc 30%)
+- ✅ Smart validation (authentication, date, slots)
+- ✅ Backend integration for time slots (BE calculates availability)
 
-### Phase 4: API Integration 🔄 IN PROGRESS
-- 🔲 Setup Axios service layer
-- 🔲 Connect to backend API
-- 🔲 Implement authentication flow
-- 🔲 Add error handling
-- 🔲 API token management
+### Phase 4: API Infrastructure ✅ COMPLETED (Feb 27, 2026)
+- ✅ Setup Axios instance with interceptors
+- ✅ Auto token attachment to requests
+- ✅ Auto token refresh on 401
+- ✅ Token manager (localStorage)
+- ✅ API endpoint configuration
+- ✅ Booking service (7 methods: create, list, detail, cancel, check-availability, etc.)
+- ✅ Field service (getTimeSlots method)
+- ✅ Error handling (401, 403, 404, 409, 500, network)
+- ✅ Environment configuration (.env)
 
-### Phase 5: State Management 📋 PLANNED
-- 🔲 Setup Redux store
-- 🔲 Create slices (auth, fields, bookings)
-- 🔲 Implement global state
-- 🔲 Add Redux DevTools
+### Phase 5: Full API Integration 🔄 IN PROGRESS (Est: 1-2 weeks)
+- ✅ Booking API integration (Done)
+- ✅ Time slot fetching (Done)
+- 🔲 Replace mock data with real APIs
+- 🔲 Authentication flow (login, register, logout)
+- 🔲 Protected routes implementation
+- 🔲 Field list/detail API connection
+- 🔲 User profile API integration
 
-### Phase 6: Advanced Features 📋 PLANNED
-- 🔲 User dashboard
-- 🔲 Admin dashboard with charts
-- 🔲 Booking system
-- 🔲 Payment integration
+### Phase 6: Payment & Booking Management 📋 PLANNED (Next 2 weeks)
+- 🔲 Payment integration (VNPay/MoMo)
+- 🔲 Booking confirmation page
+- 🔲 Email notifications
+- 🔲 User booking history page
+- 🔲 Booking detail page
+- 🔲 Cancel booking feature
+
+### Phase 7: Manager Dashboard 📋 PLANNED (Next 3-4 weeks)
+- 🔲 Dashboard overview (stats, charts)
+- 🔲 Field management (CRUD operations)
+- 🔲 Booking management (view, approve, cancel)
+- 🔲 Customer management
+- 🔲 Revenue reports
+
+### Phase 8: Advanced Features 📋 PLANNED (Future)
 - 🔲 Real-time notifications
-- 🔲 Dark mode toggle
+- 🔲 Review/rating system
+- 🔲 Favorite fields feature
+- 🔲 Performance optimization (code splitting, caching)
+- 🔲 Unit & E2E testing
 - 🔲 Multi-language support (i18n)
+
+---
+
+## 📊 Current Statistics (Feb 27, 2026)
+
+| Metric | Count |
+|--------|-------|
+| **Total Pages** | 7 pages |
+| **Components** | 15+ components |
+| **Services** | 3 services (field, booking, axios) |
+| **API Methods** | 15+ methods |
+| **Lines of Code** | ~8,000+ lines |
+| **CSS Files** | 8 files |
+| **Mock Data** | 12 fields, 7 types, 5 categories |
+
+**Completion**: 
+- ✅ UI/UX: 95% Complete
+- ✅ Core Features: 85% Complete
+- 🔄 API Integration: 40% Complete
+- 📋 Overall: ~70% Complete
+
+---
 
 ## 📝 Naming Conventions
 
 - **Components**: PascalCase (`HomePage.jsx`)
 - **Files**: camelCase for utilities, PascalCase for components
-- **CSS Classes**: Tailwind utility classes
+- **CSS Classes**: Tailwind utility classes + custom classes
 - **Routes**: kebab-case (`/forgot-password`)
+- **API Endpoints**: kebab-case (`/manager/field/list`)
 
 ## 🎯 Component Guidelines
 
 1. Use functional components with hooks
-2. Keep components small and focused
+2. Keep components small and focused (< 500 lines)
 3. Extract reusable logic into custom hooks
 4. Use Tailwind classes instead of custom CSS when possible
+5. Add comprehensive Vietnamese comments for complex logic
+6. Validate all user inputs (date, slots, forms)
 5. Follow the existing folder structure
 
 ## 📚 Resources

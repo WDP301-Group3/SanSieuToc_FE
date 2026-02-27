@@ -13,10 +13,8 @@ import FieldListPage from './pages/Field/FieldListPage';
 import FieldDetailPage from './pages/Field/FieldDetailPage';
 
 // Customer Pages
-import UserProfilePage from './pages/Customer/UserProfilePage';
-import BookingHistoryPage from './pages/Customer/BookingHistoryPage';
+import UserDashboardPage from './pages/Customer/UserDashboardPage';
 import BookingDetailPage from './pages/Customer/BookingDetailPage';
-import UserSettingsPage from './pages/Customer/UserSettingsPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
@@ -46,10 +44,10 @@ function App() {
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<UserProfilePage />} />
-          <Route path="/booking-history" element={<BookingHistoryPage />} />
+          <Route path="/profile" element={<UserDashboardPage />} />
+          <Route path="/booking-history" element={<UserDashboardPage />} />
           <Route path="/booking-history/:id" element={<BookingDetailPage />} />
-          <Route path="/settings" element={<UserSettingsPage />} />
+          <Route path="/settings" element={<UserDashboardPage />} />
         </Route>
 
         {/* Admin Routes with AdminLayout */}

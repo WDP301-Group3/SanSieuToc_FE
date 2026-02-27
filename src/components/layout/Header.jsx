@@ -66,7 +66,7 @@ const Header = () => {
               className="header-nav-link"
               to="/fields"
             >
-              Đặt sân
+              Danh sách sân
             </Link>
             <Link
               className="header-nav-link"
@@ -87,12 +87,6 @@ const Header = () => {
               <span className="material-icons-outlined">
                 {isDark ? 'light_mode' : 'dark_mode'}
               </span>
-            </button>
-
-            {/* Notifications */}
-            <button className="header-icon-btn header-notification-btn">
-              <span className="material-icons-outlined">notifications</span>
-              <span className="header-notification-dot" />
             </button>
 
             <div className="header-divider" />
