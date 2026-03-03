@@ -147,11 +147,14 @@
   z-index: 10;
   margin: -1.5rem -1.5rem 1.5rem -1.5rem; /* Negative margins to extend full width */
   padding: 1rem 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .dark .sidebar-header {
   background: var(--surface-dark);
-  border-bottom-color: #2a2e2a;
+  border-color: #2a2e2a;
 }
 
 .sidebar-title {
@@ -678,12 +681,10 @@
 .search-input-container:focus-within {
   border-color: var(--primary);
   background: white;
-  box-shadow: 0 0 0 3px rgba(0, 229, 54, 0.1);
 }
 
 .dark .search-input-container:focus-within {
   background: #0f1f0f;
-  box-shadow: 0 0 0 3px rgba(0, 229, 54, 0.15);
 }
 
 .search-input-container .search-icon {

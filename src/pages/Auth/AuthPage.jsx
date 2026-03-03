@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { mockUsers } from '../../data/mockData';
+import authService from '../../services/authService';
 import '../../styles/AuthPage.css';
 
 /**
@@ -240,7 +240,7 @@ const AuthPage = () => {
   
   /**
    * Handle login form submission
-   * Validates credentials against mockUsers
+   * Calls API to authenticate user
    * @param {Event} e - Form submit event
    */
   const handleLoginSubmit = async (e) => {
@@ -263,57 +263,42 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Call API login
+      const response = await authService.login({
+        email: loginData.email.trim(),
+        password: loginData.password,
+      });
 
-      // Find user by email
-      const foundUser = mockUsers.find(
-        (account) => account.email === loginData.email.trim()
-      );
-
-      // Validate email exists
-      if (!foundUser) {
-        setErrors({ submit: 'Email không tồn tại trong hệ thống.' });
+      // Check response
+      if (!response.success) {
+        setErrors({ submit: response.message || 'Đăng nhập thất bại.' });
         setLoading(false);
         return;
       }
 
-      // Validate password
-      if (foundUser.password !== loginData.password) {
-        setErrors({ submit: 'Mật khẩu không chính xác.' });
-        setLoading(false);
-        return;
-      }
-
-      // Validate account is active (if applicable)
-      if (foundUser.isActive === false) {
-        setErrors({ submit: 'Tài khoản đã bị vô hiệu hóa.' });
-        setLoading(false);
-        return;
-      }
+      // Extract user data and token from response
+      const { customer, token } = response.data;
 
       // Build user object for context
       const userData = {
-        id: foundUser._id,
-        name: foundUser.name,
-        email: foundUser.email,
-        phone: foundUser.phone || '',
-        image: foundUser.image || 'https://via.placeholder.com/100',
-        role: foundUser.role,
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone || '',
+        image: customer.image || 'https://via.placeholder.com/100',
+        role: 'customer',
       };
-      const mockToken = 'mock-jwt-token-' + foundUser._id;
 
-      login(userData, mockToken);
+      login(userData, token);
 
-      // Redirect based on role
-      if (foundUser.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/');
-      }
-    } catch (err) {
-      setErrors({ submit: 'Đăng nhập thất bại. Vui lòng thử lại.' });
-      console.error('Login error:', err);
+      // Redirect to homepage
+      navigate('/');
+    } catch (error) {
+      // Handle API error
+      setErrors({ 
+        submit: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' 
+      });
+      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }
@@ -321,6 +306,7 @@ const AuthPage = () => {
   
   /**
    * Handle registration form submission
+   * Calls API to register new customer
    * @param {Event} e - Form submit event
    */
   const handleRegisterSubmit = async (e) => {
@@ -334,26 +320,45 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Call API register
+      const response = await authService.register({
+        name: registerData.username.trim(),
+        email: registerData.email.trim(),
+        password: registerData.password,
+        phone: registerData.phone || '',
+      });
 
-      // Mock successful registration
-      const mockUser = {
-        id: '1',
-        name: registerData.username,
-        email: registerData.email,
-        phone: registerData.phone,
-        image: 'https://via.placeholder.com/100',
+      // Check response
+      if (!response.success) {
+        setErrors({ submit: response.message || 'Đăng ký thất bại.' });
+        setLoading(false);
+        return;
+      }
+
+      // Extract user data and token from response
+      const { customer, token } = response.data;
+
+      // Build user object for context
+      const userData = {
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone || '',
+        image: customer.image || 'https://via.placeholder.com/100',
         role: 'customer',
       };
-      const mockToken = 'mock-jwt-token-123';
 
       // Auto login after successful registration
-      login(mockUser, mockToken);
+      login(userData, token);
       navigate('/');
-    } catch (err) {
-      setErrors({ submit: 'Đăng ký thất bại. Vui lòng thử lại.' });
-      console.error('Registration error:', err);
+    } catch (error) {
+      // Handle specific error messages from server
+      if (error.errors) {
+        setErrors(error.errors);
+      } else {
+        setErrors({ submit: error.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
+      }
+      console.error('Registration error:', error);
     } finally {
       setLoading(false);
     }
@@ -361,6 +366,7 @@ const AuthPage = () => {
   
   /**
    * Handle forgot password form submission
+   * Calls API to send reset password email
    * @param {Event} e - Form submit event
    */
   const handleForgotPasswordSubmit = async (e) => {
@@ -375,15 +381,21 @@ const AuthPage = () => {
     setErrors({});
 
     try {
-      // TODO: Replace with actual API call
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call API reset password
+      const response = await authService.resetPassword(forgotPasswordEmail.trim());
+
+      // Check response
+      if (!response.success) {
+        setErrors({ submit: response.message || 'Có lỗi xảy ra.' });
+        setLoading(false);
+        return;
+      }
 
       // Show success state
       setForgotPasswordSuccess(true);
-    } catch (err) {
-      setErrors({ submit: 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
-      console.error('Password reset error:', err);
+    } catch (error) {
+      setErrors({ submit: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+      console.error('Password reset error:', error);
     } finally {
       setLoading(false);
     }

@@ -42,28 +42,17 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        // Try to refresh token
-        const refreshToken = tokenManager.getRefreshToken();
-        if (refreshToken) {
-          const response = await axios.post(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.REFRESH_TOKEN}`,
-            { refreshToken }
-          );
-
-          const { token } = response.data;
-          tokenManager.setToken(token);
-
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return axiosInstance(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh token failed, clear auth and redirect to login
-        tokenManager.clearAuth();
+      // Clear auth and redirect to login
+      // Note: Refresh token chưa được implement ở BE
+      tokenManager.clearAuth();
+      
+      // Only redirect if not already on auth pages
+      if (!window.location.pathname.includes('/login') && 
+          !window.location.pathname.includes('/register')) {
         window.location.href = '/login';
-        return Promise.reject(refreshError);
       }
+      
+      return Promise.reject(error);
     }
 
     // Handle 403 Forbidden

@@ -337,7 +337,7 @@ const HomePage = () => {
               </div>
               
               {/* Date picker */}
-              <div className="w-full md:w-48 relative group">
+              {/* <div className="w-full md:w-48 relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span className="material-icons-outlined text-gray-400 group-focus-within:text-[#00E536]">
                     calendar_today
@@ -352,7 +352,7 @@ const HomePage = () => {
                   onChange={(e) => setSearchDate(e.target.value)}
                   onKeyPress={handleKeyPress}
                 />
-              </div>
+              </div> */}
               
               {/* Search button */}
               <button 

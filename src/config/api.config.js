@@ -1,60 +1,108 @@
 /**
  * API Configuration
  * Central configuration for API endpoints and settings
+ * 
+ * @description Cấu hình endpoints API cho Sân Siêu Tốc
+ * @note Đồng bộ với Backend routes thực tế
+ * @date 2026-03-02
  */
 
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9999/api',
+  // Base URL - Không có /api vì đã có trong endpoints
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9999',
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000,
   
-  // API Endpoints
+  // ============================================
+  // API ENDPOINTS - Đồng bộ với BE
+  // ============================================
   ENDPOINTS: {
-    // Authentication
-    AUTH: {
-      LOGIN: '/auth/login',
-      REGISTER: '/auth/register',
-      LOGOUT: '/auth/logout',
-      REFRESH_TOKEN: '/auth/refresh-token',
-      FORGOT_PASSWORD: '/auth/forgot-password',
-      RESET_PASSWORD: '/auth/reset-password',
+    
+    // ------------------------------------------
+    // CUSTOMER AUTH (Đã có ở BE)
+    // POST /api/customer/auth/register
+    // POST /api/customer/auth/login
+    // POST /api/customer/auth/reset-password
+    // PUT  /api/customer/auth/change-password (auth required)
+    // ------------------------------------------
+    CUSTOMER_AUTH: {
+      REGISTER: '/api/customer/auth/register',
+      LOGIN: '/api/customer/auth/login',
+      RESET_PASSWORD: '/api/customer/auth/reset-password',
+      CHANGE_PASSWORD: '/api/customer/auth/change-password',
     },
     
-    // Customer Profile
-    CUSTOMER: {
-      PROFILE: '/customer/profile',
-      UPDATE_PROFILE: '/customer/profile/update',
-      CHANGE_PASSWORD: '/customer/change-password',
+    // ------------------------------------------
+    // CUSTOMER PROFILE (Đã có ở BE)
+    // GET /api/customer/profile/get-profile (auth required)
+    // PUT /api/customer/profile/update-profile (auth required)
+    // ------------------------------------------
+    CUSTOMER_PROFILE: {
+      GET: '/api/customer/profile/get-profile',
+      UPDATE: '/api/customer/profile/update-profile',
     },
     
-    // Fields
-    FIELD: {
-      LIST: '/manager/field/list',
-      DETAIL: (id) => `/manager/field/${id}`,
-      TIME_SLOTS: (id) => `/manager/field/${id}/time-slots`,
-      CREATE: '/manager/field/create',
-      UPDATE: (id) => `/manager/field/update/${id}`,
-      DELETE: (id) => `/manager/field/delete/${id}`,
+    // ------------------------------------------
+    // MANAGER AUTH (Đã có ở BE)
+    // POST /api/manager/auth/login
+    // POST /api/manager/auth/reset-password
+    // PUT  /api/manager/auth/change-password (auth required)
+    // ------------------------------------------
+    MANAGER_AUTH: {
+      LOGIN: '/api/manager/auth/login',
+      RESET_PASSWORD: '/api/manager/auth/reset-password',
+      CHANGE_PASSWORD: '/api/manager/auth/change-password',
     },
     
-    // Bookings
-    BOOKING: {
-      CREATE: '/customer/booking/create',
-      LIST: '/customer/booking/list',
-      DETAIL: (id) => `/customer/booking/${id}`,
-      CANCEL: (id) => `/customer/booking/cancel/${id}`,
-      CHECK_AVAILABILITY: '/customer/booking/check-availability',
+    // ------------------------------------------
+    // MANAGER PROFILE (Đã có ở BE)
+    // GET /api/manager/profile/get-profile (auth required)
+    // PUT /api/manager/profile/update-profile (auth required)
+    // ------------------------------------------
+    MANAGER_PROFILE: {
+      GET: '/api/manager/profile/get-profile',
+      UPDATE: '/api/manager/profile/update-profile',
     },
     
-    // Booking Details
-    BOOKING_DETAIL: {
-      BY_FIELD: (fieldId) => `/customer/booking-detail/field/${fieldId}`,
-      BY_DATE: '/customer/booking-detail/by-date',
+    // ------------------------------------------
+    // PUBLIC FIELDS (TODO: BE đang phát triển)
+    // ------------------------------------------
+    FIELDS: {
+      LIST: '/api/fields',
+      SEARCH: '/api/fields/search',
+      DETAIL: (id) => `/api/fields/${id}`,
     },
     
-    // Feedback
-    FEEDBACK: {
-      CREATE: '/customer/feedback/create',
-      LIST: (fieldId) => `/customer/feedback/field/${fieldId}`,
+    // ------------------------------------------
+    // CATEGORIES (TODO: BE đang phát triển)
+    // ------------------------------------------
+    CATEGORIES: {
+      LIST: '/api/categories',
+    },
+    
+    // ------------------------------------------
+    // FIELD TYPES (TODO: BE đang phát triển)
+    // ------------------------------------------
+    FIELD_TYPES: {
+      LIST: '/api/field-types',
+      BY_CATEGORY: (categoryId) => `/api/field-types/category/${categoryId}`,
+    },
+    
+    // ------------------------------------------
+    // CUSTOMER BOOKINGS (TODO: BE đang phát triển)
+    // ------------------------------------------
+    BOOKINGS: {
+      CREATE: '/api/customer/bookings',
+      LIST: '/api/customer/bookings',
+      DETAIL: (id) => `/api/customer/bookings/${id}`,
+      CANCEL: (id) => `/api/customer/bookings/${id}/cancel`,
+    },
+    
+    // ------------------------------------------
+    // FEEDBACKS (TODO: BE đang phát triển)
+    // ------------------------------------------
+    FEEDBACKS: {
+      CREATE: '/api/customer/feedbacks',
+      BY_FIELD: (fieldId) => `/api/feedbacks/field/${fieldId}`,
     },
   },
 };
