@@ -3,13 +3,41 @@
 /* Hero Section */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, rgb(240 253 244) 0%, rgb(220 252 231) 100%);
   overflow: hidden;
+  min-height: 600px;
+  height: 100vh;
+  max-height: 900px;
 }
 
-.dark .hero-section {
-  background: linear-gradient(135deg, rgb(5 46 22) 0%, rgb(20 83 45) 100%);
+/* Background Carousel - 5 hình ảnh môn thể thao luân chuyển */
+.hero-background-carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 1.5s ease-in-out;
+  z-index: 1;
 }
+
+/* Blur Overlay - Không sử dụng */
+/* .hero-blur-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+.dark .hero-blur-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+} */
 
 .hero-pattern {
   position: absolute;
@@ -59,12 +87,14 @@
   font-size: 2.25rem;
   font-family: var(--font-display);
   font-weight: 800;
-  color: rgb(17 24 39);
+  color: white;
   margin-bottom: 1.5rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .dark .hero-title {
   color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 @media (min-width: 768px) {
@@ -81,13 +111,15 @@
 /* Hero Description */
 .hero-description {
   font-size: 1.125rem;
-  color: rgb(75 85 99);
+  color: white;
   margin-bottom: 2.5rem;
   max-width: 42rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dark .hero-description {
-  color: rgb(209 213 219);
+  color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 @media (min-width: 768px) {

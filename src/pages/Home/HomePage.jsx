@@ -64,6 +64,19 @@ const HomePage = () => {
   const [searchDate, setSearchDate] = useState('');
   
   /**
+   * Background carousel state - 5 hình ảnh môn thể thao
+   * Ảnh bóng đá (football) là ảnh đầu tiên
+   */
+  const backgroundImages = [
+    '/assets/images/football.jpg',
+    '/assets/images/badminton.jpg',
+    '/assets/images/basketball.jpg',
+    '/assets/images/tennis.jpg',
+    '/assets/images/volleyball.jpg',
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  /**
    * Preview dropdown state
    */
   const [previewResults, setPreviewResults] = useState([]);
@@ -106,6 +119,17 @@ const HomePage = () => {
   // ==========================================
   // EFFECTS
   // ==========================================
+  
+  /**
+   * Effect: Background carousel - Đổi ảnh mỗi 5 giây
+   */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
   
   /**
    * Effect: Fetch preview results khi debounced query thay đổi
@@ -289,8 +313,18 @@ const HomePage = () => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-green-50 to-green-100 dark:from-[#052e16] dark:to-[#14532d] overflow-hidden">
-        {/* Background SVG */}
+      <div className="hero-section">
+        {/* Background Carousel - 5 hình ảnh môn thể thao */}
+        <div 
+          className="hero-background-carousel"
+          style={{
+            backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        
+        {/* SVG Pattern Overlay (tùy chọn) */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 dark:opacity-5">
           <svg
             className="absolute w-full h-full text-[#00E536] fill-current"
@@ -301,19 +335,21 @@ const HomePage = () => {
           </svg>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-extrabold text-gray-900 dark:text-white mb-6">
-            Tìm sân chơi{' '}
-            <span className="text-[#00E536] logo-text-shadow">Siêu Tốc</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl">
-            Đặt sân bóng đá, cầu lông, tennis ngay lập tức. Hệ thống tìm kiếm thông minh,
-            đặt sân dễ dàng chỉ trong 30 giây.
-          </p>
+        {/* Hero Content - Tiêu đề ở giữa, search ở dưới */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <h1 className="text-4xl md:text-6xl font-display font-extrabold text-white mb-6">
+              Tìm sân chơi{' '}
+              <span className="text-[#00E536] logo-text-shadow">Siêu Tốc</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white mb-10 max-w-2xl">
+              Đặt sân bóng đá, cầu lông, tennis ngay lập tức. Hệ thống tìm kiếm thông minh,
+              đặt sân dễ dàng chỉ trong 30 giây.
+            </p>
+          </div>
 
-          {/* Search Bar with Preview */}
-          <div className="w-full max-w-4xl relative" ref={searchWrapperRef}>
+          {/* Search Bar with Preview - Ở dưới */}
+          <div className="w-full max-w-4xl relative pb-20" ref={searchWrapperRef}>
             <div 
               ref={searchContainerRef}
               className="bg-white dark:bg-[#14532d] rounded-2xl shadow-xl p-3 flex flex-col md:flex-row gap-3 transform transition-all hover:scale-[1.01]"
