@@ -19,10 +19,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Context & Hooks
 import { useApp } from '../../context/AppContext';
 import { useDebounce, useClickOutside } from '../../hooks/useAppHooks';
+
+// Mock Data - TODO: Replace with API calls
+import { mockCategories, mockFields, fieldRatings } from '../../data/mockData';
 
 // Styles
 import '../../styles/HomePage.css';
@@ -47,6 +51,7 @@ const HomePage = () => {
   // ==========================================
   
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   /**
    * AppContext - Sử dụng quickSearch function
@@ -73,6 +78,11 @@ const HomePage = () => {
    * Debounced search query - Tránh gọi API quá nhiều
    */
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  /**
+   * Featured fields filter state
+   */
+  const [selectedCategory, setSelectedCategory] = useState('all');
   
   /**
    * Loading state từ context
@@ -102,6 +112,52 @@ const HomePage = () => {
    * State lưu vị trí dropdown để render portal đúng vị trí
    */
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  // ==========================================
+  // COMPUTED VALUES
+  // ==========================================
+
+  /**
+   * Danh sách categories để filter (thêm "Tất cả" ở đầu)
+   */
+  const categoryFilters = [
+    { _id: 'all', categoryName: t('home.allCategories') },
+    ...mockCategories.map(cat => ({
+      ...cat,
+      categoryName: t(`category.${cat.categoryName}`, cat.categoryName)
+    }))
+  ];
+
+  /**
+   * Featured fields - Lọc theo category và sắp xếp theo rating
+   * Chỉ lấy sân có status "Available"
+   */
+  const featuredFields = (() => {
+    // Lọc sân available
+    let fields = mockFields.filter(field => field.status === 'Available');
+    
+    // Lọc theo category nếu không phải "all"
+    if (selectedCategory !== 'all') {
+      fields = fields.filter(field => 
+        field.fieldType?.category?._id === selectedCategory
+      );
+    }
+    
+    // Thêm rating info và sắp xếp theo rating cao nhất
+    fields = fields.map(field => ({
+      ...field,
+      rating: fieldRatings[field._id] || { averageRating: 0, totalReviews: 0 }
+    })).sort((a, b) => {
+      // Ưu tiên rating cao, nếu bằng thì ưu tiên nhiều reviews hơn
+      if (b.rating.averageRating !== a.rating.averageRating) {
+        return b.rating.averageRating - a.rating.averageRating;
+      }
+      return b.rating.totalReviews - a.rating.totalReviews;
+    });
+    
+    // Chỉ lấy top 4 sân
+    return fields.slice(0, 4);
+  })();
 
   // ==========================================
   // EFFECTS
@@ -218,7 +274,7 @@ const HomePage = () => {
   const renderPreviewLoading = () => (
     <div className="p-8 text-center">
       <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-[#00E536] mb-3"></div>
-      <p className="text-gray-600 dark:text-gray-300">Đang tìm kiếm...</p>
+      <p className="text-gray-600 dark:text-gray-300">{t('home.searching')}</p>
     </div>
   );
 
@@ -229,7 +285,7 @@ const HomePage = () => {
     <>
       <div className="px-4 py-3 bg-gray-50 dark:bg-green-900/30 border-b border-gray-200 dark:border-green-800">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Tìm thấy {previewResults.length} kết quả
+          {t('home.foundResults', { count: previewResults.length })}
         </span>
       </div>
       <div className="max-h-96 overflow-y-auto">
@@ -259,7 +315,7 @@ const HomePage = () => {
                 {field.address}
               </p>
               <p className="text-sm font-medium text-[#00E536]">
-                {field.price ? `${field.price.toLocaleString()}đ/giờ` : 'Liên hệ'}
+                {field.price ? `${field.price.toLocaleString()}đ/${t('field.pricePerHour', { price: '' }).replace('/', '')}` : t('home.contact')}
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -275,7 +331,7 @@ const HomePage = () => {
           className="w-full text-center text-sm font-medium text-[#00E536] hover:text-green-600 transition-colors flex items-center justify-center gap-2"
           onClick={handleSearch}
         >
-          Xem tất cả kết quả
+          {t('home.viewAllResults')}
           <span className="material-icons-outlined text-sm">arrow_forward</span>
         </button>
       </div>
@@ -304,12 +360,11 @@ const HomePage = () => {
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 flex flex-col items-center text-center">
           <h1 className="text-4xl md:text-6xl font-display font-extrabold text-gray-900 dark:text-white mb-6">
-            Tìm sân chơi{' '}
-            <span className="text-[#00E536] logo-text-shadow">Siêu Tốc</span>
+            {t('home.heroTitle')}{' '}
+            <span className="text-[#00E536] logo-text-shadow">{t('home.heroHighlight')}</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl">
-            Đặt sân bóng đá, cầu lông, tennis ngay lập tức. Hệ thống tìm kiếm thông minh,
-            đặt sân dễ dàng chỉ trong 30 giây.
+            {t('home.heroSubtitle')}
           </p>
 
           {/* Search Bar with Preview */}
@@ -327,7 +382,7 @@ const HomePage = () => {
                 </div>
                 <input
                   className="block w-full pl-10 pr-3 py-3 border-none rounded-xl bg-gray-50 dark:bg-green-900/30 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-[#00E536] transition-shadow"
-                  placeholder="Tìm tên sân, địa chỉ, khu vực..."
+                  placeholder={t('home.searchPlaceholder')}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -336,31 +391,13 @@ const HomePage = () => {
                 />
               </div>
               
-              {/* Date picker */}
-              {/* <div className="w-full md:w-48 relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-icons-outlined text-gray-400 group-focus-within:text-[#00E536]">
-                    calendar_today
-                  </span>
-                </div>
-                <input
-                  className="block w-full pl-10 pr-3 py-3 border-none rounded-xl bg-gray-50 dark:bg-green-900/30 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-[#00E536] transition-shadow"
-                  placeholder="Chọn ngày"
-                  type="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  value={searchDate}
-                  onChange={(e) => setSearchDate(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-              </div> */}
-              
               {/* Search button */}
               <button 
                 onClick={handleSearch}
                 className="w-full md:w-auto bg-[#00E536] hover:bg-green-500 text-white dark:text-green-900 font-bold px-8 py-3 rounded-xl shadow-lg hover:shadow-neon transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <span className="material-icons-outlined">search</span>
-                Tìm sân
+                {t('home.searchButton')}
               </button>
             </div>
             
@@ -389,53 +426,80 @@ const HomePage = () => {
       {/* Featured Fields Section */}
       <section className="py-20 bg-gray-50 dark:bg-[#052e16]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Sân nổi bật
+              {t('home.featuredFields')}
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Những sân được đánh giá cao nhất bởi cộng đồng
+              {t('home.featuredFieldsDesc')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* TODO: Replace with real data from API */}
-            {[1, 2, 3, 4].map((item) => (
-              <Link key={item} to={`/fields/${item}`} className="block group">
-                <div className="bg-white dark:bg-[#14532d] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-transparent hover:border-green-200 dark:hover:border-green-700">
-                  <div className="h-40 bg-gray-200 relative">
-                    <img
-                      alt="Sân bóng"
-                      className="w-full h-full object-cover"
-                      src={`https://via.placeholder.com/400x300?text=Field+${item}`}
-                    />
-                    <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
-                      3km
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-[#00E536] transition-colors">
-                      Sân Bóng {item}
-                    </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                      Cầu Giấy, Hà Nội
-                    </p>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md">
-                        Còn sân
-                      </span>
-                      <span className="font-bold text-[#00E536] text-sm">200k/h</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+          {/* Category Filter Tabs */}
+          <div className="category-filter-tabs">
+            {categoryFilters.map((category) => (
+              <button
+                key={category._id}
+                onClick={() => setSelectedCategory(category._id)}
+                className={`category-tab ${selectedCategory === category._id ? 'active' : ''}`}
+              >
+                {category.categoryName}
+              </button>
             ))}
+          </div>
+
+          {/* Featured Fields Grid */}
+          <div className="featured-fields-grid">
+            {featuredFields.length > 0 ? (
+              featuredFields.map((field) => (
+                <Link key={field._id} to={`/fields/${field._id}`} className="featured-field-card group">
+                  <div className="card-inner">
+                    <div className="card-image">
+                      <img
+                        alt={field.fieldName}
+                        src={field.image?.[0] || '/default-field.jpg'}
+                        onError={(e) => { e.target.src = '/default-field.jpg'; }}
+                      />
+                      <div className="badge badge-category">
+                        {t(`category.${field.fieldType?.category?.categoryName}`, field.fieldType?.category?.categoryName || 'Sân')}
+                      </div>
+                      {field.rating?.averageRating > 0 && (
+                        <div className="badge badge-rating">
+                          <span className="material-icons-outlined">star</span>
+                          {field.rating.averageRating}
+                        </div>
+                      )}
+                    </div>
+                    <div className="card-content">
+                      <h4 className="card-title">{field.fieldName}</h4>
+                      <p className="card-address">
+                        <span className="material-icons-outlined">location_on</span>
+                        {field.district || field.address}
+                      </p>
+                      <div className="card-footer">
+                        <span className="field-type-badge">
+                          {field.fieldType?.typeName || t('home.standardField')}
+                        </span>
+                        <span className="field-price">
+                          {(field.hourlyPrice / 1000).toFixed(0)}k/h
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="featured-fields-empty">
+                <span className="material-icons-outlined">sports_soccer</span>
+                <p>{t('home.noFieldsFound')}</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-12 text-center">
             <Link to="/fields">
               <button className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 dark:border-green-700 text-base font-medium rounded-xl text-gray-700 dark:text-white bg-white dark:bg-[#14532d] hover:bg-gray-50 dark:hover:bg-green-800 transition-colors">
-                Xem thêm sân khác
+                {t('home.viewMoreFields')}
               </button>
             </Link>
           </div>
@@ -447,10 +511,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Cách thức hoạt động
+              {t('home.howItWorks')}
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Chỉ 3 bước đơn giản để đặt sân yêu thích của bạn
+              {t('home.howItWorksDesc')}
             </p>
           </div>
 
@@ -458,18 +522,18 @@ const HomePage = () => {
             {[
               {
                 icon: 'search',
-                title: 'Tìm kiếm',
-                description: 'Tìm sân phù hợp với vị trí và thời gian của bạn',
+                title: t('home.step1Title'),
+                description: t('home.step1Desc'),
               },
               {
                 icon: 'event_available',
-                title: 'Đặt sân',
-                description: 'Chọn khung giờ và xác nhận đặt sân trực tuyến',
+                title: t('home.step2Title'),
+                description: t('home.step2Desc'),
               },
               {
                 icon: 'sports_soccer',
-                title: 'Chơi thôi!',
-                description: 'Đến sân và tận hưởng trận đấu của bạn',
+                title: t('home.step3Title'),
+                description: t('home.step3Desc'),
               },
             ].map((step, index) => (
               <div key={index} className="text-center">
@@ -491,10 +555,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { number: '500+', label: 'Sân thể thao' },
-              { number: '10,000+', label: 'Người dùng' },
-              { number: '50+', label: 'Thành phố' },
-              { number: '4.8/5', label: 'Đánh giá' },
+              { number: '500+', label: t('home.stats.fields') },
+              { number: '10,000+', label: t('home.stats.users') },
+              { number: '50+', label: t('home.stats.cities') },
+              { number: '4.8/5', label: t('home.stats.rating') },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-[#00E536] mb-2">

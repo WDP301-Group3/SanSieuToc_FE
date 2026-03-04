@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/images/logo.png';
 import '../../styles/Header.css';
 
 const Header = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [hidden, setHidden] = useState(false);
@@ -60,19 +62,25 @@ const Header = () => {
               className="header-nav-link"
               to="/"
             >
-              Trang chủ
+              {t('nav.home')}
             </Link>
             <Link
               className="header-nav-link"
               to="/fields"
             >
-              Danh sách sân
+              {t('nav.fields')}
+            </Link>
+            <Link
+              className="header-nav-link"
+              to="/about"
+            >
+              {t('nav.about')}
             </Link>
             <Link
               className="header-nav-link"
               to="/terms"
             >
-              Điều khoản
+              {t('footer.terms')}
             </Link>
           </div>
 
@@ -117,7 +125,7 @@ const Header = () => {
                       onClick={() => setShowDropdown(false)}
                     >
                       <span className="material-icons-outlined">person</span>
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                     {user?.role === 'admin' && (
                       <Link
@@ -135,7 +143,7 @@ const Header = () => {
                       onClick={() => { logout(); setShowDropdown(false); }}
                     >
                       <span className="material-icons-outlined">logout</span>
-                      Đăng xuất
+                      {t('auth.logout')}
                     </button>
                   </div>
                 )}
@@ -144,7 +152,7 @@ const Header = () => {
               <Link to="/login">
                 <button className="header-login-btn">
                   <span className="material-icons-outlined text-sm">login</span>
-                  Đăng nhập
+                  {t('auth.login')}
                 </button>
               </Link>
             )}

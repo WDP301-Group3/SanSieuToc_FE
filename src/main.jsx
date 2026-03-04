@@ -15,6 +15,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
+// Initialize i18n (internationalization)
+import './i18n'
+
 // Context Providers
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'

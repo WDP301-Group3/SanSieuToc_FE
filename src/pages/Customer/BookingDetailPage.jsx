@@ -1,119 +1,93 @@
-﻿import { useMemo } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { mockBookings, mockFields, BOOKING_ORDER_STATUS } from '../../data/mockData';
+import { useTranslation } from 'react-i18next';
+import MapModal from '../../components/Map/MapModal';
+import {
+  mockBookings,
+  mockFields,
+  BOOKING_ORDER_STATUS,
+  BOOKING_STATUS_CONFIG,
+  UTILITY_LABELS,
+  FIELD_RULES_BY_CATEGORY,
+} from '../../data/mockData';
 import '../../styles/BookingDetailPage.css';
 
-// Utility English → Vietnamese mapping
-const utilityMap = {
-  'Wifi': 'Wifi miễn phí',
-  'Parking': 'Gửi xe miễn phí',
-  'Shower': 'Phòng tắm sạch sẽ',
-  'Changing Room': 'Phòng thay đồ',
-  'Water': 'Nước suối miễn phí (2 chai)',
-  'First Aid': 'Dụng cụ y tế sơ cứu',
-  'Equipment Rental': 'Cho thuê dụng cụ thể thao',
-  'Coaching': 'Huấn luyện viên hỗ trợ',
-  'Cafe': 'Quán cà phê khu vực sân',
-  'Air Conditioning': 'Điều hòa không khí',
-  'Snack Bar': 'Căn tin phục vụ đồ ăn nhẹ',
-  'Scoreboard': 'Bảng điểm điện tử',
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Format date string (YYYY-MM-DD) to DD/MM/YYYY
+ */
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
 };
 
-// Default rules per sport category
-const defaultRules = {
-  Football: [
-    'Có mặt trước 15 phút để làm thủ tục nhận sân.',
-    'Sử dụng giày chuyên dụng cho cỏ nhân tạo.',
-    'Không mang chất dễ cháy nổ vào khu vực sân.',
-    'Không hút thuốc trong khu vực sân bóng.',
-  ],
-  Badminton: [
-    'Có mặt trước 10 phút để nhận sân.',
-    'Mang giày thể thao trong nhà (đế không trầy sàn).',
-    'Không ăn uống trên sân thi đấu.',
-    'Giữ gìn vệ sinh chung sau khi sử dụng.',
-  ],
-  Tennis: [
-    'Có mặt trước 15 phút để nhận sân.',
-    'Sử dụng giày tennis chuyên dụng.',
-    'Không mang đồ ăn ra khu vực sân.',
-    'Trả sân đúng giờ để không ảnh hưởng lịch tiếp theo.',
-  ],
-  Basketball: [
-    'Có mặt trước 10 phút để nhận sân.',
-    'Mang giày bóng rổ hoặc giày thể thao.',
-    'Không treo bám vào vành rổ.',
-    'Giữ gìn vệ sinh khu vực sân.',
-  ],
-  Pickleball: [
-    'Có mặt trước 10 phút để nhận sân.',
-    'Mang giày thể thao đế bằng.',
-    'Sử dụng bóng pickleball tiêu chuẩn.',
-    'Giữ gìn vệ sinh chung.',
-  ],
+/**
+ * Format date with day name
+ */
+const formatDateWithDay = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  return `${days[date.getDay()]}, ${formatDate(dateStr)}`;
 };
 
-// Status config
-const statusConfig = {
-  [BOOKING_ORDER_STATUS.CONFIRMED]: {
-    icon: 'check_circle',
-    label: 'Đã xác nhận đặt sân',
-    bannerClass: 'confirmed',
-  },
-  [BOOKING_ORDER_STATUS.COMPLETED]: {
-    icon: 'task_alt',
-    label: 'Đã hoàn thành',
-    bannerClass: 'completed',
-  },
-  [BOOKING_ORDER_STATUS.CANCELLED]: {
-    icon: 'cancel',
-    label: 'Đã hủy đặt sân',
-    bannerClass: 'cancelled',
-  },
-  [BOOKING_ORDER_STATUS.PENDING]: {
-    icon: 'hourglass_top',
-    label: 'Chờ xác nhận',
-    bannerClass: 'pending',
-  },
+/**
+ * Format ISO date to DD/MM/YYYY
+ */
+const formatOrderDate = (isoStr) => {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 };
+
+/**
+ * Calculate duration in minutes between two time strings
+ */
+const calcDuration = (start, end) => {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+};
+
+/**
+ * Get utility labels in Vietnamese
+ */
+const getUtilityLabels = (utilities) => {
+  if (!utilities || !Array.isArray(utilities)) return [];
+  return utilities.map((u) => UTILITY_LABELS[u] || u);
+};
+
+/**
+ * Get field rules by category
+ */
+const getFieldRules = (categoryName) => {
+  return FIELD_RULES_BY_CATEGORY[categoryName] || FIELD_RULES_BY_CATEGORY.Football;
+};
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 const BookingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   // Find booking and field from mockData
+  // TODO: Replace with API call - GET /api/bookings/:id
   const booking = useMemo(() => mockBookings.find((b) => b._id === id), [id]);
+  
+  // TODO: Replace with API call - GET /api/fields/:id
   const field = useMemo(() => {
     if (!booking) return null;
     return mockFields.find((f) => f._id === booking.fieldID) || null;
   }, [booking]);
-
-  // Format helpers
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const [y, m, d] = dateStr.split('-');
-    return `${d}/${m}/${y}`;
-  };
-
-  const formatDateWithDay = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    return `${days[date.getDay()]}, ${formatDate(dateStr)}`;
-  };
-
-  const formatOrderDate = (isoStr) => {
-    if (!isoStr) return '';
-    const d = new Date(isoStr);
-    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-  };
-
-  const calcDuration = (start, end) => {
-    if (!start || !end) return '';
-    const [sh, sm] = start.split(':').map(Number);
-    const [eh, em] = end.split(':').map(Number);
-    return (eh * 60 + em) - (sh * 60 + sm);
-  };
 
   // Not found
   if (!booking) {
@@ -134,16 +108,18 @@ const BookingDetailPage = () => {
     );
   }
 
-  const status = statusConfig[booking.status] || statusConfig[BOOKING_ORDER_STATUS.PENDING];
+  // Derived data
+  const status = BOOKING_STATUS_CONFIG[booking.status] || BOOKING_STATUS_CONFIG.Pending;
   const duration = calcDuration(booking.startTime, booking.endTime);
   const fieldTypeName = field?.fieldType?.typeName || '';
   const categoryName = field?.fieldType?.category?.categoryName || 'Football';
   const fieldAddress = field?.address || '';
   const managerPhone = field?.manager?.phone || '';
-  const amenities = (field?.utilities || []).map((u) => utilityMap[u] || u);
-  const rules = defaultRules[categoryName] || defaultRules.Football;
+  const amenities = getUtilityLabels(field?.utilities);
+  const rules = getFieldRules(categoryName);
 
   // Price breakdown
+  // TODO: Get price breakdown from API response
   const basePrice = field?.hourlyPrice || booking.totalPrice;
   const lightingFee = booking.startTime >= '18:00' ? 50000 : 0;
   const totalDisplay = booking.totalPrice;
@@ -152,14 +128,22 @@ const BookingDetailPage = () => {
     booking.status === BOOKING_ORDER_STATUS.CONFIRMED ||
     booking.status === BOOKING_ORDER_STATUS.PENDING;
 
+  // Handlers
+  // TODO: Implement API calls
   const handleCancelBooking = () => {
     if (window.confirm('Bạn có chắc chắn muốn hủy đặt sân này?')) {
+      // TODO: Call API - PUT /api/bookings/:id/cancel
       console.log('Cancel booking:', booking._id);
     }
   };
 
   const handleDownloadInvoice = () => {
+    // TODO: Call API - GET /api/bookings/:id/invoice
     console.log('Download invoice:', booking._id);
+  };
+
+  const handleOpenDirections = () => {
+    setIsMapModalOpen(true);
   };
 
   return (
@@ -228,7 +212,7 @@ const BookingDetailPage = () => {
                       </div>
                     </div>
                   )}
-                  <button className="bh-btn-directions">
+                  <button className="bh-btn-directions" onClick={handleOpenDirections}>
                     <span className="material-symbols-outlined">directions</span>
                     Chỉ đường ngay
                   </button>
@@ -358,6 +342,14 @@ const BookingDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Map Modal */}
+      <MapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        address={fieldAddress}
+        fieldName={booking.fieldName}
+      />
     </div>
   );
 };
