@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/TermsPage.css';
-import '../styles/TermsPage.css';
 
 const TermsPage = () => {
   const [activeSection, setActiveSection] = useState('general-terms');

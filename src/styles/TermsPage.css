@@ -8,8 +8,7 @@
 }
 
 .dark .terms-page {
-  /* Use global dark background so pages are consistent */
-  background-color: var(--bg-primary-dark);
+  background-color: var(--bg-primary-dark, #102210);
 }
 
 @media (min-width: 768px) {
@@ -84,7 +83,7 @@
 }
 
 .dark .terms-title {
-  color: white;
+  color: #00E536;
 }
 
 @media (min-width: 768px) {
@@ -156,9 +155,8 @@
 }
 
 .dark .terms-sidebar-sticky {
-  /* Use the site's dark surface variable for consistency */
-  background-color: var(--surface-dark);
-  border-color: #2a2e2a;
+  background-color: var(--surface-dark, #1a2e1a);
+  border-color: #2a3e2a;
 }
 
 .terms-sidebar-label {
@@ -253,9 +251,14 @@
   border: 1px solid rgb(229 231 235);
 }
 
+.dark .terms-section {
+  background-color: var(--surface-dark, #1a2e1a);
+  border-color: #2a3e2a;
+}
+
 .dark .terms-content {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
+  background-color: var(--surface-dark, #1a2e1a);
+  border-color: #2a3e2a;
 }
 
 @media (min-width: 640px) {
@@ -272,7 +275,7 @@
 }
 
 .dark .terms-header {
-  border-bottom-color: rgb(55 65 81);
+  border-bottom-color: #2a3e2a;
 }
 
 .terms-title {
@@ -283,7 +286,7 @@
 }
 
 .dark .terms-title {
-  color: white;
+  color: #00E536;
 }
 
 @media (min-width: 768px) {
@@ -315,7 +318,7 @@
 }
 
 .dark .terms-section-divider {
-  border-top-color: rgb(55 65 81);
+  border-top-color: #2a3e2a;
 }
 
 .terms-section-title {
@@ -329,12 +332,67 @@
 }
 
 .dark .terms-section-title {
-  color: white;
+  color: #e8fbe9;
 }
 
 .terms-section-icon {
   color: #00E536;
   font-size: 1.75rem;
+}
+
+/* Section Icon Wrappers */
+.terms-section-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.terms-section-icon-wrapper .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.terms-section-icon-wrapper.green {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.dark .terms-section-icon-wrapper.green {
+  background-color: rgba(22, 163, 74, 0.2);
+  color: #4ade80;
+}
+
+.terms-section-icon-wrapper.orange {
+  background-color: #ffedd5;
+  color: #ea580c;
+}
+
+.dark .terms-section-icon-wrapper.orange {
+  background-color: rgba(234, 88, 12, 0.2);
+  color: #fb923c;
+}
+
+.terms-section-icon-wrapper.purple {
+  background-color: #f3e8ff;
+  color: #9333ea;
+}
+
+.dark .terms-section-icon-wrapper.purple {
+  background-color: rgba(147, 51, 234, 0.2);
+  color: #c084fc;
+}
+
+.terms-section-icon-wrapper.teal {
+  background-color: #ccfbf1;
+  color: #0d9488;
+}
+
+.dark .terms-section-icon-wrapper.teal {
+  background-color: rgba(13, 148, 136, 0.2);
+  color: #2dd4bf;
 }
 
 .terms-subsection-title {
@@ -355,12 +413,33 @@
   font-size: 0.95rem;
 }
 
+.dark .terms-section-content {
+  color: rgb(180 195 180);
+}
+
+.terms-section-body {
+  color: rgb(55 65 81);
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+
 .dark .terms-section-body {
-  color: rgb(209 213 219);
+  color: rgb(180 195 180);
 }
 
 .terms-section-body p {
   margin-bottom: 1rem;
+}
+
+.terms-section-body ul,
+.terms-section-body ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.terms-section-body li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 /* Bullet List with green dots */
@@ -408,7 +487,7 @@
 }
 
 .dark .terms-info-box-title {
-  color: white;
+  color: #b8e6b8;
 }
 
 .terms-info-box p {
@@ -419,7 +498,7 @@
 }
 
 .dark .terms-info-box p {
-  color: rgb(209 213 219);
+  color: rgb(180 195 180);
 }
 
 /* Refund Cards (side by side) */
@@ -445,8 +524,8 @@
 }
 
 .dark .terms-refund-card {
-  background-color: var(--surface-dark);
-  border-color: #2a2e2a;
+  background-color: var(--surface-dark, #1a2e1a);
+  border-color: #2a3e2a;
 }
 
 .terms-refund-time {
@@ -587,4 +666,38 @@
 /* ===== Section Divider (unused but kept for compat) ===== */
 .terms-section-divider {
   display: none;
+}
+
+/* ===== Highlight Box ===== */
+.terms-highlight {
+  background-color: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.dark .terms-highlight {
+  background-color: rgba(0, 229, 54, 0.08);
+  border-color: #2a3e2a;
+}
+
+.terms-highlight-content {
+  color: rgb(55 65 81);
+  font-size: 0.925rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.dark .terms-highlight-content {
+  color: rgb(180 195 180);
+}
+
+.terms-contact-link {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.dark .terms-contact-link {
+  color: #00E536;
 }

@@ -17,6 +17,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Context & Hooks
 import { useApp } from '../../context/AppContext';
@@ -84,7 +85,17 @@ const FieldListPage = () => {
   // ==========================================
   
   /**
+   * i18n - Internationalization hook
+   */
+  const { t } = useTranslation();
+  
+  /**
    * AppContext - Global state và API functions
+   * 
+   * TODO: API Integration Points
+   * - searchFields: GET /api/fields?searchText=...&categoryName=...&district=...&priceMax=...&page=...&limit=...
+   * - globalData: GET /api/config (categories, districts, fieldTypes, priceRange)
+   * - getFieldTypesByCategory: GET /api/field-types?categoryId=...
    */
   const { 
     searchFields,           // Search function từ context
@@ -417,7 +428,7 @@ const FieldListPage = () => {
   const renderLoading = () => (
     <div className="loading-container">
       <div className="loading-spinner"></div>
-      <p>Đang tải danh sách sân...</p>
+      <p>{t('fieldList.loading')}</p>
     </div>
   );
 
@@ -427,10 +438,10 @@ const FieldListPage = () => {
   const renderError = () => (
     <div className="error-container">
       <span className="material-symbols-outlined error-icon">error</span>
-      <h3>Có lỗi xảy ra</h3>
+      <h3>{t('fieldList.errorTitle')}</h3>
       <p>{error}</p>
       <button onClick={fetchFields} className="retry-button">
-        Thử lại
+        {t('fieldList.retry')}
       </button>
     </div>
   );
@@ -441,10 +452,10 @@ const FieldListPage = () => {
   const renderEmpty = () => (
     <div className="empty-container">
       <span className="material-symbols-outlined empty-icon">search_off</span>
-      <h3>Không tìm thấy sân phù hợp</h3>
-      <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+      <h3>{t('fieldList.emptyTitle')}</h3>
+      <p>{t('fieldList.emptyDescription')}</p>
       <button onClick={handleReset} className="reset-filters-button">
-        Đặt lại bộ lọc
+        {t('fieldList.resetFilters')}
       </button>
     </div>
   );
@@ -457,8 +468,8 @@ const FieldListPage = () => {
     <div className="field-list-page">
       {/* Page Title - full width, above sidebar+content */}
       <div className="field-list-page-header">
-        <h1 className="page-title" >Danh sách sân thể thao</h1>
-        <p className="page-subtitle">Tìm và đặt sân thể thao phù hợp với bạn</p>
+        <h1 className="page-title" >{t('fieldList.pageTitle')}</h1>
+        <p className="page-subtitle">{t('fieldList.pageSubtitle')}</p>
       </div>
 
       <div className="field-list-container">
@@ -471,7 +482,7 @@ const FieldListPage = () => {
           >
             <span className="toggle-label">
               <span className="material-symbols-outlined">filter_list</span>
-              Bộ lọc
+              {t('fieldList.filters')}
             </span>
             <span className="material-symbols-outlined">expand_more</span>
           </div>
@@ -481,14 +492,14 @@ const FieldListPage = () => {
             <div className="sidebar-header">
               <h3 className="sidebar-title">
                 <span className="material-symbols-outlined">tune</span>
-                Bộ lọc tìm kiếm
+                {t('fieldList.filterSearch')}
               </h3>
-              <button onClick={handleReset} className="reset-button">Đặt lại</button>
+              <button onClick={handleReset} className="reset-button">{t('fieldList.reset')}</button>
             </div>
 
             {/* Search Input trong Bộ lọc */}
             <div className="filter-group search-filter-group">
-              <p className="filter-label">Tìm kiếm</p>
+              <p className="filter-label">{t('fieldList.searchLabel')}</p>
               <div className="search-box">
                 <div className="search-input-container">
                   <input
@@ -496,7 +507,7 @@ const FieldListPage = () => {
                     value={searchInputText}
                     onChange={(e) => setSearchInputText(e.target.value)}
                     onKeyPress={handleSearchKeyPress}
-                    placeholder="Tên sân, địa chỉ..."
+                    placeholder={t('fieldList.searchPlaceholder')}
                     className="search-input"
                   />
                   {searchInputText && (
@@ -522,7 +533,7 @@ const FieldListPage = () => {
 
             {/* Sport Type Filter */}
             <div className="filter-group">
-              <p className="filter-label">Môn thể thao</p>
+              <p className="filter-label">{t('fieldList.sportType')}</p>
               <div className="sport-chips">
                 {facets.categories.map(({ name, count }) => (
                   <label key={name} className="chip-label">
@@ -543,7 +554,7 @@ const FieldListPage = () => {
             {/* Field Type Filter - Only for Football */}
             {filters.categoryName === 'Football' && footballFieldTypes.length > 0 && (
               <div className="filter-group">
-                <p className="filter-label">Loại sân</p>
+                <p className="filter-label">{t('fieldList.fieldType')}</p>
                 <div className="sport-chips">
                   {footballFieldTypes.map((fieldType) => (
                     <label key={fieldType._id || fieldType.typeName} className="chip-label">
@@ -564,14 +575,14 @@ const FieldListPage = () => {
 
             {/* Location Filter */}
             <div className="filter-group">
-              <p className="filter-label">Quận/Huyện</p>
+              <p className="filter-label">{t('fieldList.district')}</p>
               <div className="select-wrapper">
                 <select
                   value={filters.district}
                   onChange={(e) => handleFilterChange('district', e.target.value)}
                   className="filter-select"
                 >
-                  <option value="">Tất cả Quận/Huyện</option>
+                  <option value="">{t('fieldList.allDistricts')}</option>
                   {globalData.districts.map(district => (
                     <option key={district} value={district}>
                       {district}
@@ -587,7 +598,7 @@ const FieldListPage = () => {
 
             {/* Date & Time Filter */}
             <div className="filter-group">
-              <p className="filter-label">Thời gian</p>
+              <p className="filter-label">{t('fieldList.time')}</p>
               <div className="time-inputs">
                 <input
                   type="date"
@@ -616,7 +627,7 @@ const FieldListPage = () => {
 
             {/* Price Filter - Đơn giản hóa: chỉ nhập giá tối đa */}
             <div className="filter-group">
-              <p className="filter-label">Giá tối đa</p>
+              <p className="filter-label">{t('fieldList.maxPrice')}</p>
               <div className="price-filter-simple">
                 <div className="price-input-wrapper">
                   <span className="price-currency">₫</span>
@@ -627,11 +638,14 @@ const FieldListPage = () => {
                     onBlur={handlePriceInputBlur}
                     onKeyPress={handlePriceKeyPress}
                     className="price-input-field"
-                    placeholder="Nhập giá tối đa..."
+                    placeholder={t('fieldList.maxPrice')}
                   />
                 </div>
                 <p className="price-hint">
-                  Hiển thị sân có giá từ <strong>0đ</strong> đến <strong>{filters.priceMax.toLocaleString('vi-VN')}đ</strong>
+                  {t('fieldList.priceHint', { 
+                    min: '0đ', 
+                    max: `${filters.priceMax.toLocaleString('vi-VN')}đ` 
+                  })}
                 </p>
               </div>
             </div>
@@ -653,14 +667,14 @@ const FieldListPage = () => {
                   value={searchInputText}
                   onChange={(e) => setSearchInputText(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
-                  placeholder="Tìm kiếm theo tên sân, địa chỉ..."
+                  placeholder={t('fieldList.searchPlaceholder')}
                   className="search-input"
                 />
                 {searchInputText && (
                   <button 
                     className="clear-search-btn"
                     onClick={clearSearch}
-                    aria-label="Xóa tìm kiếm"
+                    aria-label={t('common.close')}
                     type="button"
                   >
                     <span className="material-symbols-outlined">close</span>
@@ -673,7 +687,7 @@ const FieldListPage = () => {
                 type="button"
               >
                 <span className="material-symbols-outlined">search</span>
-                Tìm
+                {t('common.search')}
               </button>
             </div>
           </div>
@@ -683,14 +697,14 @@ const FieldListPage = () => {
             <div className="results-meta">
               <p className="results-count">
                 {loading ? (
-                  'Đang tải...'
+                  t('fieldList.resultsLoading')
                 ) : filters.searchText ? (
                   <>
-                    Tìm thấy <strong>{pagination.total}</strong> sân cho từ khóa{' '}
+                    {t('fieldList.resultsFoundWithKeyword', { count: pagination.total })}{' '}
                     <strong className="search-keyword">"{filters.searchText}"</strong>
                   </>
                 ) : (
-                  <>Tìm thấy <strong>{pagination.total}</strong> sân</>
+                  t('fieldList.resultsFound', { count: pagination.total })
                 )}
               </p>
               <div className="view-toggle">
@@ -712,10 +726,10 @@ const FieldListPage = () => {
                 value={filters.sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
               >
-                <option value="newest">Mới nhất</option>
-                <option value="name">Tên A-Z</option>
-                <option value="price-asc">Giá thấp nhất</option>
-                <option value="price-desc">Giá cao nhất</option>
+                <option value="newest">{t('fieldList.sortNewest')}</option>
+                <option value="name">{t('fieldList.sortNameAZ')}</option>
+                <option value="price-asc">{t('fieldList.sortPriceAsc')}</option>
+                <option value="price-desc">{t('fieldList.sortPriceDesc')}</option>
               </select>
             </div>
           </div>
@@ -740,58 +754,82 @@ const FieldListPage = () => {
                       backgroundImage: `url(${field.image && field.image[0] ? field.image[0] : 'https://via.placeholder.com/400x300?text=No+Image'})`
                     }}
                   >
-                    <div className="field-badges">
-                      {field.status === 'Available' && (
-                        <span className="badge badge-verified">
-                          <span className="material-symbols-outlined">verified</span>
-                          Có sẵn
-                        </span>
-                      )}
-                      {field.manager?.verified && (
-                        <span className="badge badge-quick">
-                          <span className="material-symbols-outlined">bolt</span>
-                          Chủ sân xác thực
-                        </span>
-                      )}
-                    </div>
+                    {/* Category Badge - góc trên trái */}
+                    {/* <div className="field-category-badge">
+                      <span className="category-icon material-symbols-outlined">
+                        {field.fieldType?.category?.categoryName === 'Football' ? 'sports_soccer' :
+                         field.fieldType?.category?.categoryName === 'Tennis' ? 'sports_tennis' :
+                         field.fieldType?.category?.categoryName === 'Badminton' ? 'sports_tennis' :
+                         field.fieldType?.category?.categoryName === 'Basketball' ? 'sports_basketball' :
+                         field.fieldType?.category?.categoryName === 'Volleyball' ? 'sports_volleyball' : 'sports'}
+                      </span>
+                      <span>{field.fieldType?.category?.categoryName || 'Sports'}</span>
+                    </div> */}
+                    
+                    {/* Status Badge - góc trên phải */}
+                    {field.status === 'Available' && (
+                      <div className="field-status-badge available">
+                        <span className="status-dot"></span>
+                        {t('fieldList.badgeAvailable')}
+                      </div>
+                    )}
+                    {field.status === 'Maintenance' && (
+                      <div className="field-status-badge maintenance">
+                        <span className="status-dot"></span>
+                        {t('fieldList.badgeMaintenance')}
+                      </div>
+                    )}
                   </div>
+                  
                   <div className="field-content">
+                    {/* Header: Name + Rating */}
                     <div className="field-header">
-                      <h3 className="field-name">{field.fieldName}</h3>
-                      <div className="field-rating">
+                      <h3 className="field-name" title={field.fieldName}>{field.fieldName}</h3>
+                      <div className={`field-rating ${field.averageRating > 0 ? '' : 'no-rating'}`}>
                         <span className="material-symbols-outlined rating-star">star</span>
                         <span className="rating-value">
-                          {field.averageRating ? field.averageRating.toFixed(1) : '5.0'}
+                          {field.averageRating > 0 ? field.averageRating.toFixed(1) : t('field.new')}
                         </span>
                       </div>
                     </div>
+                    
+                    {/* Address */}
                     <div className="field-location">
                       <span className="material-symbols-outlined">location_on</span>
-                      <span>{field.address}</span>
+                      <span className="location-text" title={field.address}>{field.address}</span>
                     </div>
-                    <div className="field-type-info">
-                      <span className="type-badge">
+                    
+                    {/* Field Type */}
+                    <div className="field-type-row">
+                      <span className="category-tag">
                         {field.fieldType?.category?.categoryName || 'Sports'}
                       </span>
-                      <span className="type-detail">
-                        {field.fieldType?.typeName || ''}
-                      </span>
-                    </div>
-                    <div className="field-amenities">
-                      {field.utilities?.slice(0, 4).map(utility => (
-                        <span key={utility} className="amenity-tag">{utility}</span>
-                      ))}
-                      {field.utilities && field.utilities.length > 4 && (
-                        <span className="amenity-tag more">+{field.utilities.length - 4}</span>
+                      {field.fieldType?.typeName && (
+                        <span className="type-separator">•</span>
+                      )}
+                      {field.fieldType?.typeName && (
+                        <span className="type-name">{field.fieldType.typeName}</span>
                       )}
                     </div>
+                    
+                    {/* Amenities - 1 dòng */}
+                    <div className="field-amenities">
+                      {field.utilities?.slice(0, 3).map(utility => (
+                        <span key={utility} className="amenity-tag">{utility}</span>
+                      ))}
+                      {field.utilities && field.utilities.length > 3 && (
+                        <span className="amenity-tag more">+{field.utilities.length - 3}</span>
+                      )}
+                    </div>
+                    
+                    {/* Footer: Price + Book Button */}
                     <div className="field-footer">
                       <div className="field-price">
                         <span className="price-amount">{field.hourlyPrice.toLocaleString()}đ</span>
-                        <span className="price-unit">/giờ</span>
+                        <span className="price-unit">{t('fieldList.perHour')}</span>
                       </div>
                       <button className="book-button">
-                        Đặt ngay
+                        {t('field.bookNow')}
                         <span className="material-symbols-outlined">arrow_forward</span>
                       </button>
                     </div>

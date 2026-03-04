@@ -2315,6 +2315,99 @@ export const ALL_UTILITIES = [
 ];
 
 /**
+ * Utility English → Vietnamese mapping for display
+ * @type {Object<string, string>}
+ */
+export const UTILITY_LABELS = {
+  'Wifi': 'Wifi miễn phí',
+  'Parking': 'Gửi xe miễn phí',
+  'Shower': 'Phòng tắm sạch sẽ',
+  'Changing Room': 'Phòng thay đồ',
+  'Water': 'Nước suối miễn phí (2 chai)',
+  'First Aid': 'Dụng cụ y tế sơ cứu',
+  'Equipment Rental': 'Cho thuê dụng cụ thể thao',
+  'Coaching': 'Huấn luyện viên hỗ trợ',
+  'Cafe': 'Quán cà phê khu vực sân',
+  'Air Conditioning': 'Điều hòa không khí',
+  'Snack Bar': 'Căn tin phục vụ đồ ăn nhẹ',
+  'Scoreboard': 'Bảng điểm điện tử',
+};
+
+/**
+ * Default field rules per sport category
+ * @type {Object<string, string[]>}
+ */
+export const FIELD_RULES_BY_CATEGORY = {
+  Football: [
+    'Có mặt trước 15 phút để làm thủ tục nhận sân.',
+    'Sử dụng giày chuyên dụng cho cỏ nhân tạo.',
+    'Không mang chất dễ cháy nổ vào khu vực sân.',
+    'Không hút thuốc trong khu vực sân bóng.',
+  ],
+  Badminton: [
+    'Có mặt trước 10 phút để nhận sân.',
+    'Mang giày thể thao trong nhà (đế không trầy sàn).',
+    'Không ăn uống trên sân thi đấu.',
+    'Giữ gìn vệ sinh chung sau khi sử dụng.',
+  ],
+  Tennis: [
+    'Có mặt trước 15 phút để nhận sân.',
+    'Sử dụng giày tennis chuyên dụng.',
+    'Không mang đồ ăn ra khu vực sân.',
+    'Trả sân đúng giờ để không ảnh hưởng lịch tiếp theo.',
+  ],
+  Basketball: [
+    'Có mặt trước 10 phút để nhận sân.',
+    'Mang giày bóng rổ hoặc giày thể thao.',
+    'Không treo bám vào vành rổ.',
+    'Giữ gìn vệ sinh khu vực sân.',
+  ],
+  Volleyball: [
+    'Có mặt trước 10 phút để nhận sân.',
+    'Mang giày thể thao đế bằng.',
+    'Không chạm vào lưới khi đang thi đấu.',
+    'Giữ gìn vệ sinh chung.',
+  ],
+  Pickleball: [
+    'Có mặt trước 10 phút để nhận sân.',
+    'Mang giày thể thao đế bằng.',
+    'Sử dụng bóng pickleball tiêu chuẩn.',
+    'Giữ gìn vệ sinh chung.',
+  ],
+};
+
+/**
+ * Booking status display config (icon, label, CSS class)
+ * @type {Object}
+ */
+export const BOOKING_STATUS_CONFIG = {
+  Pending: {
+    icon: 'hourglass_top',
+    label: 'Chờ xác nhận',
+    bannerClass: 'pending',
+    badgeClass: 'status-pending',
+  },
+  Confirmed: {
+    icon: 'check_circle',
+    label: 'Đã xác nhận',
+    bannerClass: 'confirmed',
+    badgeClass: 'status-confirmed',
+  },
+  Completed: {
+    icon: 'task_alt',
+    label: 'Đã hoàn thành',
+    bannerClass: 'completed',
+    badgeClass: 'status-completed',
+  },
+  Cancelled: {
+    icon: 'cancel',
+    label: 'Đã hủy',
+    bannerClass: 'cancelled',
+    badgeClass: 'status-cancelled',
+  },
+};
+
+/**
  * All districts in Hà Nội where fields are located
  * @type {string[]}
  */

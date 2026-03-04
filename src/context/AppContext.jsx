@@ -24,6 +24,7 @@ import {
   mockFields,
   mockCategories,
   mockFieldTypes,
+  fieldRatings,
   ALL_DISTRICTS,
   PRICE_RANGE
 } from '../data/mockData';
@@ -379,6 +380,14 @@ export const AppProvider = ({ children }) => {
       const endIndex = startIndex + limit;
       const paginatedFields = fields.slice(startIndex, endIndex);
 
+      // Inject averageRating và totalReviews vào mỗi field từ fieldRatings
+      // TODO: API sẽ trả về trực tiếp averageRating trong response
+      const fieldsWithRatings = paginatedFields.map(field => ({
+        ...field,
+        averageRating: fieldRatings[field._id]?.averageRating || 0,
+        totalReviews: fieldRatings[field._id]?.totalReviews || 0
+      }));
+
       // Tạo facets từ toàn bộ fields (trước khi paginate) để hiển thị filter options
       // Categories facet - đếm số lượng sân theo từng category
       const categoryCount = {};
@@ -409,7 +418,7 @@ export const AppProvider = ({ children }) => {
       const result = {
         success: true,
         data: {
-          fields: paginatedFields,
+          fields: fieldsWithRatings,
           pagination: {
             page,
             limit,

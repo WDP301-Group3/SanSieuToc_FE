@@ -5,6 +5,7 @@ import AdminLayout from './components/layout/AdminLayout';
 // Pages
 import HomePage from './pages/Home/HomePage';
 import AuthPage from './pages/Auth/AuthPage'; // Unified Auth Interface
+import AboutPage from './pages/AboutPage';
 import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -13,7 +14,7 @@ import FieldListPage from './pages/Field/FieldListPage';
 import FieldDetailPage from './pages/Field/FieldDetailPage';
 
 // Customer Pages
-import UserDashboardPage from './pages/Customer/UserDashboardPage';
+import UserProfilePage from './pages/Customer/UserProfilePage';
 import BookingDetailPage from './pages/Customer/BookingDetailPage';
 
 // Admin Pages
@@ -33,6 +34,7 @@ function App() {
         {/* Public Routes with MainLayout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<TermsPage />} />
           
           {/* Auth Routes (inside MainLayout with Header/Footer) */}
@@ -44,10 +46,10 @@ function App() {
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<UserDashboardPage />} />
-          <Route path="/booking-history" element={<UserDashboardPage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/booking-history" element={<UserProfilePage />} />
           <Route path="/booking-history/:id" element={<BookingDetailPage />} />
-          <Route path="/settings" element={<UserDashboardPage />} />
+          <Route path="/settings" element={<UserProfilePage />} />
         </Route>
 
         {/* Admin Routes with AdminLayout */}
