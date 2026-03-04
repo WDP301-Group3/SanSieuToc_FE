@@ -9,18 +9,8 @@
   max-height: 900px;
 }
 
-/* Background Carousel - 5 hình ảnh môn thể thao luân chuyển */
-.hero-background-carousel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  transition: background-image 1.5s ease-in-out;
-  z-index: 1;
-}
+/* Background Carousel - Không dùng nữa, đã chuyển sang opacity fade trong JSX */
+/* .hero-background-carousel { ... } */
 
 /* Blur Overlay - Không sử dụng */
 /* .hero-blur-overlay {

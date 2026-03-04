@@ -11,52 +11,34 @@ const AboutPage = () => {
   // Team members data
   const teamMembers = [
     {
-      name: 'Nguyễn Văn A',
+      name: 'Nguyễn Viết Sang',
       role: 'Founder & CEO',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face',
       description: 'Với hơn 10 năm kinh nghiệm trong lĩnh vực thể thao và công nghệ.',
     },
     {
-      name: 'Trần Thị B',
+      name: 'Phan Duy Thành',
       role: 'Co-Founder & CTO',
       image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face',
       description: 'Chuyên gia công nghệ với đam mê xây dựng sản phẩm số.',
     },
     {
-      name: 'Lê Văn C',
+      name: 'Hoàng Tuấn Long',
       role: 'Head of Operations',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
       description: 'Đảm bảo vận hành mượt mà cho hệ thống toàn quốc.',
     },
     {
-      name: 'Phạm Thị D',
+      name: 'Phạm Quốc Minh',
       role: 'Customer Success Manager',
       image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
       description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
     },
-  ];
-
-  // Core values
-  const coreValues = [
     {
-      icon: 'speed',
-      title: 'Nhanh chóng',
-      description: 'Đặt sân chỉ trong 30 giây với hệ thống tối ưu.',
-    },
-    {
-      icon: 'verified',
-      title: 'Uy tín',
-      description: 'Đảm bảo chất lượng sân và dịch vụ cam kết.',
-    },
-    {
-      icon: 'support_agent',
-      title: 'Hỗ trợ 24/7',
-      description: 'Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc.',
-    },
-    {
-      icon: 'diversity_3',
-      title: 'Cộng đồng',
-      description: 'Kết nối hàng nghìn người yêu thể thao trên toàn quốc.',
+      name: 'Phạm Đức Minh',
+      role: 'Customer Success Manager',
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
+      description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
     },
   ];
 
@@ -87,7 +69,7 @@ const AboutPage = () => {
 
       {/* Mission Section */}
       <section className="about-section">
-        <div className="about-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="about-mission-grid">
             <div className="about-mission-content">
               <span className="about-section-label">{t('about.ourMission', 'Sứ mệnh của chúng tôi')}</span>
@@ -103,7 +85,7 @@ const AboutPage = () => {
             </div>
             <div className="about-mission-image">
               <img
-                src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop"
+                src="/assets/images/football.jpg"
                 alt="Sports field"
               />
             </div>
@@ -111,32 +93,61 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Core Values Section */}
+      {/* Why Choose Us Section */}
       <section className="about-section about-section-alt">
-        <div className="about-container">
-          <div className="about-section-header">
-            <span className="about-section-label">{t('about.coreValues', 'Giá trị cốt lõi')}</span>
-            <h2 className="about-section-title">
-              {t('about.whyChooseUs', 'Tại sao chọn Sân Siêu Tốc?')}
-            </h2>
-          </div>
-          <div className="about-values-grid">
-            {coreValues.map((value, index) => (
-              <div key={index} className="about-value-card">
-                <div className="about-value-icon">
-                  <span className="material-symbols-outlined">{value.icon}</span>
-                </div>
-                <h3 className="about-value-title">{value.title}</h3>
-                <p className="about-value-desc">{value.description}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left - Image */}
+            <div className="relative rounded-3xl overflow-hidden shadow-xl">
+              <img
+                src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=700&h=500&fit=crop"
+                alt="Why Choose Us"
+                className="w-full h-full object-cover"
+                style={{ minHeight: '420px' }}
+              />
+              <div className="absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(135deg, rgba(0,229,54,0.08) 0%, transparent 60%)' }} />
+            </div>
+
+            {/* Right - Content */}
+            <div>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4" style={{ color: '#00c42e' }}>
+                {t('about.whyChooseUs')}
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 text-base mb-10 leading-relaxed">
+                {t('about.whyChooseDesc')}
+              </p>
+
+              {/* Feature list */}
+              <div className="flex flex-col gap-7">
+                {[
+                  { icon: 'timer', title: t('about.feature1Title'), desc: t('about.feature1Desc') },
+                  { icon: 'verified', title: t('about.feature2Title'), desc: t('about.feature2Desc') },
+                  { icon: 'touch_app', title: t('about.feature3Title'), desc: t('about.feature3Desc') },
+                  { icon: 'support_agent', title: t('about.feature4Title'), desc: t('about.feature4Desc') },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    {/* Icon tròn */}
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,229,54,0.12)' }}>
+                      <span className="material-symbols-outlined text-xl" style={{ color: '#00c42e' }}>{item.icon}</span>
+                    </div>
+                    {/* Text */}
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{item.title}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
       <section className="about-stats-section">
-        <div className="about-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="about-stats-grid">
             <div className="about-stat">
               <span className="about-stat-number">500+</span>
@@ -160,7 +171,7 @@ const AboutPage = () => {
 
       {/* Timeline Section */}
       <section className="about-section">
-        <div className="about-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="about-section-header">
             <span className="about-section-label">{t('about.ourJourney', 'Hành trình của chúng tôi')}</span>
             <h2 className="about-section-title">
@@ -183,7 +194,7 @@ const AboutPage = () => {
 
       {/* Team Section */}
       <section className="about-section about-section-alt">
-        <div className="about-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="about-section-header">
             <span className="about-section-label">{t('about.ourTeam', 'Đội ngũ của chúng tôi')}</span>
             <h2 className="about-section-title">
@@ -209,7 +220,7 @@ const AboutPage = () => {
 
       {/* CTA Section */}
       <section className="about-cta-section">
-        <div className="about-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="about-cta-content">
             <h2 className="about-cta-title">
               {t('about.ctaTitle', 'Sẵn sàng trải nghiệm?')}

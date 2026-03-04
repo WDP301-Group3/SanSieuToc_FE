@@ -69,11 +69,6 @@
   background: #14532d;
 }
 
-.about-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
 
 .about-section-header {
   text-align: center;
@@ -309,8 +304,8 @@
    ============================================ */
 .about-team-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
 }
 
 .about-team-card {
@@ -453,9 +448,12 @@
    RESPONSIVE STYLES
    ============================================ */
 @media (max-width: 1024px) {
-  .about-values-grid,
-  .about-team-grid {
+  .about-values-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-team-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .about-stats-grid {
@@ -495,11 +493,15 @@
     order: 1;
   }
 
-  .about-values-grid,
-  .about-team-grid {
+  .about-values-grid {
     grid-template-columns: 1fr;
     max-width: 400px;
     margin: 0 auto;
+  }
+
+  .about-team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
   }
 
   .about-stats-grid {

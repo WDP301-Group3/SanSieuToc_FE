@@ -66,16 +66,17 @@ const Header = () => {
             </Link>
             <Link
               className="header-nav-link"
-              to="/fields"
-            >
-              {t('nav.fields')}
-            </Link>
-            <Link
-              className="header-nav-link"
               to="/about"
             >
               {t('nav.about')}
             </Link>
+            <Link
+              className="header-nav-link"
+              to="/fields"
+            >
+              {t('nav.fields')}
+            </Link>
+            
             <Link
               className="header-nav-link"
               to="/terms"

@@ -28,6 +28,9 @@ import { useDebounce, useClickOutside } from '../../hooks/useAppHooks';
 // Mock Data - TODO: Replace with API calls
 import { mockCategories, mockFields, fieldRatings } from '../../data/mockData';
 
+// Assets
+import logoImg from '../../assets/images/logo.png';
+
 // Styles
 import '../../styles/HomePage.css';
 
@@ -66,7 +69,7 @@ const HomePage = () => {
    * Search form state
    */
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchDate, setSearchDate] = useState('');
+  const [searchDate] = useState('');
   
   /**
    * Preview dropdown state
@@ -83,6 +86,19 @@ const HomePage = () => {
    * Featured fields filter state
    */
   const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  /**
+   * Background carousel state - 5 hình ảnh môn thể thao
+   * Ảnh bóng đá (football) là ảnh đầu tiên
+   */
+  const backgroundImages = [
+    '/assets/images/football.jpg',
+    '/assets/images/badminton.jpg',
+    '/assets/images/basketball.jpg',
+    '/assets/images/tennis.jpg',
+    '/assets/images/volleyball.jpg',
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   /**
    * Loading state từ context
@@ -162,6 +178,17 @@ const HomePage = () => {
   // ==========================================
   // EFFECTS
   // ==========================================
+  
+  /**
+   * Effect: Background carousel - Đổi ảnh mỗi 5 giây
+   */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
   
   /**
    * Effect: Fetch preview results khi debounced query thay đổi
@@ -345,30 +372,42 @@ const HomePage = () => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-green-50 to-green-100 dark:from-[#052e16] dark:to-[#14532d] overflow-hidden">
-        {/* Background SVG */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 dark:opacity-5">
-          <svg
-            className="absolute w-full h-full text-[#00E536] fill-current"
-            preserveAspectRatio="none"
-            viewBox="0 0 100 100"
-          >
-            <path d="M0 100 C 20 0 50 0 100 100 Z" />
-          </svg>
-        </div>
+      <div className="relative overflow-hidden" style={{ height: '90vh', minHeight: '600px', maxHeight: '860px' }}>
+        {/* Background Carousel - Render tất cả ảnh, dùng opacity để fade mượt */}
+        {backgroundImages.map((img, index) => (
+          <div
+            key={img}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${img})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: index === currentImageIndex ? 1 : 0,
+              transition: 'opacity 1.2s ease-in-out',
+              zIndex: 1,
+            }}
+          />
+        ))}
+        
+        {/* Gradient overlay nhẹ phía dưới để text dễ đọc */}
+        <div className="absolute bottom-0 left-0 w-full h-2/3 z-[2]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 70%, transparent 100%)' }} />
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl font-display font-extrabold text-gray-900 dark:text-white mb-6">
-            {t('home.heroTitle')}{' '}
-            <span className="text-[#00E536] logo-text-shadow">{t('home.heroHighlight')}</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl">
-            {t('home.heroSubtitle')}
-          </p>
+        {/* Hero Content - Chữ và search ở phía dưới */}
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 max-w-4xl">
+            <h1 className="text-4xl md:text-6xl font-display font-extrabold text-white mb-4" style={{ textShadow: '0 2px 12px rgba(0, 0, 0, 0.5)' }}>
+              {t('home.heroTitle')}{' '}
+              <span className="text-[#00E536] logo-text-shadow">{t('home.heroHighlight')}</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white max-w-2xl mx-auto" style={{ textShadow: '0 1px 6px rgba(0, 0, 0, 0.4)' }}>
+              {t('home.heroSubtitle')}
+            </p>
+          </div>
 
           {/* Search Bar with Preview */}
-          <div className="w-full max-w-4xl relative" ref={searchWrapperRef}>
+          <div className="w-full max-w-3xl relative" ref={searchWrapperRef}>
             <div 
               ref={searchContainerRef}
               className="bg-white dark:bg-[#14532d] rounded-2xl shadow-xl p-3 flex flex-col md:flex-row gap-3 transform transition-all hover:scale-[1.01]"
@@ -422,6 +461,80 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Our Story Section */}
+      <section className="py-20 bg-white dark:bg-[#14532d]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Left - Text content */}
+            <div>
+              {/* Badge */}
+              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold text-[#00E536] bg-[#00E536]/10 mb-6 tracking-wide uppercase">
+                {t('home.ourStoryBadge')}
+              </span>
+
+              {/* Title */}
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+                {t('home.ourStoryTitle')}{' '}
+                <span className="text-[#00E536]">{t('home.ourStoryHighlight')}</span>
+              </h2>
+
+              {/* Paragraphs */}
+              <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed mb-4">
+                {t('home.ourStoryP1')}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed mb-4"
+                dangerouslySetInnerHTML={{ __html: t('home.ourStoryP2') }}
+              />
+              <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed mb-10"
+                dangerouslySetInnerHTML={{ __html: t('home.ourStoryP3') }}
+              />
+
+              {/* Stats */}
+              <div className="flex items-center gap-8 pt-6 border-t border-gray-200 dark:border-green-700">
+                {[
+                  { value: t('home.ourStoryStat1Value'), label: t('home.ourStoryStat1Label') },
+                  { value: t('home.ourStoryStat2Value'), label: t('home.ourStoryStat2Label') },
+                  { value: t('home.ourStoryStat3Value'), label: t('home.ourStoryStat3Label') },
+                ].map((stat, i) => (
+                  <div key={i} className={`${i < 2 ? 'pr-8 border-r border-gray-200 dark:border-green-700' : ''}`}>
+                    <div className="text-2xl font-black text-[#00E536]">{stat.value}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right - Image */}
+            <div className="relative">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-gradient-to-br from-green-50 to-emerald-100 dark:from-[#052e16] dark:to-[#14532d] flex items-center justify-center">
+                <img
+                  src={logoImg}
+                  alt="Sân Siêu Tốc"
+                  className="w-2/3 h-2/3 object-contain drop-shadow-2xl"
+                />
+                {/* Decorative blobs */}
+                <div className="absolute top-6 right-6 w-20 h-20 rounded-full bg-[#00E536]/10" />
+                <div className="absolute bottom-8 left-8 w-14 h-14 rounded-full bg-[#00E536]/15" />
+              </div>
+              {/* Floating badge */}
+              <div className="absolute -bottom-5 -left-5 bg-white dark:bg-[#052e16] rounded-2xl shadow-xl px-6 py-4 flex items-center gap-3 border border-gray-100 dark:border-green-800">
+                <div className="w-10 h-10 rounded-full bg-[#00E536]/10 flex items-center justify-center">
+                  <span className="material-icons-outlined text-[#00E536]">emoji_events</span>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">#1 Sports Booking</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Vietnam 2024</div>
+                </div>
+              </div>
+              {/* Decorative circle */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full border-4 border-[#00E536]/20 dark:border-[#00E536]/10" />
+            </div>
+
+          </div>
+        </div>
+      </section>
 
       {/* Featured Fields Section */}
       <section className="py-20 bg-gray-50 dark:bg-[#052e16]">
@@ -507,71 +620,118 @@ const HomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-white dark:bg-[#14532d]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+      <section className="relative py-24 overflow-hidden bg-white dark:bg-[#052e16]">
+        {/* Background decoration */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 w-72 h-72 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #00E536 0%, transparent 70%)', transform: 'translate(-50%, -50%)' }} />
+          <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #00E536 0%, transparent 70%)', transform: 'translate(40%, 40%)' }} />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold text-[#00E536] bg-[#00E536]/10 mb-4 tracking-wide uppercase">
               {t('home.howItWorks')}
+            </span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+              {t('home.howItWorksTitle')}
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-lg">
               {t('home.howItWorksDesc')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {[
               {
+                step: '01',
                 icon: 'search',
+                image: '/assets/images/football.jpg',
                 title: t('home.step1Title'),
                 description: t('home.step1Desc'),
+                color: 'from-green-400 to-emerald-500',
               },
               {
+                step: '02',
                 icon: 'event_available',
+                image: '/assets/images/badminton.jpg',
                 title: t('home.step2Title'),
                 description: t('home.step2Desc'),
+                color: 'from-emerald-400 to-teal-500',
               },
               {
+                step: '03',
                 icon: 'sports_soccer',
+                image: '/assets/images/tennis.jpg',
                 title: t('home.step3Title'),
                 description: t('home.step3Desc'),
+                color: 'from-teal-400 to-green-500',
               },
             ].map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#00E536]/10 text-[#00E536] mb-4">
-                  <span className="material-icons-outlined text-3xl">{step.icon}</span>
+              <div key={index} className="relative group flex flex-col items-center text-center">
+                {/* Mũi tên kết nối giữa các bước (desktop) */}
+                {index < 2 && (
+                  <div className="hidden md:flex absolute top-14 -right-6 z-20 items-center justify-center">
+                    <span className="material-icons-outlined text-[#00E536] text-3xl">arrow_forward</span>
+                  </div>
+                )}
+
+                {/* Card */}
+                <div className="relative w-full bg-white dark:bg-[#14532d] rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 overflow-hidden">
+                  {/* Ảnh minh họa */}
+                  <div className="relative h-44 overflow-hidden">
+                    <img
+                      src={step.image}
+                      alt={step.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    {/* Gradient overlay trên ảnh */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-60`} />
+
+                    {/* Số bước nổi bật */}
+                    <div className="absolute top-3 left-3 w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                      <span className="text-white font-black text-sm">{step.step}</span>
+                    </div>
+
+                    {/* Icon ở giữa ảnh */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/40 group-hover:scale-110 transition-transform duration-300">
+                        <span className="material-icons-outlined text-white text-3xl">{step.icon}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-[#00E536] transition-colors duration-200">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                  </div>
+
+                  {/* Bottom accent bar */}
+                  <div className={`h-1 w-0 group-hover:w-full bg-gradient-to-r ${step.color} transition-all duration-500`} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center mt-14">
+            <Link
+              to="/fields"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'linear-gradient(135deg, #00E536, #00c42e)' }}
+            >
+              <span className="material-icons-outlined">rocket_launch</span>
+              {t('home.bookNow')}
+              <span className="material-icons-outlined">arrow_forward</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-white dark:bg-[#14532d]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { number: '500+', label: t('home.stats.fields') },
-              { number: '10,000+', label: t('home.stats.users') },
-              { number: '50+', label: t('home.stats.cities') },
-              { number: '4.8/5', label: t('home.stats.rating') },
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-[#00E536] mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </>
   );
 };
