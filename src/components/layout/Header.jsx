@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,8 +13,24 @@ const Header = () => {
   const { isDark, toggleTheme } = useTheme();
   const [hidden, setHidden] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const lastScrollY = useRef(0);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
+
+  const handleNavClick = (to) => {
+    scrollToTop();
+    navigate(to);
+  };
+
+  const handleLogoutConfirm = () => {
+    logout();
+    setShowLogoutModal(false);
+    setShowDropdown(false);
+    handleNavClick('/login');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,46 +59,35 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`header-nav ${hidden ? 'header-hidden' : ''}`}>
+    <>
+      <nav className={`header-nav ${hidden ? 'header-hidden' : ''}`}>
       <div className="header-container">
         <div className="header-inner">
           {/* Logo */}
           <div className="header-logo-section">
-            <Link to="/" className="header-logo-link">
+            <button className="header-logo-link" onClick={() => handleNavClick('/')}>
               <img
                 alt="Sân Siêu Tốc Logo"
                 className="header-logo-image"
                 src={logo}
               />
-            </Link>
+            </button>
           </div>
 
           {/* Navigation Links */}
           <div className="header-nav-links">
-            <Link
-              className="header-nav-link"
-              to="/"
-            >
+            <button className="header-nav-link" onClick={() => handleNavClick('/')}>
               {t('nav.home')}
-            </Link>
-            <Link
-              className="header-nav-link"
-              to="/fields"
-            >
+            </button>
+            <button className="header-nav-link" onClick={() => handleNavClick('/fields')}>
               {t('nav.fields')}
-            </Link>
-            <Link
-              className="header-nav-link"
-              to="/terms"
-            >
+            </button>
+            <button className="header-nav-link" onClick={() => handleNavClick('/terms')}>
               {t('footer.terms')}
-            </Link>
-            <Link
-              className="header-nav-link"
-              to="/about"
-            >
+            </button>
+            <button className="header-nav-link" onClick={() => handleNavClick('/about')}>
               {t('nav.about')}
-            </Link>
+            </button>
           </div>
 
           {/* Actions */}
@@ -120,28 +125,26 @@ const Header = () => {
                       <p className="header-dropdown-email">{user?.email || ''}</p>
                     </div>
                     <div className="header-dropdown-divider" />
-                    <Link
-                      to="/profile"
+                    <button
                       className="header-dropdown-item"
-                      onClick={() => setShowDropdown(false)}
+                      onClick={() => { setShowDropdown(false); handleNavClick('/profile'); }}
                     >
                       <span className="material-icons-outlined">person</span>
                       {t('nav.profile')}
-                    </Link>
+                    </button>
                     {user?.role === 'admin' && (
-                      <Link
-                        to="/admin"
+                      <button
                         className="header-dropdown-item"
-                        onClick={() => setShowDropdown(false)}
+                        onClick={() => { setShowDropdown(false); handleNavClick('/admin'); }}
                       >
                         <span className="material-icons-outlined">dashboard</span>
                         Dashboard
-                      </Link>
+                      </button>
                     )}
                     <div className="header-dropdown-divider" />
                     <button
                       className="header-dropdown-item logout"
-                      onClick={() => { logout(); setShowDropdown(false); }}
+                      onClick={() => { setShowDropdown(false); setShowLogoutModal(true); }}
                     >
                       <span className="material-icons-outlined">logout</span>
                       {t('auth.logout')}
@@ -150,17 +153,59 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <Link to="/login">
-                <button className="header-login-btn">
-                  <span className="material-icons-outlined text-sm">login</span>
-                  {t('auth.login')}
-                </button>
-              </Link>
+              <button className="header-login-btn" onClick={() => handleNavClick('/login')}>
+                <span className="material-icons-outlined text-sm">login</span>
+                {t('auth.login')}
+              </button>
             )}
           </div>
         </div>
       </div>
     </nav>
+
+    {/* Logout Confirmation Modal */}
+    {showLogoutModal && (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)' }}
+        onClick={() => setShowLogoutModal(false)}
+      >
+        <div
+          className="bg-white dark:bg-[#14532d] rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 flex flex-col items-center gap-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Icon */}
+          <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-1">
+            <span className="material-icons-outlined text-red-500 text-3xl">logout</span>
+          </div>
+
+          {/* Title */}
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center">
+            {t('auth.logoutConfirmTitle')}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm text-center leading-relaxed">
+            {t('auth.logoutConfirmDesc')}
+          </p>
+
+          {/* Buttons */}
+          <div className="flex gap-3 w-full mt-2">
+            <button
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-green-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-green-900/30 transition-colors"
+              onClick={() => setShowLogoutModal(false)}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors"
+              onClick={handleLogoutConfirm}
+            >
+              {t('auth.logout')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
