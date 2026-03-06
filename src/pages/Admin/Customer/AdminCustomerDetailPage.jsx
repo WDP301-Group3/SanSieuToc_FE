@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mockUsers, mockBookings, USER_ROLES } from '../../../data/mockData';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/AdminCustomerDetailPage.css';
 
 /**
@@ -60,6 +61,7 @@ const getCustomerRank = (completedCount) => {
 const AdminCustomerDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const notification = useNotification();
   const [confirmModal, setConfirmModal] = useState(null);
   const [showAllBookings, setShowAllBookings] = useState(false);
 
@@ -105,7 +107,7 @@ const AdminCustomerDetailPage = () => {
 
   const handleConfirm = () => {
     setConfirmModal(null);
-    alert('Thao tác đã được thực hiện (mock).');
+    notification.success('Thao tác đã được thực hiện.');
   };
 
   // 404 if user not found or not a customer

@@ -108,14 +108,14 @@
       "rating": "Đánh giá"
     },
     "contact": "Liên hệ",
-    "pricePerHour": "{{price}}k/h",
+    "pricePerHour": "{{price}}k/slot",
     "standardField": "Sân tiêu chuẩn"
   },
   "field": {
     "fieldName": "Tên sân",
     "address": "Địa chỉ",
     "price": "Giá",
-    "pricePerHour": "{{price}}/giờ",
+    "pricePerHour": "{{price}}/slot",
     "rating": "Đánh giá",
     "reviews": "đánh giá",
     "noRating": "Chưa có",
@@ -163,7 +163,7 @@
     "badgeAvailable": "Có sẵn",
     "badgeVerified": "Chủ sân xác thực",
     "badgeMaintenance": "Bảo trì",
-    "perHour": "/giờ"
+    "perHour": "/slot"
   },
   "booking": {
     "bookingDetails": "Chi tiết đặt sân",

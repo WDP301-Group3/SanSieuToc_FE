@@ -1,16 +1,43 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useNotification } from '../../context/NotificationContext';
+import bookingService from '../../services/bookingService';
 import MapModal from '../../components/Map/MapModal';
+import QRPaymentModal from '../../components/QRPaymentModal';
 import {
-  mockBookings,
-  mockFields,
-  BOOKING_ORDER_STATUS,
-  BOOKING_STATUS_CONFIG,
   UTILITY_LABELS,
   FIELD_RULES_BY_CATEGORY,
 } from '../../data/mockData';
 import '../../styles/BookingDetailPage.css';
+
+/** Status display config — từ ngữ phù hợp với đặt sân thể thao */
+const BOOKING_STATUS_CONFIG = {
+  Pending: {
+    icon: 'hourglass_top',
+    label: 'Chờ thanh toán',
+    bannerClass: 'pending',
+    badgeClass: 'status-pending',
+  },
+  Confirmed: {
+    icon: 'check_circle',
+    label: 'Đã đặt sân',
+    bannerClass: 'confirmed',
+    badgeClass: 'status-confirmed',
+  },
+  Completed: {
+    icon: 'task_alt',
+    label: 'Đã hoàn thành',
+    bannerClass: 'completed',
+    badgeClass: 'status-completed',
+  },
+  Cancelled: {
+    icon: 'cancel',
+    label: 'Đã hủy',
+    bannerClass: 'cancelled',
+    badgeClass: 'status-cancelled',
+  },
+};
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -77,17 +104,53 @@ const BookingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const notification = useNotification();
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // Find booking and field from mockData
-  // TODO: Replace with API call - GET /api/bookings/:id
-  const booking = useMemo(() => mockBookings.find((b) => b._id === id), [id]);
-  
-  // TODO: Replace with API call - GET /api/fields/:id
-  const field = useMemo(() => {
-    if (!booking) return null;
-    return mockFields.find((f) => f._id === booking.fieldID) || null;
-  }, [booking]);
+  // ========== API Data State ==========
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ========== Fetch booking from API ==========
+  useEffect(() => {
+    const fetchBooking = async () => {
+      setLoading(true);
+      try {
+        const response = await bookingService.getMyBookings();
+        // BE: { success, data: [...] }, bookingService unwrap axios → { success, data: [...] }
+        let bookings = [];
+        if (Array.isArray(response)) {
+          bookings = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          bookings = response.data;
+        }
+        // Find the booking by ID from the list
+        const found = bookings.find((b) => b.id === id || b._id === id) || null;
+        setBooking(found || null);
+      } catch (err) {
+        console.error('Error fetching booking:', err);
+        setBooking(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchBooking();
+  }, [id]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="booking-history-page">
+        <div className="booking-history-container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+          <div style={{ width: 48, height: 48, margin: '0 auto 1rem', border: '4px solid var(--border-color)', borderTopColor: 'var(--primary-color)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ color: 'var(--text-muted)' }}>Đang tải thông tin đặt sân...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Not found
   if (!booking) {
@@ -108,42 +171,74 @@ const BookingDetailPage = () => {
     );
   }
 
-  // Derived data
+  // Derived data from API response
   const status = BOOKING_STATUS_CONFIG[booking.status] || BOOKING_STATUS_CONFIG.Pending;
-  const duration = calcDuration(booking.startTime, booking.endTime);
-  const fieldTypeName = field?.fieldType?.typeName || '';
-  const categoryName = field?.fieldType?.category?.categoryName || 'Football';
-  const fieldAddress = field?.address || '';
-  const managerPhone = field?.manager?.phone || '';
-  const amenities = getUtilityLabels(field?.utilities);
-  const rules = getFieldRules(categoryName);
+  const bookingId = booking.id || booking._id;
+  
+  // Extract field info from first booking detail
+  const firstDetail = booking.bookingDetails?.[0] || {};
+  const fieldName = firstDetail.fieldName || '';
+  const fieldAddress = firstDetail.fieldAddress || '';
+  
+  // Manager info from API
+  const managerPhone = booking.managerInfo?.phone || '';
+  
+  // Format booking details time ranges
+  const bookingDetailsList = booking.bookingDetails || [];
+  const firstSlotStart = bookingDetailsList.length > 0 
+    ? new Date(bookingDetailsList[0].startTime) : null;
+  const lastSlotEnd = bookingDetailsList.length > 0 
+    ? new Date(bookingDetailsList[bookingDetailsList.length - 1].endTime) : null;
+  
+  const startTimeStr = firstSlotStart 
+    ? `${String(firstSlotStart.getHours()).padStart(2, '0')}:${String(firstSlotStart.getMinutes()).padStart(2, '0')}` 
+    : '';
+  const endTimeStr = lastSlotEnd 
+    ? `${String(lastSlotEnd.getHours()).padStart(2, '0')}:${String(lastSlotEnd.getMinutes()).padStart(2, '0')}` 
+    : '';
+  
+  const bookingDate = firstSlotStart ? firstSlotStart.toISOString().split('T')[0] : '';
+  const duration = calcDuration(startTimeStr, endTimeStr);
 
-  // Price breakdown
-  // TODO: Get price breakdown from API response
-  const basePrice = field?.hourlyPrice || booking.totalPrice;
-  const lightingFee = booking.startTime >= '18:00' ? 50000 : 0;
-  const totalDisplay = booking.totalPrice;
+  // Price info from API
+  const totalDisplay = booking.totalPrice || 0;
+  const depositDisplay = booking.depositAmount || 0;
+  const paymentMessage = booking.paymentInfo?.paymentMessage || '';
 
-  const isCancellable =
-    booking.status === BOOKING_ORDER_STATUS.CONFIRMED ||
-    booking.status === BOOKING_ORDER_STATUS.PENDING;
+  // Cancel is only allowed when status is Pending (from API flag)
+  const isCancellable = booking.canCancel === true;
+
+  // QR payment available for Pending bookings
+  const hasQrPayment = booking.status === 'Pending' && (booking.qrCode || booking.managerInfo);
 
   // Handlers
-  // TODO: Implement API calls
-  const handleCancelBooking = () => {
-    if (window.confirm('Bạn có chắc chắn muốn hủy đặt sân này?')) {
-      // TODO: Call API - PUT /api/bookings/:id/cancel
-      console.log('Cancel booking:', booking._id);
+  const handleCancelBooking = async () => {
+    setShowCancelConfirm(false);
+    setCancelLoading(true);
+    try {
+      const response = await bookingService.cancelBooking(bookingId);
+      const data = response.data || response;
+      notification.success(data.message || 'Hủy đặt sân thành công!');
+      // Update local state
+      setBooking(prev => prev ? { ...prev, status: 'Cancelled', canCancel: false, qrCode: null, managerInfo: null } : null);
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message || 'Hủy đặt sân thất bại.';
+      notification.error(errMsg);
+    } finally {
+      setCancelLoading(false);
     }
   };
 
   const handleDownloadInvoice = () => {
-    // TODO: Call API - GET /api/bookings/:id/invoice
-    console.log('Download invoice:', booking._id);
+    notification.info('Tính năng tải hóa đơn đang được phát triển.');
   };
 
   const handleOpenDirections = () => {
     setIsMapModalOpen(true);
+  };
+
+  const handleShowQR = () => {
+    setQrModalOpen(true);
   };
 
   return (
@@ -155,7 +250,7 @@ const BookingDetailPage = () => {
           <span className="material-symbols-outlined bh-breadcrumb-sep">chevron_right</span>
           <Link to="/booking-history" className="bh-breadcrumb-link">Lịch sử đặt sân</Link>
           <span className="material-symbols-outlined bh-breadcrumb-sep">chevron_right</span>
-          <span className="bh-breadcrumb-current">Chi tiết đơn đặt #{booking.bookingCode}</span>
+          <span className="bh-breadcrumb-current">Chi tiết đơn đặt #{typeof bookingId === 'string' ? bookingId.slice(-8).toUpperCase() : bookingId}</span>
         </nav>
 
         {/* Status Banner */}
@@ -167,11 +262,17 @@ const BookingDetailPage = () => {
             <div>
               <h1 className="bh-status-title">{status.label}</h1>
               <p className="bh-status-meta">
-                Mã đặt sân: <span className="bh-code">#{booking.bookingCode}</span> • Ngày đặt: {formatOrderDate(booking.createdAt)}
+                Mã đặt sân: <span className="bh-code">#{typeof bookingId === 'string' ? bookingId.slice(-8).toUpperCase() : bookingId}</span> • Ngày đặt: {formatOrderDate(booking.createdAt)}
               </p>
             </div>
           </div>
           <div className="bh-status-actions">
+            {hasQrPayment && (
+              <button className="bh-btn-download" onClick={handleShowQR} style={{ background: '#2563eb', color: '#fff' }}>
+                <span className="material-symbols-outlined">qr_code_2</span>
+                Thanh toán QR
+              </button>
+            )}
             <button className="bh-btn-download" onClick={handleDownloadInvoice}>
               <span className="material-symbols-outlined">download</span>
               Tải hóa đơn
@@ -185,16 +286,12 @@ const BookingDetailPage = () => {
           <div className="bh-left-col">
             {/* Field Info Card */}
             <div className="bh-field-card">
-              <div
-                className="bh-field-image"
-                style={{ backgroundImage: `url(${booking.fieldImage})` }}
-              />
-              <div className="bh-field-info">
-                <h2
-                  className="bh-field-name clickable"
-                  onClick={() => navigate(`/fields/${booking.fieldID}`)}
-                >
-                  {booking.fieldName}
+              <div className="bh-field-info" style={{ padding: '1.5rem' }}>
+                <h2 className="bh-field-name clickable" onClick={() => {
+                  const detailFieldId = bookingDetailsList[0]?.fieldId || bookingDetailsList[0]?.id;
+                  if (detailFieldId) navigate(`/fields/${detailFieldId}`);
+                }}>
+                  {fieldName}
                 </h2>
                 {fieldAddress && (
                   <div className="bh-field-address">
@@ -220,104 +317,131 @@ const BookingDetailPage = () => {
               </div>
             </div>
 
-            {/* Amenities & Rules */}
-            <div className="bh-details-grid">
-              {/* Amenities */}
-              {amenities.length > 0 && (
-                <div className="bh-detail-card">
-                  <h3 className="bh-detail-title">
-                    <span className="material-symbols-outlined">inventory_2</span>
-                    Tiện ích đi kèm
-                  </h3>
-                  <ul className="bh-amenities-list">
-                    {amenities.map((item, index) => (
-                      <li key={index} className="bh-amenity-item">
-                        <span className="material-symbols-outlined bh-check-icon">check</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Rules */}
+            {/* Booking Details List */}
+            {bookingDetailsList.length > 0 && (
               <div className="bh-detail-card">
                 <h3 className="bh-detail-title">
-                  <span className="material-symbols-outlined">rule</span>
-                  Quy định sân
+                  <span className="material-symbols-outlined">calendar_month</span>
+                  Chi tiết các slot ({bookingDetailsList.length} slot)
                 </h3>
-                <ul className="bh-rules-list">
-                  {rules.map((rule, index) => (
-                    <li key={index} className="bh-rule-item">
-                      <span className="bh-rule-dot" />
-                      <span>{rule}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {bookingDetailsList.map((detail, idx) => {
+                    const detailStart = new Date(detail.startTime);
+                    const detailEnd = new Date(detail.endTime);
+                    const dateStr = detailStart.toLocaleDateString('vi-VN');
+                    const timeStr = `${String(detailStart.getHours()).padStart(2, '0')}:${String(detailStart.getMinutes()).padStart(2, '0')} - ${String(detailEnd.getHours()).padStart(2, '0')}:${String(detailEnd.getMinutes()).padStart(2, '0')}`;
+                    return (
+                      <div key={detail.id || idx} style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '0.625rem 0.75rem', background: 'var(--bg-secondary)', borderRadius: '0.5rem',
+                        fontSize: '0.875rem'
+                      }}>
+                        <div>
+                          <span style={{ fontWeight: 500 }}>{dateStr}</span>
+                          <span style={{ color: 'var(--text-muted)', margin: '0 0.5rem' }}>•</span>
+                          <span>{timeStr}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>{detail.price?.toLocaleString('vi-VN')}đ</span>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500,
+                            background: detail.status === 'Active' ? '#dcfce7' : detail.status === 'Completed' ? '#dbeafe' : '#fee2e2',
+                            color: detail.status === 'Active' ? '#16a34a' : detail.status === 'Completed' ? '#2563eb' : '#dc2626'
+                          }}>
+                            {detail.status}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column — Booking Summary */}
           <div className="bh-right-col">
             <div className="bh-summary-card">
-              <h3 className="bh-summary-title">Chi tiết lịch đặt</h3>
+              <h3 className="bh-summary-title">Tổng quan đặt sân</h3>
 
               <div className="bh-summary-details">
-                <div className="bh-summary-row">
-                  <span>Ngày chơi</span>
-                  <span className="bh-summary-value">{formatDateWithDay(booking.date)}</span>
-                </div>
-                <div className="bh-summary-row">
-                  <span>Khung giờ</span>
-                  <span className="bh-summary-value">{booking.startTime} - {booking.endTime}</span>
-                </div>
-                <div className="bh-summary-row">
-                  <span>Thời lượng</span>
-                  <span className="bh-summary-value">{duration} phút</span>
-                </div>
-                {fieldTypeName && (
+                {bookingDate && (
                   <div className="bh-summary-row">
-                    <span>Loại sân</span>
-                    <span className="bh-summary-value">{fieldTypeName}</span>
+                    <span>Ngày chơi</span>
+                    <span className="bh-summary-value">{formatDateWithDay(bookingDate)}</span>
                   </div>
                 )}
+                {startTimeStr && endTimeStr && (
+                  <div className="bh-summary-row">
+                    <span>Khung giờ</span>
+                    <span className="bh-summary-value">{startTimeStr} - {endTimeStr}</span>
+                  </div>
+                )}
+                {duration > 0 && (
+                  <div className="bh-summary-row">
+                    <span>Thời lượng</span>
+                    <span className="bh-summary-value">{duration} phút</span>
+                  </div>
+                )}
+                <div className="bh-summary-row">
+                  <span>Số slot</span>
+                  <span className="bh-summary-value">{bookingDetailsList.length}</span>
+                </div>
               </div>
 
               <div className="bh-price-section">
-                <div className="bh-price-row">
-                  <span>Giá thuê sân ({duration}p)</span>
-                  <span>{(basePrice).toLocaleString('vi-VN')}đ</span>
-                </div>
-                {lightingFee > 0 && (
+                {depositDisplay > 0 && (
                   <div className="bh-price-row">
-                    <span>Phụ phí đèn chiếu sáng</span>
-                    <span>{lightingFee.toLocaleString('vi-VN')}đ</span>
+                    <span>Tiền cọc (20%)</span>
+                    <span>{depositDisplay.toLocaleString('vi-VN')}đ</span>
                   </div>
                 )}
                 <div className="bh-total-row">
                   <span>Tổng cộng</span>
                   <span className="bh-total-value">{totalDisplay.toLocaleString('vi-VN')}đ</span>
                 </div>
-                <p className="bh-payment-note">Đã thanh toán qua {booking.paymentMethod}</p>
+                {paymentMessage && (
+                  <p className="bh-payment-note">{paymentMessage}</p>
+                )}
               </div>
+
+              {/* QR Payment button for Pending bookings */}
+              {hasQrPayment && (
+                <div style={{ padding: '0 1rem 1rem' }}>
+                  <button 
+                    className="bh-btn-rebook" 
+                    onClick={handleShowQR}
+                    style={{ width: '100%', background: '#2563eb', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  >
+                    <span className="material-symbols-outlined">qr_code_2</span>
+                    Xem QR thanh toán cọc
+                  </button>
+                </div>
+              )}
 
               {isCancellable && (
                 <div className="bh-cancel-section">
-                  <button className="bh-btn-cancel" onClick={handleCancelBooking}>
-                    Hủy đặt sân
+                  <button 
+                    className="bh-btn-cancel" 
+                    onClick={() => setShowCancelConfirm(true)}
+                    disabled={cancelLoading}
+                  >
+                    {cancelLoading ? 'Đang hủy...' : 'Hủy đặt sân'}
                   </button>
                   <p className="bh-cancel-note">
-                    * Lưu ý: Hủy sân trước 24h để được hoàn tiền 100%. Sau 24h sẽ không được hoàn trả phí.
+                    * Lưu ý: Booking chỉ có thể hủy khi trạng thái là Pending (chưa thanh toán cọc).
                   </p>
                 </div>
               )}
 
-              {booking.status === BOOKING_ORDER_STATUS.COMPLETED && (
+              {booking.status === 'Completed' && (
                 <div className="bh-cancel-section">
                   <button
                     className="bh-btn-rebook"
-                    onClick={() => navigate(`/fields/${booking.fieldID}`)}
+                    onClick={() => {
+                      const detailFieldId = bookingDetailsList[0]?.fieldId || bookingDetailsList[0]?.id;
+                      if (detailFieldId) navigate(`/fields/${detailFieldId}`);
+                    }}
                   >
                     Đặt lại sân này
                   </button>
@@ -348,8 +472,46 @@ const BookingDetailPage = () => {
         isOpen={isMapModalOpen}
         onClose={() => setIsMapModalOpen(false)}
         address={fieldAddress}
-        fieldName={booking.fieldName}
+        fieldName={fieldName}
       />
+
+      {/* QR Payment Modal */}
+      {hasQrPayment && (
+        <QRPaymentModal
+          isOpen={qrModalOpen}
+          onClose={() => setQrModalOpen(false)}
+          qrCodeUrl={booking.qrCode}
+          managerInfo={booking.managerInfo}
+          depositAmount={depositDisplay}
+          totalPrice={totalDisplay}
+          bookingId={bookingId}
+          fieldName={fieldName}
+        />
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelConfirm && (
+        <div className="modal-overlay" onClick={() => setShowCancelConfirm(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon danger">
+              <span className="material-symbols-outlined">cancel</span>
+            </div>
+            <h3 className="modal-title">Xác nhận hủy đặt sân</h3>
+            <p className="modal-description">
+              Bạn có chắc chắn muốn hủy đơn đặt sân <strong>#{typeof bookingId === 'string' ? bookingId.slice(-8).toUpperCase() : bookingId}</strong>?
+              Hành động này không thể hoàn tác.
+            </p>
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setShowCancelConfirm(false)}>
+                Quay lại
+              </button>
+              <button className="modal-btn confirm-ban" onClick={handleCancelBooking}>
+                Xác nhận hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

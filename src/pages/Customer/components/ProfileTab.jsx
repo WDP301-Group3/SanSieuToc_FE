@@ -4,17 +4,30 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BOOKING_ORDER_STATUS } from '../../../data/mockData';
+import { useAuth } from '../../../context/AuthContext';
+import { useNotification } from '../../../context/NotificationContext';
+import authService from '../../../services/authService';
+
+/** Booking status constants (khớp với BE) */
+const BOOKING_STATUS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
 
 const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
+  const notification = useNotification();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
     email: user?.email || '',
-    address: user?.address || 'Hà Nội, Việt Nam',
+    address: user?.address || '',
   });
 
   const handleChange = (e) => {
@@ -22,9 +35,45 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    console.log('Saving profile:', formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    // Basic validation
+    if (!formData.name.trim()) {
+      notification.error('Tên không được để trống');
+      return;
+    }
+    if (formData.phone && !/^(0|\+84)[0-9]{9,10}$/.test(formData.phone)) {
+      notification.error('Số điện thoại không hợp lệ (VD: 0901234567)');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await authService.updateProfile({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+      });
+
+      if (response.success) {
+        const updatedCustomer = response.data?.customer;
+        // Update user in AuthContext & localStorage
+        updateUser({
+          ...user,
+          name: updatedCustomer?.name || formData.name.trim(),
+          phone: updatedCustomer?.phone || formData.phone.trim(),
+          address: updatedCustomer?.address || formData.address.trim(),
+        });
+        notification.success('Cập nhật thông tin thành công!');
+        setIsEditing(false);
+      } else {
+        notification.error(response.message || 'Cập nhật thất bại');
+      }
+    } catch (error) {
+      notification.error(error.message || 'Lỗi khi cập nhật thông tin. Vui lòng thử lại.');
+      console.error('Profile update error:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -32,7 +81,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
       name: user?.name || '',
       phone: user?.phone || '',
       email: user?.email || '',
-      address: user?.address || 'Hà Nội, Việt Nam',
+      address: user?.address || '',
     });
     setIsEditing(false);
   };
@@ -45,14 +94,14 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
 
   const getStatusInfo = (status) => {
     switch (status) {
-      case BOOKING_ORDER_STATUS.CONFIRMED:
-        return { className: 'status-confirmed', label: 'Đã xác nhận' };
-      case BOOKING_ORDER_STATUS.COMPLETED:
+      case BOOKING_STATUS.CONFIRMED:
+        return { className: 'status-confirmed', label: 'Đã đặt sân' };
+      case BOOKING_STATUS.COMPLETED:
         return { className: 'status-completed', label: 'Đã hoàn thành' };
-      case BOOKING_ORDER_STATUS.CANCELLED:
+      case BOOKING_STATUS.CANCELLED:
         return { className: 'status-cancelled', label: 'Đã hủy' };
-      case BOOKING_ORDER_STATUS.PENDING:
-        return { className: 'status-pending', label: 'Chờ xác nhận' };
+      case BOOKING_STATUS.PENDING:
+        return { className: 'status-pending', label: 'Chờ thanh toán' };
       default:
         return { className: '', label: status };
     }
@@ -127,11 +176,11 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
 
           {isEditing && (
             <div className="user-dashboard-form-actions">
-              <button type="button" className="btn-cancel" onClick={handleCancel}>
+              <button type="button" className="btn-cancel" onClick={handleCancel} disabled={saving}>
                 Hủy bỏ
               </button>
-              <button type="button" className="btn-save" onClick={handleSave}>
-                Lưu thay đổi
+              <button type="button" className="btn-save" onClick={handleSave} disabled={saving}>
+                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
           )}
@@ -160,43 +209,62 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
           ) : (
             upcomingBookings.map((booking) => {
               const statusInfo = getStatusInfo(booking.status);
+              const bookingId = booking.id || booking._id;
+              const details = booking.bookingDetails || [];
+              const firstDetail = details[0] || {};
+              const fieldName = firstDetail.fieldName || 'Không rõ sân';
+
+              // Parse date & time from ISO string
+              let dateStr = '';
+              let startTimeStr = '';
+              let endTimeStr = '';
+              if (firstDetail.startTime) {
+                const start = new Date(firstDetail.startTime);
+                dateStr = start.toISOString().split('T')[0];
+                startTimeStr = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
+              }
+              if (details.length > 0) {
+                const lastDetail = details[details.length - 1];
+                if (lastDetail.endTime) {
+                  const end = new Date(lastDetail.endTime);
+                  endTimeStr = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+                }
+              }
+
               return (
-                <div key={booking._id} className="user-dashboard-booking-card">
-                  <div
-                    className="user-dashboard-booking-image"
-                    style={{ backgroundImage: `url(${booking.fieldImage})` }}
-                  />
+                <div key={bookingId} className="user-dashboard-booking-card">
                   <div className="user-dashboard-booking-info">
                     <div className="user-dashboard-booking-badges">
                       <span className={`user-dashboard-booking-status ${statusInfo.className}`}>
                         {statusInfo.label}
                       </span>
-                      <span className="user-dashboard-booking-code">
-                        Mã: #{booking.bookingCode}
-                      </span>
                     </div>
-                    <h4 className="user-dashboard-booking-name">{booking.fieldName}</h4>
+                    <h4 className="user-dashboard-booking-name">{fieldName}</h4>
                     <div className="user-dashboard-booking-meta">
-                      <div className="user-dashboard-booking-meta-item">
-                        <span className="material-symbols-outlined">calendar_today</span>
-                        <span>{formatDate(booking.date)}</span>
-                      </div>
-                      <div className="user-dashboard-booking-meta-item">
-                        <span className="material-symbols-outlined">schedule</span>
-                        <span>
-                          {booking.startTime} - {booking.endTime}
-                        </span>
-                      </div>
+                      {dateStr && (
+                        <div className="user-dashboard-booking-meta-item">
+                          <span className="material-symbols-outlined">calendar_today</span>
+                          <span>{formatDate(dateStr)}</span>
+                        </div>
+                      )}
+                      {startTimeStr && (
+                        <div className="user-dashboard-booking-meta-item">
+                          <span className="material-symbols-outlined">schedule</span>
+                          <span>
+                            {startTimeStr}{endTimeStr ? ` - ${endTimeStr}` : ''}
+                          </span>
+                        </div>
+                      )}
                       <div className="user-dashboard-booking-meta-item price">
                         <span className="material-symbols-outlined">payments</span>
-                        <span>{booking.totalPrice.toLocaleString('vi-VN')}đ</span>
+                        <span>{(booking.totalPrice || 0).toLocaleString('vi-VN')}đ</span>
                       </div>
                     </div>
                   </div>
                   <div className="user-dashboard-booking-actions">
                     <button
                       className="btn-detail"
-                      onClick={() => navigate(`/booking-history/${booking._id}`)}
+                      onClick={() => navigate(`/booking-history/${bookingId}`)}
                     >
                       Chi tiết
                     </button>

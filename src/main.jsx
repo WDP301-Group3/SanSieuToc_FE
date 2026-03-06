@@ -22,6 +22,10 @@ import './i18n'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { AppProvider } from './context/AppContext'
+import { NotificationProvider } from './context/NotificationContext'
+
+// Notification styles
+import './styles/Notification.css'
 
 // ============================================================================
 // APP INITIALIZATION
@@ -38,7 +42,9 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <AuthProvider>
         <AppProvider>
-          <App />
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
         </AppProvider>
       </AuthProvider>
     </ThemeProvider>

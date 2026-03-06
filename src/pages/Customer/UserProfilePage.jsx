@@ -6,16 +6,13 @@
  * - ProfileTab: Tab thông tin cá nhân
  * - BookingsTab: Tab lịch sử đặt sân
  * - SettingsTab: Tab cài đặt
+ * 
+ * Data: Lấy booking từ API thật (bookingService.getMyBookings)
  */
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import {
-  getBookingsByUserID,
-  getUserBookingStats,
-  getUserMemberTier,
-  BOOKING_ORDER_STATUS,
-} from '../../data/mockData';
+import bookingService from '../../services/bookingService';
 
 // Components
 import { UserSidebar, ProfileTab, BookingsTab, SettingsTab } from './components';
@@ -23,11 +20,49 @@ import { UserSidebar, ProfileTab, BookingsTab, SettingsTab } from './components'
 // Styles
 import '../../styles/UserProfilePage.css';
 
+/** Booking status constants (khớp với BE) */
+const BOOKING_STATUS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
 const UserProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+
+  // ========== API State ==========
+  const [allBookings, setAllBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
+
+  // ========== Fetch bookings from API ==========
+  const fetchBookings = useCallback(async () => {
+    setBookingsLoading(true);
+    try {
+      const response = await bookingService.getMyBookings();
+      // BE controller trả { success: true, data: [...] }
+      // bookingService unwrap axios → response = { success: true, data: [...] }
+      let bookings = [];
+      if (Array.isArray(response)) {
+        bookings = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        bookings = response.data;
+      }
+      setAllBookings(bookings);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setAllBookings([]);
+    } finally {
+      setBookingsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   // Determine active tab from URL path
   const getTabFromPath = () => {
@@ -40,29 +75,24 @@ const UserProfilePage = () => {
 
   const activeTab = getTabFromPath();
 
-  // Get data from mockData
-  const allBookings = useMemo(() => {
-    if (!user?.id) return [];
-    return getBookingsByUserID(user.id);
-  }, [user]);
-
+  // Calculate stats from API data
   const stats = useMemo(() => {
-    if (!user?.id)
-      return { total: 0, completed: 0, confirmed: 0, cancelled: 0, pending: 0, totalSpent: 0 };
-    return getUserBookingStats(user.id);
-  }, [user]);
+    return {
+      total: allBookings.length,
+      completed: allBookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length,
+      confirmed: allBookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length,
+      cancelled: allBookings.filter((b) => b.status === BOOKING_STATUS.CANCELLED).length,
+      pending: allBookings.filter((b) => b.status === BOOKING_STATUS.PENDING).length,
+    };
+  }, [allBookings]);
 
-  const memberTier = useMemo(() => {
-    if (!user?.id) return { name: 'Thành viên Đồng', color: '#cd7f32' };
-    return getUserMemberTier(user.id);
-  }, [user]);
-
+  // Upcoming bookings (Confirmed + Pending)
   const upcomingBookings = useMemo(() => {
     return allBookings
       .filter(
         (b) =>
-          b.status === BOOKING_ORDER_STATUS.CONFIRMED ||
-          b.status === BOOKING_ORDER_STATUS.PENDING
+          b.status === BOOKING_STATUS.CONFIRMED ||
+          b.status === BOOKING_STATUS.PENDING
       )
       .slice(0, 4);
   }, [allBookings]);
@@ -85,7 +115,6 @@ const UserProfilePage = () => {
         <UserSidebar
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          memberTier={memberTier}
           userName={user?.name || ''}
           userImage={user?.image}
         />
@@ -101,7 +130,12 @@ const UserProfilePage = () => {
           )}
 
           {activeTab === 'bookings' && (
-            <BookingsTab allBookings={allBookings} stats={stats} />
+            <BookingsTab
+              allBookings={allBookings}
+              stats={stats}
+              loading={bookingsLoading}
+              onRefresh={fetchBookings}
+            />
           )}
 
           {activeTab === 'settings' && <SettingsTab />}

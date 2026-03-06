@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { mockFeedbacks, mockFields } from '../../../data/mockData';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/AdminFeedbackPage.css';
 
 /**
@@ -38,6 +39,7 @@ const renderStars = (rating) => {
 };
 
 const AdminFeedbackPage = () => {
+  const notification = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -121,7 +123,7 @@ const AdminFeedbackPage = () => {
 
   const handleConfirmDelete = () => {
     setConfirmDelete(null);
-    alert('Đã xóa feedback (mock).');
+    notification.success('Đã xóa feedback thành công.');
   };
 
   // Pagination helpers

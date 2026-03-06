@@ -3,8 +3,10 @@
  * Modal đổi mật khẩu
  */
 import { useState } from 'react';
+import { useNotification } from '../../../context/NotificationContext';
 
 const PasswordChangeModal = ({ onClose }) => {
+  const notification = useNotification();
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -44,7 +46,7 @@ const PasswordChangeModal = ({ onClose }) => {
       return;
     }
 
-    console.log('Password changed:', passwordForm);
+    notification.success('Đổi mật khẩu thành công!');
     setPasswordError('');
     setPasswordSuccess(true);
     setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });

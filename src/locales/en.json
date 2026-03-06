@@ -108,14 +108,14 @@
       "rating": "Rating"
     },
     "contact": "Contact",
-    "pricePerHour": "{{price}}k/h",
+    "pricePerHour": "{{price}}k/slot",
     "standardField": "Standard Field"
   },
   "field": {
     "fieldName": "Field Name",
     "address": "Address",
     "price": "Price",
-    "pricePerHour": "{{price}}/hour",
+    "pricePerHour": "{{price}}/slot",
     "rating": "Rating",
     "reviews": "reviews",
     "noRating": "No rating",
@@ -163,7 +163,7 @@
     "badgeAvailable": "Available",
     "badgeVerified": "Verified Owner",
     "badgeMaintenance": "Maintenance",
-    "perHour": "/hour"
+    "perHour": "/slot"
   },
   "booking": {
     "bookingDetails": "Booking Details",

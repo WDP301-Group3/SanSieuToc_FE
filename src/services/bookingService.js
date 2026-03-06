@@ -1,6 +1,12 @@
 /**
  * Booking Service
  * Handles all booking-related API calls
+ * 
+ * Endpoints (from api.config.js → BOOKINGS):
+ *   POST /api/customer/bookings                         → createBooking
+ *   GET  /api/customer/bookings/my-bookings             → getMyBookings
+ *   PUT  /api/customer/bookings/:id/cancel              → cancelBooking
+ *   GET  /api/customer/fields/:fieldId/availability     → (in fieldService)
  */
 
 import axiosInstance from './axios';
@@ -9,19 +15,22 @@ import { API_CONFIG } from '../config/api.config';
 const bookingService = {
   /**
    * Create a new booking
-   * @param {Object} bookingData - Booking data
-   * @param {string} bookingData.customerID - Customer ID
-   * @param {string} bookingData.fieldID - Field ID
-   * @param {Array} bookingData.bookingDetails - Array of booking details
-   * @param {number} bookingData.totalPrice - Total price
-   * @param {number} bookingData.depositAmount - Deposit amount
-   * @param {string} bookingData.statusPayment - Payment status
+   * 
+   * BE expects: { fieldId, startDate, selectedSlots: [{startTime, endTime}], repeatType, duration }
+   * BE returns: { bookingId, totalPrice, depositAmount, status, qrCode, managerInfo, bookingDetails, message }
+   * 
+   * @param {Object} bookingData
+   * @param {string} bookingData.fieldId - Field ID
+   * @param {string} bookingData.startDate - Start date (YYYY-MM-DD)
+   * @param {Array}  bookingData.selectedSlots - [{startTime: "HH:mm", endTime: "HH:mm"}]
+   * @param {string} bookingData.repeatType - "once" | "weekly" | "recurring"
+   * @param {number} [bookingData.duration] - 1|2|3 months (only for "recurring")
    * @returns {Promise} API response
    */
   async createBooking(bookingData) {
     try {
       const response = await axiosInstance.post(
-        API_CONFIG.ENDPOINTS.BOOKING.CREATE,
+        API_CONFIG.ENDPOINTS.BOOKINGS.CREATE,
         bookingData
       );
       return response.data;
@@ -35,10 +44,10 @@ const bookingService = {
    * Get customer's booking list
    * @returns {Promise} API response with booking list
    */
-  async getBookingList() {
+  async getMyBookings() {
     try {
       const response = await axiosInstance.get(
-        API_CONFIG.ENDPOINTS.BOOKING.LIST
+        API_CONFIG.ENDPOINTS.BOOKINGS.MY_BOOKINGS
       );
       return response.data;
     } catch (error) {
@@ -48,94 +57,18 @@ const bookingService = {
   },
 
   /**
-   * Get booking details by ID
-   * @param {string} bookingId - Booking ID
-   * @returns {Promise} API response with booking details
-   */
-  async getBookingDetail(bookingId) {
-    try {
-      const response = await axiosInstance.get(
-        API_CONFIG.ENDPOINTS.BOOKING.DETAIL(bookingId)
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching booking detail:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Cancel a booking
+   * Cancel a booking (only when status is "Pending")
    * @param {string} bookingId - Booking ID
    * @returns {Promise} API response
    */
   async cancelBooking(bookingId) {
     try {
       const response = await axiosInstance.put(
-        API_CONFIG.ENDPOINTS.BOOKING.CANCEL(bookingId)
+        API_CONFIG.ENDPOINTS.BOOKINGS.CANCEL(bookingId)
       );
       return response.data;
     } catch (error) {
       console.error('Error canceling booking:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Check slot availability
-   * @param {Object} params - Query parameters
-   * @param {string} params.fieldID - Field ID
-   * @param {string} params.date - Date in YYYY-MM-DD format
-   * @returns {Promise} API response with availability data
-   */
-  async checkAvailability(params) {
-    try {
-      const response = await axiosInstance.get(
-        API_CONFIG.ENDPOINTS.BOOKING.CHECK_AVAILABILITY,
-        { params }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error checking availability:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Get booking details by field ID
-   * @param {string} fieldId - Field ID
-   * @param {string} date - Date in YYYY-MM-DD format (optional)
-   * @returns {Promise} API response with booking details
-   */
-  async getBookingDetailsByField(fieldId, date = null) {
-    try {
-      const url = API_CONFIG.ENDPOINTS.BOOKING_DETAIL.BY_FIELD(fieldId);
-      const params = date ? { date } : {};
-      const response = await axiosInstance.get(url, { params });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching booking details by field:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Get booking details by date range
-   * @param {Object} params - Query parameters
-   * @param {string} params.fieldID - Field ID
-   * @param {string} params.startDate - Start date in YYYY-MM-DD format
-   * @param {string} params.endDate - End date in YYYY-MM-DD format
-   * @returns {Promise} API response with booking details
-   */
-  async getBookingDetailsByDate(params) {
-    try {
-      const response = await axiosInstance.get(
-        API_CONFIG.ENDPOINTS.BOOKING_DETAIL.BY_DATE,
-        { params }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching booking details by date:', error);
       throw error;
     }
   },

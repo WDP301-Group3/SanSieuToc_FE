@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import tokenManager from '../utils/tokenManager';
 
 const AuthContext = createContext(null);
 
@@ -13,16 +14,25 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = () => {
       try {
         const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
+        const token = tokenManager.getToken();
 
-        if (storedUser && token) {
+        // Also check legacy key 'token' and migrate if needed
+        const legacyToken = localStorage.getItem('token');
+        if (!token && legacyToken) {
+          tokenManager.setToken(legacyToken);
+          localStorage.removeItem('token');
+        }
+
+        const activeToken = token || legacyToken;
+
+        if (storedUser && activeToken) {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
         }
       } catch (error) {
         console.error('Error checking auth:', error);
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        tokenManager.clearAuth();
       } finally {
         setLoading(false);
       }
@@ -33,13 +43,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData, token) => {
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
+    tokenManager.setToken(token);
+    // Clean up legacy key if exists
+    localStorage.removeItem('token');
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
     localStorage.removeItem('user');
+    tokenManager.clearAuth();
+    // Clean up legacy key if exists
     localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);

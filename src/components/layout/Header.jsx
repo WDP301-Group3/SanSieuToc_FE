@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { getUserAvatar } from '../../utils/defaultAvatar';
 import logo from '../../assets/images/logo.png';
 import '../../styles/Header.css';
 
@@ -66,22 +67,21 @@ const Header = () => {
             </Link>
             <Link
               className="header-nav-link"
-              to="/about"
-            >
-              {t('nav.about')}
-            </Link>
-            <Link
-              className="header-nav-link"
               to="/fields"
             >
               {t('nav.fields')}
             </Link>
-            
             <Link
               className="header-nav-link"
               to="/terms"
             >
               {t('footer.terms')}
+            </Link>
+            <Link
+              className="header-nav-link"
+              to="/about"
+            >
+              {t('nav.about')}
             </Link>
           </div>
 
@@ -107,7 +107,7 @@ const Header = () => {
                   onClick={() => setShowDropdown(!showDropdown)}
                 >
                   <img
-                    src={user?.image || 'https://via.placeholder.com/40'}
+                    src={getUserAvatar(user?.image, user?.name)}
                     alt={user?.name || 'User Avatar'}
                     className="header-avatar-image"
                   />

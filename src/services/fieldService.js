@@ -1,656 +1,427 @@
 /**
  * @fileoverview Field Service - API Layer for Sports Field Operations
- * 
- * This service handles all field-related API calls:
- * - Search and filter fields
- * - Get field details
- * - Check field availability
- * 
- * Features:
- * - Frontend validation before API calls (Defense in Depth)
- * - Input sanitization to prevent XSS/injection attacks
- * - Business rule validation
- * 
- * Currently using mock data for development
- * TODO: Replace with actual API calls when backend is ready
- * 
+ *
+ * Calls real backend endpoints:
+ *   GET /api/field/list                                      → searchFields
+ *   GET /api/field/categories                                → getCategoriesAndTypes
+ *   GET /api/field/types                                     → getCategoriesAndTypes
+ *   GET /api/field/types/category/:catId                     → getFieldTypesByCategory
+ *   GET /api/field/:id                                       → getFieldById
+ *   GET /api/customer/fields/:id/availability?date=YYYY-MM-DD → getFieldAvailability
+ *
+ * All functions return  { success: boolean, data?: any, error?: string }
+ *
  * @author San Sieu Toc Team
- * @date 2026-02-24
  */
 
-import {
-  mockFields,
-  mockBookingDetails,
-  mockCategories,
-  mockFieldTypes,
-  ALL_UTILITIES,
-  ALL_DISTRICTS,
-  PRICE_RANGE,
-  FIELD_STATUS,
-  BOOKING_STATUS
-} from '../data/mockData';
+import axiosInstance from './axios';
+import { API_CONFIG } from '../config/api.config';
 
-// Import validation utilities
-import { validateSearchFilters } from '../utils/validation';
+const { ENDPOINTS } = API_CONFIG;
 
 // ============================================================================
-// CONSTANTS
+// PUBLIC FIELD FUNCTIONS
 // ============================================================================
 
 /**
- * Items per page for pagination
- * @constant {number}
- */
-const ITEMS_PER_PAGE = 9;
-
-/**
- * API base URL (for future implementation)
- * @constant {string}
- */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// ============================================================================
-// MAIN FUNCTIONS
-// ============================================================================
-
-/**
- * Search and filter sports fields
- * 
- * Supports 6 main filter criteria:
- * - Text search (name, address, description)
- * - Category filter (Football, Tennis, Badminton, Basketball, Volleyball)
- * - Field type filter (only for Football: Sân 5, 7, 11 người)
- * - Location filter (district)
- * - Price range filter
- * - Date/time availability filter
- * 
- * Note: Utilities displayed on cards but NOT filterable (reduced complexity)
- * Note: Field type filter only shown when category === 'Football'
- * 
- * @param {Object} filters - Filter criteria
- * @param {string} [filters.searchText=''] - Text search query
- * @param {string} [filters.categoryName=''] - Category name
- * @param {string} [filters.fieldTypeName=''] - Field type name (only for Football)
- * @param {string} [filters.district=''] - District name
- * @param {number} [filters.priceMin=0] - Minimum price
- * @param {number} [filters.priceMax=1000000] - Maximum price
- * @param {string} [filters.date=''] - Date in YYYY-MM-DD format
- * @param {string} [filters.startTime=''] - Start time in HH:mm format
- * @param {string} [filters.endTime=''] - End time in HH:mm format
- * @param {string} [filters.status='Available'] - Field status
- * @param {boolean} [filters.onlyAvailable=true] - Show only available fields
- * @param {string} [filters.sortBy='name'] - Sort criteria
- * @param {number} [filters.page=1] - Page number
- * @param {number} [filters.limit=9] - Items per page
- * @returns {Promise<{success: boolean, data: Object, error?: string}>}
- * 
- * @example
- * // Search for Football fields in Quận 7
- * const result = await searchFields({
- *   categoryName: 'Football',
- *   district: 'Quận 7',
- *   priceMax: 300000
- * });
+ * Fetch all fields from BE, then apply client-side filter / sort / paginate.
+ *
+ * BE returns { success, data: { fields: [...] } }
+ * Each field has populated fieldTypeID (with categoryID) and managerID.
+ *
+ * @param {Object} filters
+ * @param {string}  [filters.searchText]
+ * @param {string}  [filters.categoryName]
+ * @param {string}  [filters.categoryId]
+ * @param {string}  [filters.fieldTypeName]
+ * @param {string}  [filters.fieldTypeId]
+ * @param {string}  [filters.district]
+ * @param {number}  [filters.priceMin]
+ * @param {number}  [filters.priceMax]
+ * @param {string}  [filters.status]        - 'all' (default), 'Available', 'Maintenance'
+ * @param {string}  [filters.sortBy]        - 'name' | 'price-asc' | 'price-desc' | 'newest'
+ * @param {number}  [filters.page]          - default 1
+ * @param {number}  [filters.limit]         - default 9
+ * @returns {Promise<{success:boolean, data?:Object, error?:string}>}
  */
 export const searchFields = async (filters = {}) => {
   try {
-    // ===== VALIDATION LAYER (Defense in Depth) =====
-    // Validate and sanitize input before processing
-    const validation = validateSearchFilters(filters);
-    
-    if (!validation.valid) {
-      console.warn('⚠️ Validation failed:', validation.errors);
-      return {
-        success: false,
-        error: Object.values(validation.errors)[0], // Return first error
-        validationErrors: validation.errors
-      };
+    const response = await axiosInstance.get(ENDPOINTS.FIELDS.LIST);
+    // BE: { success: true, data: { fields: [...] } }
+    const allFields = response.data?.data?.fields || response.data?.fields || [];
+
+    // Normalise each field so the rest of the UI keeps the same property shape
+    const normalised = allFields.map(normaliseField);
+
+    // ---- client-side filtering ----
+    let result = normalised;
+
+    // Text search — fuzzy / partial match across multiple fields
+    if (filters.searchText) {
+      const q = filters.searchText.toLowerCase().trim();
+      // Build token list so "san tennis" matches fields containing both words
+      const tokens = q.split(/\s+/).filter(Boolean);
+      result = result.filter(f => {
+        // All searchable strings for this field
+        const haystack = [
+          f.fieldName,
+          f.address,
+          f.description,
+          f.fieldType?.category?.categoryName,
+          f.fieldType?.typeName,
+          f.district,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        // Every token must appear somewhere in the haystack
+        return tokens.every(token => haystack.includes(token));
+      });
     }
-    
-    // Use sanitized filters
-    const sanitizedFilters = validation.sanitized;
-    
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE_URL}/fields/search`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(sanitizedFilters)
-    // });
-    // const data = await response.json();
-    // return data;
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Category by name
+    if (filters.categoryName) {
+      result = result.filter(f =>
+        f.fieldType?.category?.categoryName === filters.categoryName
+      );
+    }
 
-    // Get all fields
-    let fields = [...mockFields];
+    // Category by id
+    if (filters.categoryId) {
+      result = result.filter(f =>
+        f.fieldType?.category?._id === filters.categoryId ||
+        f.fieldType?.categoryID?._id === filters.categoryId ||
+        f.fieldType?.categoryID === filters.categoryId
+      );
+    }
 
-    // Apply filters (using sanitized data)
-    fields = applyFilters(fields, filters);
+    // Field type by name
+    if (filters.fieldTypeName) {
+      result = result.filter(f => f.fieldType?.typeName === filters.fieldTypeName);
+    }
 
-    // Apply sorting
-    fields = sortFields(fields, filters.sortBy || 'name');
+    // Field type by id
+    if (filters.fieldTypeId) {
+      result = result.filter(f =>
+        f.fieldType?._id === filters.fieldTypeId ||
+        f.fieldTypeID?._id === filters.fieldTypeId ||
+        f.fieldTypeID === filters.fieldTypeId
+      );
+    }
 
-    // Apply pagination
+    // District / address
+    if (filters.district) {
+      result = result.filter(f =>
+        f.address?.includes(filters.district) ||
+        f.district === filters.district
+      );
+    }
+
+    // Price range
+    if (filters.priceMin !== undefined) {
+      result = result.filter(f => f.hourlyPrice >= filters.priceMin);
+    }
+    if (filters.priceMax !== undefined) {
+      result = result.filter(f => f.hourlyPrice <= filters.priceMax);
+    }
+
+    // Status (default: show all statuses)
+    const statusFilter = filters.status || 'all';
+    if (statusFilter !== 'all') {
+      result = result.filter(f => f.status === statusFilter);
+    }
+
+    // ---- facets (computed from ALL normalised fields, NOT filtered result) ----
+    // This ensures all categories always appear in the sidebar even when one is selected
+    const categoryCount = {};
+    normalised.forEach(f => {
+      const catName = f.fieldType?.category?.categoryName;
+      if (catName) categoryCount[catName] = (categoryCount[catName] || 0) + 1;
+    });
+
+    const districtCount = {};
+    normalised.forEach(f => {
+      const d = f.district || extractDistrict(f.address);
+      if (d) districtCount[d] = (districtCount[d] || 0) + 1;
+    });
+
+    // ---- sort ----
+    result = sortFieldsArr(result, filters.sortBy || 'name');
+
+    // ---- paginate ----
     const page = filters.page || 1;
-    const limit = filters.limit || ITEMS_PER_PAGE;
-    const { items, totalPages, totalItems } = paginateFields(fields, page, limit);
+    const limit = filters.limit || 9;
+    const total = result.length;
+    const totalPages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const paginated = result.slice(start, start + limit);
 
-    // Return API-like response
+    const prices = normalised.map(f => f.hourlyPrice).filter(Boolean);
+
     return {
       success: true,
       data: {
-        fields: items,
-        pagination: {
-          page,
-          limit,
-          total: totalItems,
-          totalPages
-        },
+        fields: paginated,
+        pagination: { page, limit, total, totalPages },
         facets: {
-          categories: getCategoryCounts(mockFields),
-          districts: getDistrictCounts(mockFields),
-          priceRange: PRICE_RANGE
+          categories: Object.entries(categoryCount).map(([name, count]) => ({ name, count })),
+          districts: Object.entries(districtCount).map(([name, count]) => ({ name, count })),
+          priceRange: {
+            min: prices.length ? Math.min(...prices) : 0,
+            max: prices.length ? Math.max(...prices) : 1000000
+          }
         }
       }
     };
   } catch (error) {
-    console.error('Error searching fields:', error);
+    console.error('searchFields error:', error);
     return {
       success: false,
-      data: null,
-      error: error.message || 'Failed to search fields'
+      error: error.response?.data?.message || error.message || 'Lỗi tìm kiếm sân'
     };
   }
 };
 
 /**
- * Get field details by ID
- * 
- * Returns complete field information including:
- * - Field details
- * - Manager information
- * - Field type and category
- * - Availability for selected date (if provided)
- * 
- * @param {string} fieldId - Field ID
- * @param {Object} [options={}] - Additional options
- * @param {string} [options.date] - Date to check availability (YYYY-MM-DD)
- * @returns {Promise<{success: boolean, data: Object, error?: string}>}
- * 
- * @example
- * // Get field with availability for a specific date
- * const result = await getFieldById('6984ade0031fcdd6b5e78715', {
- *   date: '2026-02-24'
- * });
+ * Get a single field by ID.
+ * Uses the public GET /api/field/:id endpoint (status must be 'Available').
+ *
+ * @param {string} fieldId
+ * @param {Object} [options]
+ * @param {string} [options.date] - YYYY-MM-DD; also fetches availability if provided
+ * @returns {Promise<{success:boolean, data?:Object, error?:string}>}
  */
 export const getFieldById = async (fieldId, options = {}) => {
   try {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE_URL}/fields/${fieldId}`);
-    // const data = await response.json();
-    // return data;
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Find field
-    const field = mockFields.find(f => f._id === fieldId);
-
-    if (!field) {
-      return {
-        success: false,
-        data: null,
-        error: 'Field not found'
-      };
+    if (!fieldId) {
+      return { success: false, data: null, error: 'Field ID is required' };
     }
 
-    // Get availability if date provided
+    const response = await axiosInstance.get(ENDPOINTS.FIELDS.DETAIL(fieldId));
+    // BE getFieldDetail returns a flat object (not nested in data.data always)
+    const raw = response.data?.data || response.data;
+    const field = normaliseFieldDetail(raw);
+
     let availability = null;
     if (options.date) {
-      availability = await getFieldAvailability(fieldId, options.date);
+      const avRes = await getFieldAvailability(fieldId, options.date);
+      availability = avRes.success ? avRes.data : null;
     }
 
-    return {
-      success: true,
-      data: {
-        field,
-        availability: availability?.data || null
-      }
-    };
+    return { success: true, data: { field, availability } };
   } catch (error) {
-    console.error('Error getting field details:', error);
+    if (error.response?.status === 404) {
+      return { success: false, data: null, error: 'Không tìm thấy sân' };
+    }
+    console.error('getFieldById error:', error);
     return {
       success: false,
       data: null,
-      error: error.message || 'Failed to get field details'
+      error: error.response?.data?.message || error.message || 'Lỗi tải thông tin sân'
     };
   }
 };
 
 /**
- * Get field availability for a specific date
- * 
- * Returns all time slots with availability status
- * Checks against bookingdetails to determine occupied slots
- * 
- * @param {string} fieldId - Field ID
- * @param {string} date - Date in YYYY-MM-DD format
- * @returns {Promise<{success: boolean, data: Object, error?: string}>}
- * 
- * @example
- * // Check availability for tomorrow
- * const result = await getFieldAvailability('6984ade0031fcdd6b5e78715', '2026-02-25');
+ * Get field availability for a date.
+ * GET /api/customer/fields/:fieldId/availability?date=YYYY-MM-DD
+ *
+ * @param {string} fieldId
+ * @param {string} date - YYYY-MM-DD
+ * @returns {Promise<{success:boolean, data?:Object, error?:string}>}
  */
 export const getFieldAvailability = async (fieldId, date) => {
   try {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE_URL}/fields/${fieldId}/availability?date=${date}`);
-    // const data = await response.json();
-    // return data;
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 150));
-
-    // Find field
-    const field = mockFields.find(f => f._id === fieldId);
-
-    if (!field) {
-      return {
-        success: false,
-        data: null,
-        error: 'Field not found'
-      };
+    if (!fieldId || !date) {
+      return { success: false, data: null, error: 'Field ID and date are required' };
     }
 
-    // Generate time slots for the field
-    const slots = generateTimeSlots(field, date);
+    const response = await axiosInstance.get(
+      ENDPOINTS.BOOKINGS.AVAILABILITY(fieldId),
+      { params: { date } }
+    );
 
-    return {
-      success: true,
-      data: {
-        fieldId,
-        date,
-        slots,
-        field: {
-          _id: field._id,
-          fieldName: field.fieldName,
-          hourlyPrice: field.hourlyPrice,
-          slotDuration: field.slotDuration
-        }
-      }
-    };
+    const raw = response.data?.data || response.data;
+    return { success: true, data: raw };
   } catch (error) {
-    console.error('Error getting field availability:', error);
+    console.error('getFieldAvailability error:', error);
     return {
       success: false,
       data: null,
-      error: error.message || 'Failed to get field availability'
+      error: error.response?.data?.message || error.message || 'Lỗi tải lịch sân'
     };
   }
 };
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
 /**
- * Apply all filters to fields array
- * 
- * @private
- * @param {Array} fields - Array of field objects
- * @param {Object} filters - Filter criteria
- * @returns {Array} Filtered fields
+ * Fetch categories and field types in parallel (for filter UI and AppContext global data).
+ *
+ * @returns {Promise<{success:boolean, data?:{categories:Array, fieldTypes:Array}, error?:string}>}
  */
-const applyFilters = (fields, filters) => {
-  return fields.filter(field => {
-    // 1. Text search filter
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      const matchesSearch = 
-        field.fieldName.toLowerCase().includes(query) ||
-        field.address.toLowerCase().includes(query) ||
-        field.description.toLowerCase().includes(query);
-      
-      if (!matchesSearch) return false;
-    }
+export const getCategoriesAndTypes = async () => {
+  try {
+    const [catRes, typeRes] = await Promise.all([
+      axiosInstance.get(ENDPOINTS.FIELDS.CATEGORIES),
+      axiosInstance.get(ENDPOINTS.FIELDS.TYPES)
+    ]);
 
-    // 2. Category filter
-    if (filters.categoryName) {
-      if (field.fieldType.category.categoryName !== filters.categoryName) {
-        return false;
-      }
-    }
+    const categories = catRes.data?.data?.categories || catRes.data?.categories || [];
+    const fieldTypes = typeRes.data?.data?.fieldTypes || typeRes.data?.fieldTypes || [];
 
-    // 3. Field type filter (only meaningful for Football)
-    if (filters.fieldTypeName) {
-      if (field.fieldType.typeName !== filters.fieldTypeName) {
-        return false;
-      }
-    }
-
-    // 4. District filter
-    if (filters.district) {
-      if (field.district !== filters.district) {
-        return false;
-      }
-    }
-
-    // 5. Price range filter
-    const priceMin = filters.priceMin !== undefined ? filters.priceMin : 0;
-    const priceMax = filters.priceMax !== undefined ? filters.priceMax : Infinity;
-    
-    if (field.hourlyPrice < priceMin || field.hourlyPrice > priceMax) {
-      return false;
-    }
-
-    // 6. Status filter
-    if (filters.status && filters.status !== 'all') {
-      if (field.status !== filters.status) {
-        return false;
-      }
-    }
-
-    // 7. Utilities filter - REMOVED (Simplified UX)
-    // Utilities are displayed on cards but not filterable
-    // Rationale: Reduce filter complexity, most users care about category/price/location
-
-    // 8. Availability filter (if date and time provided)
-    if (filters.onlyAvailable && filters.date && filters.startTime && filters.endTime) {
-      // Check if field has any conflicting bookings
-      const isAvailable = checkFieldAvailability(
-        field._id,
-        filters.date,
-        filters.startTime,
-        filters.endTime
-      );
-      if (!isAvailable) return false;
-    }
-
-    // 9. Status must be Available if onlyAvailable is true (and no date filter)
-    if (filters.onlyAvailable && !filters.date && field.status !== FIELD_STATUS.AVAILABLE) {
-      return false;
-    }
-
-    return true;
-  });
-};
-
-/**
- * Sort fields by specified criteria
- * 
- * @private
- * @param {Array} fields - Array of field objects
- * @param {string} sortBy - Sort criteria ('name', 'price-asc', 'price-desc', 'newest')
- * @returns {Array} Sorted fields
- */
-const sortFields = (fields, sortBy) => {
-  const sorted = [...fields];
-
-  switch (sortBy) {
-    case 'name':
-      return sorted.sort((a, b) =>
-        a.fieldName.localeCompare(b.fieldName, 'vi')
-      );
-
-    case 'price-asc':
-      return sorted.sort((a, b) => a.hourlyPrice - b.hourlyPrice);
-
-    case 'price-desc':
-      return sorted.sort((a, b) => b.hourlyPrice - a.hourlyPrice);
-
-    case 'newest':
-      return sorted.sort((a, b) =>
-        new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
-    default:
-      return sorted;
+    return { success: true, data: { categories, fieldTypes } };
+  } catch (error) {
+    console.error('getCategoriesAndTypes error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi tải danh mục'
+    };
   }
 };
 
 /**
- * Paginate fields array
- * 
- * @private
- * @param {Array} fields - Array of field objects
- * @param {number} page - Page number (1-indexed)
- * @param {number} limit - Items per page
- * @returns {{items: Array, totalPages: number, totalItems: number}}
+ * Fetch field types for a specific category.
+ * GET /api/field/types/category/:categoryId
+ *
+ * @param {string} categoryId
+ * @returns {Promise<{success:boolean, data?:{category:Object, fieldTypes:Array}, error?:string}>}
  */
-const paginateFields = (fields, page, limit) => {
-  const totalItems = fields.length;
-  const totalPages = Math.ceil(totalItems / limit);
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
+export const getFieldTypesByCategory = async (categoryId) => {
+  try {
+    if (!categoryId) return { success: false, error: 'Category ID is required' };
+
+    const response = await axiosInstance.get(ENDPOINTS.FIELDS.TYPES_BY_CATEGORY(categoryId));
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getFieldTypesByCategory error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi tải loại sân'
+    };
+  }
+};
+
+/**
+ * Quick search — top N fields matching a text query.
+ * Fetches all fields and filters client-side.
+ *
+ * @param {string} query
+ * @param {number} [limit=5]
+ * @returns {Promise<Array>}
+ */
+export const quickSearch = async (query, limit = 5) => {
+  if (!query || query.trim().length < 2) return [];
+  try {
+    const result = await searchFields({ searchText: query.trim(), status: 'all', page: 1, limit: 100 });
+    if (!result.success) return [];
+    return result.data.fields.slice(0, limit).map(f => ({
+      id: f._id,
+      name: f.fieldName,
+      address: f.address,
+      category: f.fieldType?.category?.categoryName || f.fieldType?.typeName,
+      price: f.hourlyPrice,
+      imageUrl: (f.images || f.image)?.[0] || null
+    }));
+  } catch {
+    return [];
+  }
+};
+
+// ============================================================================
+// NORMALISATION HELPERS (private)
+// ============================================================================
+
+/**
+ * Normalise a field record from GET /api/field/list.
+ * BE populates fieldTypeID (with nested categoryID) and managerID.
+ */
+function normaliseField(f) {
+  if (!f) return f;
+
+  const ftRaw = f.fieldTypeID;
+  const catRaw = ftRaw?.categoryID;
+
+  const fieldType = ftRaw
+    ? {
+        _id: ftRaw._id,
+        typeName: ftRaw.typeName,
+        categoryID: catRaw?._id ?? catRaw,
+        category: catRaw
+          ? { _id: catRaw._id, categoryName: catRaw.categoryName }
+          : undefined
+      }
+    : f.fieldType; // already normalised or from fallback
+
+  const manager = f.managerID
+    ? { _id: f.managerID._id, name: f.managerID.name, phone: f.managerID.phone, image: f.managerID.image }
+    : f.manager;
+
+  const district = f.district || extractDistrict(f.address);
 
   return {
-    items: fields.slice(startIndex, endIndex),
-    totalPages,
-    totalItems
+    ...f,
+    fieldType,
+    manager,
+    district,
+    images: f.images || f.image || [],
+    image: f.images || f.image || []
   };
-};
+}
 
 /**
- * Check if field is available for specific date and time
- * 
- * Kiểm tra xem sân có bị đặt trong khoảng thời gian yêu cầu không
- * 
- * @private
- * @param {string} fieldId - Field ID
- * @param {string} date - Date in YYYY-MM-DD format
- * @param {string} startTime - Start time in HH:mm format
- * @param {string} endTime - End time in HH:mm format
- * @returns {boolean} True if available, false if booked
+ * Normalise a field record from GET /api/field/:id (getFieldDetail).
+ * BE returns { fieldType, category, manager, images } at top level.
  */
-const checkFieldAvailability = (fieldId, date, startTime, endTime) => {
-  // Convert requested time to Date objects for comparison
-  const requestStart = new Date(`${date}T${startTime}:00.000Z`);
-  const requestEnd = new Date(`${date}T${endTime}:00.000Z`);
+function normaliseFieldDetail(f) {
+  if (!f) return f;
+  return {
+    ...f,
+    // Nest category inside fieldType for UI consistency
+    fieldType: f.fieldType
+      ? { ...f.fieldType, category: f.category || f.fieldType?.category }
+      : f.fieldType,
+    images: f.images || f.image || [],
+    image: f.images || f.image || []
+  };
+}
 
-  // Find all active bookings for this field
-  const activeBookings = mockBookingDetails.filter(
-    booking => 
-      booking.fieldID === fieldId &&
-      booking.status === BOOKING_STATUS.ACTIVE
-  );
+/**
+ * Try to extract a district string from an address for filter facets.
+ */
+function extractDistrict(address) {
+  if (!address) return null;
+  const match = address.match(/(Quận\s+[\w\d]+|Q\.\s*[\w\d]+|Huyện\s+[\w\s]+|TP\.[\w\s]+)/i);
+  return match ? match[0].trim() : null;
+}
 
-  // Check if any booking conflicts with requested time
-  for (const booking of activeBookings) {
-    const bookingStart = new Date(booking.startTime);
-    const bookingEnd = new Date(booking.endTime);
-
-    // Check for time overlap
-    // Overlap occurs if: (requestStart < bookingEnd) AND (requestEnd > bookingStart)
-    const hasOverlap = requestStart < bookingEnd && requestEnd > bookingStart;
-
-    if (hasOverlap) {
-      return false; // Not available
-    }
+/**
+ * Sort an array of fields.
+ */
+function sortFieldsArr(fields, sortBy) {
+  const arr = [...fields];
+  switch (sortBy) {
+    case 'name':
+      return arr.sort((a, b) => (a.fieldName || '').localeCompare(b.fieldName || '', 'vi'));
+    case 'price-asc':
+      return arr.sort((a, b) => (a.hourlyPrice || 0) - (b.hourlyPrice || 0));
+    case 'price-desc':
+      return arr.sort((a, b) => (b.hourlyPrice || 0) - (a.hourlyPrice || 0));
+    case 'newest':
+      return arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    default:
+      return arr;
   }
-
-  return true; // Available
-};
-
-/**
- * Generate time slots for a field on a specific date
- * 
- * Tạo danh sách các khung giờ có thể đặt cho sân
- * dựa trên giờ mở cửa, đóng cửa và thời lượng mỗi slot
- * 
- * @private
- * @param {Object} field - Field object
- * @param {string} date - Date in YYYY-MM-DD format
- * @returns {Array<{startTime: string, endTime: string, available: boolean, price: number}>}
- */
-const generateTimeSlots = (field, date) => {
-  const slots = [];
-  
-  // Parse opening and closing times
-  const [openHour, openMinute] = field.openingTime.split(':').map(Number);
-  const [closeHour, closeMinute] = field.closingTime.split(':').map(Number);
-  
-  // Convert to minutes since midnight
-  const openMinutes = openHour * 60 + openMinute;
-  const closeMinutes = closeHour * 60 + closeMinute;
-  const slotDuration = field.slotDuration;
-
-  // Generate slots
-  for (let minutes = openMinutes; minutes + slotDuration <= closeMinutes; minutes += slotDuration) {
-    const startHour = Math.floor(minutes / 60);
-    const startMinute = minutes % 60;
-    const endMinutes = minutes + slotDuration;
-    const endHour = Math.floor(endMinutes / 60);
-    const endMinute = endMinutes % 60;
-
-    const startTime = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
-    const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
-
-    // Check availability
-    const available = checkFieldAvailability(field._id, date, startTime, endTime);
-
-    slots.push({
-      startTime,
-      endTime,
-      available,
-      price: field.hourlyPrice,
-      duration: slotDuration
-    });
-  }
-
-  return slots;
-};
-
-/**
- * Get category counts for faceted search
- * 
- * @private
- * @param {Array} fields - Array of all fields
- * @returns {Array<{name: string, count: number}>}
- */
-const getCategoryCounts = (fields) => {
-  const counts = {};
-  
-  fields.forEach(field => {
-    const categoryName = field.fieldType.category.categoryName;
-    counts[categoryName] = (counts[categoryName] || 0) + 1;
-  });
-
-  return Object.entries(counts).map(([name, count]) => ({
-    name,
-    count
-  }));
-};
-
-/**
- * Get district counts for faceted search
- * 
- * @private
- * @param {Array} fields - Array of all fields
- * @returns {Array<{name: string, count: number}>}
- */
-const getDistrictCounts = (fields) => {
-  const counts = {};
-  
-  fields.forEach(field => {
-    const district = field.district;
-    counts[district] = (counts[district] || 0) + 1;
-  });
-
-  return Object.entries(counts).map(([name, count]) => ({
-    name,
-    count
-  }));
-};
-
-/**
- * Get available time slots for a field on a specific date
- * Backend calculates slots based on field's startTime, endTime, and slotDuration
- * and checks availability against existing bookings
- * 
- * @async
- * @param {string} fieldId - Field ID
- * @param {string} date - Date in YYYY-MM-DD format
- * @returns {Promise<Array>} Array of time slot objects
- * @example
- * Response: [
- *   { time: "08:00 - 09:30", startTime: "08:00", endTime: "09:30", available: true },
- *   { time: "09:30 - 11:00", startTime: "09:30", endTime: "11:00", available: false },
- * ]
- */
-const getTimeSlots = async (fieldId, date) => {
-  try {
-    // TODO: Replace with actual API call when backend is ready
-    // const response = await axiosInstance.get(
-    //   `/manager/field/${fieldId}/time-slots`,
-    //   { params: { date } }
-    // );
-    // return response.data;
-
-    // Mock implementation for now
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const field = mockFields.find(f => f.id === parseInt(fieldId));
-    if (!field) {
-      throw new Error('Field not found');
-    }
-
-    // Get field's time configuration (from backend)
-    const { startTime = '08:00', endTime = '21:00', slotDuration = 90 } = field;
-
-    // Backend generates time slots
-    const slots = [];
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    
-    let currentMinutes = startHour * 60 + startMinute;
-    const endMinutes = endHour * 60 + endMinute;
-    
-    while (currentMinutes + slotDuration <= endMinutes) {
-      const slotStartHour = Math.floor(currentMinutes / 60);
-      const slotStartMinute = currentMinutes % 60;
-      const slotEndMinutes = currentMinutes + slotDuration;
-      const slotEndHour = Math.floor(slotEndMinutes / 60);
-      const slotEndMinute = slotEndMinutes % 60;
-      
-      const timeStart = `${slotStartHour.toString().padStart(2, '0')}:${slotStartMinute.toString().padStart(2, '0')}`;
-      const timeEnd = `${slotEndHour.toString().padStart(2, '0')}:${slotEndMinute.toString().padStart(2, '0')}`;
-      
-      // Check availability against existing bookings
-      const isBooked = mockBookingDetails.some(booking => {
-        if (booking.fieldId !== parseInt(fieldId)) return false;
-        
-        const bookingDate = new Date(booking.date).toISOString().split('T')[0];
-        if (bookingDate !== date) return false;
-        
-        return booking.timeSlot.startTime === timeStart && booking.timeSlot.endTime === timeEnd;
-      });
-      
-      slots.push({
-        time: `${timeStart} - ${timeEnd}`,
-        startTime: timeStart,
-        endTime: timeEnd,
-        available: !isBooked
-      });
-      
-      currentMinutes += slotDuration;
-    }
-    
-    return slots;
-  } catch (error) {
-    console.error('Error fetching time slots:', error);
-    throw error;
-  }
-};
+}
 
 // ============================================================================
-// EXPORTS
+// DEFAULT EXPORT (backward compat)
 // ============================================================================
 
 export default {
   searchFields,
   getFieldById,
   getFieldAvailability,
-  getTimeSlots
+  getCategoriesAndTypes,
+  getFieldTypesByCategory,
+  quickSearch
 };

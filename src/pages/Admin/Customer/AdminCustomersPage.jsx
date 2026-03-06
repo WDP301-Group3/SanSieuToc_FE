@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mockUsers, mockBookings, USER_ROLES } from '../../../data/mockData';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/AdminCustomersPage.css';
 
 /**
@@ -31,6 +32,7 @@ const STATUS_CONFIG = {
 };
 
 const AdminCustomersPage = () => {
+  const notification = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,7 +113,7 @@ const AdminCustomersPage = () => {
   const handleConfirm = () => {
     // In real app, call API here
     setConfirmModal(null);
-    alert('Thao tác đã được thực hiện (mock).');
+    notification.success('Thao tác đã được thực hiện.');
   };
 
   return (

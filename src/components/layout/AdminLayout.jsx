@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { getUserAvatar } from '../../utils/defaultAvatar';
 import logo from '../../assets/images/logo.png';
 import '../../styles/AdminLayout.css';
 
@@ -100,7 +101,7 @@ const AdminLayout = () => {
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <img
-                  src={user?.image || 'https://via.placeholder.com/40'}
+                  src={getUserAvatar(user?.image, user?.name)}
                   alt={user?.name || 'Admin'}
                   className="admin-avatar-img"
                 />

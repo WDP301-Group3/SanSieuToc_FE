@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useNotification } from '../../../context/NotificationContext';
 import {
   mockCategories,
   mockFieldTypes,
@@ -30,6 +31,7 @@ const utilityLabelMap = {
 
 const AdminFieldCreatePage = () => {
   const navigate = useNavigate();
+  const notification = useNotification();
 
   /* ---------- Form state — all empty / default ---------- */
   const [fieldName, setFieldName] = useState('');
@@ -136,8 +138,7 @@ const AdminFieldCreatePage = () => {
         : null,
     };
 
-    console.log('New field data:', newField);
-    alert(`Tạo sân "${fieldName}" thành công!`);
+    notification.success(`Tạo sân "${fieldName}" thành công!`);
     navigate('/admin/fields');
   };
 

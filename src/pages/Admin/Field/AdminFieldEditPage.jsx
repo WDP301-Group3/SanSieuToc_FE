@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNotification } from '../../../context/NotificationContext';
 import {
   mockFields,
   mockCategories,
@@ -32,6 +33,7 @@ const utilityLabelMap = {
 const AdminFieldEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   // Find field from mockData
   const field = mockFields.find((f) => f._id === id);
@@ -165,8 +167,7 @@ const AdminFieldEditPage = () => {
       } : field.manager,
     };
 
-    console.log('Updated field data:', updatedField);
-    alert(`Cập nhật sân "${fieldName}" thành công!`);
+    notification.success(`Cập nhật sân "${fieldName}" thành công!`);
     navigate(`/admin/fields/${field._id}`);
   };
 
