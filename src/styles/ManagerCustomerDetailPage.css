@@ -1,5 +1,5 @@
-/* ===== Admin Customer Detail Page ===== */
-.admin-customer-detail-page {
+﻿/* ===== Admin Customer Detail Page ===== */
+.manager-customer-detail-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -603,4 +603,136 @@
     justify-content: center;
     width: 100%;
   }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-customer-detail {
+  color: #f1f5f9;
+}
+
+.dark .customer-detail-header h1 {
+  color: #f1f5f9;
+}
+
+.dark .customer-detail-header p {
+  color: #94a3b8;
+}
+
+.dark .back-btn {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .back-btn:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .customer-profile-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customer-name-heading {
+  color: #f1f5f9;
+}
+
+.dark .customer-email-text {
+  color: #94a3b8;
+}
+
+.dark .profile-info-label {
+  color: #94a3b8;
+}
+
+.dark .profile-info-value {
+  color: #f1f5f9;
+}
+
+.dark .profile-info-row {
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .customer-stats-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customer-stats-card h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .stat-number {
+  color: #4ade80;
+}
+
+.dark .stat-label-text {
+  color: #94a3b8;
+}
+
+.dark .customer-bookings-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customer-bookings-card h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .customer-bookings-table th {
+  background: #152015;
+  color: #94a3b8;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .customer-bookings-table td {
+  color: #d1d5db;
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .customer-bookings-table tbody tr:hover {
+  background: #1e2e1e;
+}
+
+.dark .status-badge {
+  background: rgba(74,222,128,0.15);
+  color: #86efac;
+}
+
+.dark .status-badge.banned {
+  background: rgba(248,113,113,0.15);
+  color: #fca5a5;
+}
+
+.dark .status-badge.inactive {
+  background: rgba(156,163,175,0.15);
+  color: #9ca3af;
+}
+
+.dark .action-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .action-card h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .action-card p {
+  color: #94a3b8;
+}
+
+.dark .loading-container {
+  color: #94a3b8;
+}
+
+.dark .error-container {
+  color: #fca5a5;
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useNotification } from '../../../context/NotificationContext';
 import {
@@ -9,7 +9,7 @@ import {
   ALL_DISTRICTS,
   FIELD_STATUS,
 } from '../../../data/mockData';
-import '../../../styles/AdminFieldEditPage.css';
+import '../../../styles/ManagerFieldEditPage.css';
 
 /**
  * Map utility key → Vietnamese label + icon
@@ -29,7 +29,7 @@ const utilityLabelMap = {
   Scoreboard: { label: 'Bảng điểm', icon: 'scoreboard' },
 };
 
-const AdminFieldCreatePage = () => {
+const ManagerFieldCreatePage = () => {
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -497,4 +497,4 @@ const AdminFieldCreatePage = () => {
   );
 };
 
-export default AdminFieldCreatePage;
+export default ManagerFieldCreatePage;

@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNotification } from '../../context/NotificationContext';
 import bookingService from '../../services/bookingService';
+import feedbackService from '../../services/feedbackService';
 import MapModal from '../../components/Map/MapModal';
 import QRPaymentModal from '../../components/QRPaymentModal';
 import {
@@ -36,6 +37,12 @@ const BOOKING_STATUS_CONFIG = {
     label: 'Đã hủy',
     bannerClass: 'cancelled',
     badgeClass: 'status-cancelled',
+  },
+  Expired: {
+    icon: 'timer_off',
+    label: 'Hết hạn thanh toán',
+    bannerClass: 'cancelled',
+    badgeClass: 'status-expired',
   },
 };
 
@@ -94,6 +101,145 @@ const getUtilityLabels = (utilities) => {
  */
 const getFieldRules = (categoryName) => {
   return FIELD_RULES_BY_CATEGORY[categoryName] || FIELD_RULES_BY_CATEGORY.Football;
+};
+
+// ============================================================================
+// FEEDBACK SUB-COMPONENTS
+// ============================================================================
+
+const StarRating = ({ value, onChange, readonly = false }) => (
+  <div className="bd-star-rating">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <span
+        key={star}
+        className={`material-symbols-outlined bd-star ${value >= star ? 'filled' : ''} ${!readonly ? 'interactive' : ''}`}
+        onClick={() => !readonly && onChange && onChange(star)}
+      >
+        star
+      </span>
+    ))}
+  </div>
+);
+
+const FeedbackSection = ({ detail, bookingId }) => {
+  const notification = useNotification();
+  const [feedback, setFeedback] = useState(detail.feedback || null);
+  const [isWriting, setIsWriting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [rating, setRating] = useState(feedback?.rating || feedback?.rate || 5);
+  const [comment, setComment] = useState(feedback?.comment || feedback?.content || '');
+  const [saving, setSaving] = useState(false);
+
+  const detailId = detail.id || detail._id;
+
+  const handleSubmit = async () => {
+    if (!comment.trim()) { notification.error('Vui lòng nhập nội dung đánh giá.'); return; }
+    if (comment.trim().length > 500) { notification.error('Nội dung đánh giá tối đa 500 ký tự.'); return; }
+    setSaving(true);
+    try {
+      const result = await feedbackService.createFeedback({ bookingDetailId: detailId, rating, comment: comment.trim() });
+      if (result.success) {
+        setFeedback(result.data?.feedback || result.data || { rate: rating, content: comment.trim() });
+        setIsWriting(false);
+        notification.success('Đã gửi đánh giá thành công!');
+      } else { notification.error(result.error || 'Gửi đánh giá thất bại.'); }
+    } catch { notification.error('Có lỗi xảy ra. Vui lòng thử lại.'); }
+    finally { setSaving(false); }
+  };
+
+  const handleUpdate = async () => {
+    if (!comment.trim()) { notification.error('Vui lòng nhập nội dung đánh giá.'); return; }
+    if (comment.trim().length > 500) { notification.error('Nội dung đánh giá tối đa 500 ký tự.'); return; }
+    setSaving(true);
+    try {
+      const feedbackId = feedback?._id || feedback?.id;
+      const result = await feedbackService.updateFeedback(feedbackId, { rating, comment: comment.trim() });
+      if (result.success) {
+        setFeedback((prev) => ({ ...prev, rate: rating, content: comment.trim() }));
+        setIsEditing(false);
+        notification.success('Đã cập nhật đánh giá!');
+      } else { notification.error(result.error || 'Cập nhật thất bại.'); }
+    } catch { notification.error('Có lỗi xảy ra. Vui lòng thử lại.'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      const feedbackId = feedback?._id || feedback?.id;
+      const result = await feedbackService.deleteFeedback(feedbackId);
+      if (result.success) {
+        setFeedback(null); setShowDeleteConfirm(false); setRating(5); setComment('');
+        notification.success('Đã xóa đánh giá.');
+      } else { notification.error(result.error || 'Xóa thất bại.'); }
+    } catch { notification.error('Có lỗi xảy ra. Vui lòng thử lại.'); }
+    finally { setSaving(false); }
+  };
+
+  const openEdit = () => { setRating(feedback?.rate || feedback?.rating || 5); setComment(feedback?.content || feedback?.comment || ''); setIsEditing(true); };
+  const cancelForm = () => { setIsWriting(false); setIsEditing(false); setRating(feedback?.rate || feedback?.rating || 5); setComment(feedback?.content || feedback?.comment || ''); };
+
+  if (feedback && !isEditing) {
+    return (
+      <div className="bd-feedback-existing">
+        <div className="bd-feedback-header">
+          <span className="material-symbols-outlined bd-feedback-icon">rate_review</span>
+          <span className="bd-feedback-label">Đánh giá của bạn</span>
+          <div className="bd-feedback-actions-small">
+            <button className="bd-feedback-btn-icon" onClick={openEdit} title="Sửa đánh giá"><span className="material-symbols-outlined">edit</span></button>
+            <button className="bd-feedback-btn-icon danger" onClick={() => setShowDeleteConfirm(true)} title="Xóa đánh giá"><span className="material-symbols-outlined">delete</span></button>
+          </div>
+        </div>
+        <StarRating value={feedback.rate || feedback.rating} readonly />
+        <p className="bd-feedback-comment">"{feedback.content || feedback.comment}"</p>
+        {showDeleteConfirm && (
+          <div className="bd-feedback-delete-confirm">
+            <p>Xác nhận xóa đánh giá này?</p>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <button className="bd-feedback-btn secondary" onClick={() => setShowDeleteConfirm(false)} disabled={saving}>Hủy</button>
+              <button className="bd-feedback-btn danger" onClick={handleDelete} disabled={saving}>{saving ? 'Đang xóa...' : 'Xóa'}</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (isEditing) {
+    return (
+      <div className="bd-feedback-form">
+        <p className="bd-feedback-form-title">Chỉnh sửa đánh giá</p>
+        <StarRating value={rating} onChange={setRating} />
+        <textarea className="bd-feedback-textarea" placeholder="Chia sẻ trải nghiệm của bạn..." value={comment} onChange={(e) => setComment(e.target.value)} rows={3} />
+        <div className="bd-feedback-form-actions">
+          <button className="bd-feedback-btn secondary" onClick={cancelForm} disabled={saving}>Hủy</button>
+          <button className="bd-feedback-btn primary" onClick={handleUpdate} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu'}</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isWriting) {
+    return (
+      <button className="bd-feedback-write-btn" onClick={() => setIsWriting(true)}>
+        <span className="material-symbols-outlined">rate_review</span>
+        Viết đánh giá
+      </button>
+    );
+  }
+
+  return (
+    <div className="bd-feedback-form">
+      <p className="bd-feedback-form-title">Đánh giá slot này</p>
+      <StarRating value={rating} onChange={setRating} />
+      <textarea className="bd-feedback-textarea" placeholder="Chia sẻ trải nghiệm của bạn về sân..." value={comment} onChange={(e) => setComment(e.target.value)} rows={3} />
+      <div className="bd-feedback-form-actions">
+        <button className="bd-feedback-btn secondary" onClick={cancelForm} disabled={saving}>Hủy</button>
+        <button className="bd-feedback-btn primary" onClick={handleSubmit} disabled={saving}>{saving ? 'Đang gửi...' : 'Gửi đánh giá'}</button>
+      </div>
+    </div>
+  );
 };
 
 // ============================================================================
@@ -324,33 +470,41 @@ const BookingDetailPage = () => {
                   <span className="material-symbols-outlined">calendar_month</span>
                   Chi tiết các slot ({bookingDetailsList.length} slot)
                 </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {bookingDetailsList.map((detail, idx) => {
                     const detailStart = new Date(detail.startTime);
                     const detailEnd = new Date(detail.endTime);
                     const dateStr = detailStart.toLocaleDateString('vi-VN');
                     const timeStr = `${String(detailStart.getHours()).padStart(2, '0')}:${String(detailStart.getMinutes()).padStart(2, '0')} - ${String(detailEnd.getHours()).padStart(2, '0')}:${String(detailEnd.getMinutes()).padStart(2, '0')}`;
+                    const canFeedback = detail.status === 'Completed';
                     return (
                       <div key={detail.id || idx} style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '0.625rem 0.75rem', background: 'var(--bg-secondary)', borderRadius: '0.5rem',
-                        fontSize: '0.875rem'
+                        padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '0.5rem',
+                        fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem'
                       }}>
-                        <div>
-                          <span style={{ fontWeight: 500 }}>{dateStr}</span>
-                          <span style={{ color: 'var(--text-muted)', margin: '0 0.5rem' }}>•</span>
-                          <span>{timeStr}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <span style={{ fontWeight: 500 }}>{dateStr}</span>
+                            <span style={{ color: 'var(--text-muted)', margin: '0 0.5rem' }}>•</span>
+                            <span>{timeStr}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>{detail.price?.toLocaleString('vi-VN')}đ</span>
+                            <span style={{
+                              padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500,
+                              background: detail.status === 'Active' ? '#dcfce7' : detail.status === 'Completed' ? '#dbeafe' : '#fee2e2',
+                              color: detail.status === 'Active' ? '#16a34a' : detail.status === 'Completed' ? '#2563eb' : '#dc2626'
+                            }}>
+                              {detail.status}
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ color: 'var(--text-muted)' }}>{detail.price?.toLocaleString('vi-VN')}đ</span>
-                          <span style={{
-                            padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500,
-                            background: detail.status === 'Active' ? '#dcfce7' : detail.status === 'Completed' ? '#dbeafe' : '#fee2e2',
-                            color: detail.status === 'Active' ? '#16a34a' : detail.status === 'Completed' ? '#2563eb' : '#dc2626'
-                          }}>
-                            {detail.status}
-                          </span>
-                        </div>
+                        {canFeedback && (
+                          <FeedbackSection
+                            detail={detail}
+                            bookingId={bookingId}
+                          />
+                        )}
                       </div>
                     );
                   })}

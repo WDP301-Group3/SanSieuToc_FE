@@ -1,0 +1,396 @@
+/**
+ * @fileoverview Manager Service - API Layer for Manager Dashboard Operations
+ *
+ * Calls real backend endpoints:
+ *   GET /api/manager/dashboard/stats         → getDashboardStats
+ *   GET /api/manager/dashboard/summary       → getDashboardSummary
+ *   GET /api/manager/dashboard/recent-bookings → getRecentBookings
+ *   GET /api/manager/customers               → getCustomers
+ *   GET /api/manager/customers/stats         → getCustomerStats
+ *   GET /api/manager/customers/:id           → getCustomerById
+ *   PUT /api/manager/customers/:id/status    → updateCustomerStatus
+ *   GET /api/feedback/all                    → getAllFeedbacks (manager view)
+ *   DELETE /api/feedback/delete/:id          → deleteFeedback
+ *   GET /api/manager/field/categories        → getManagerCategories
+ *   GET /api/manager/field/types/category/:catId → getManagerTypesByCategory
+ *   GET /api/manager/field/create-form       → getFieldCreateForm
+ *   GET /api/manager/field/:id               → getManagerFieldById
+ *   POST /api/manager/field/create           → createField
+ *   PUT /api/manager/field/:id               → updateField
+ *   DELETE /api/manager/field/:id            → deleteField
+ *
+ * All functions return { success: boolean, data?: any, error?: string }
+ *
+ * @author San Sieu Toc Team
+ */
+import axiosInstance from './axios';
+import { API_CONFIG } from '../config/api.config';
+
+const { ENDPOINTS } = API_CONFIG;
+
+// ============================================================================
+// DASHBOARD
+// ============================================================================
+
+/**
+ * Get full dashboard statistics.
+ * GET /api/manager/dashboard/stats
+ */
+export const getDashboardStats = async () => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.DASHBOARD.STATS);
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getDashboardStats error:', error);
+    return {
+      success: false,
+      data: null,
+      error: error.response?.data?.message || error.message || 'Lỗi tải thống kê',
+    };
+  }
+};
+
+/**
+ * Get dashboard summary (fields/customers/bookings/feedbacks counts).
+ * GET /api/manager/dashboard/summary
+ */
+export const getDashboardSummary = async () => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.DASHBOARD.SUMMARY);
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getDashboardSummary error:', error);
+    return {
+      success: false,
+      data: null,
+      error: error.response?.data?.message || error.message || 'Lỗi tải tổng quan',
+    };
+  }
+};
+
+/**
+ * Get recent bookings for dashboard table.
+ * GET /api/manager/dashboard/recent-bookings?limit=20
+ * @param {number} [limit=20]
+ */
+export const getRecentBookings = async (limit = 20) => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.DASHBOARD.RECENT_BOOKINGS, {
+      params: { limit },
+    });
+    const raw = response.data?.data || response.data;
+    const bookings = raw?.bookings || raw?.recentBookings || raw || [];
+    return { success: true, data: bookings };
+  } catch (error) {
+    console.error('getRecentBookings error:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.response?.data?.message || error.message || 'Lỗi tải đặt sân gần đây',
+    };
+  }
+};
+
+// ============================================================================
+// CUSTOMER MANAGEMENT
+// ============================================================================
+
+/**
+ * Get all customers (paginated, searchable).
+ * GET /api/manager/customers?page=1&limit=10&search=&status=
+ * @param {Object} [params]
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=50]
+ * @param {string} [params.search]
+ * @param {string} [params.status]
+ */
+export const getCustomers = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_CUSTOMERS.LIST, { params });
+    const raw = response.data?.data || response.data;
+    const customers = raw?.customers || raw || [];
+    const total = raw?.total || customers.length;
+    return { success: true, data: customers, total };
+  } catch (error) {
+    console.error('getCustomers error:', error);
+    return {
+      success: false,
+      data: [],
+      total: 0,
+      error: error.response?.data?.message || error.message || 'Lỗi tải danh sách khách hàng',
+    };
+  }
+};
+
+/**
+ * Get customer statistics (total/active/inactive/banned counts).
+ * GET /api/manager/customers/stats
+ */
+export const getCustomerStats = async () => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_CUSTOMERS.STATS);
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getCustomerStats error:', error);
+    return {
+      success: false,
+      data: null,
+      error: error.response?.data?.message || error.message || 'Lỗi tải thống kê khách hàng',
+    };
+  }
+};
+
+/**
+ * Get a single customer's detail.
+ * GET /api/manager/customers/:id
+ * @param {string} customerId
+ */
+export const getCustomerById = async (customerId) => {
+  try {
+    if (!customerId) return { success: false, data: null, error: 'Customer ID is required' };
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_CUSTOMERS.DETAIL(customerId));
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getCustomerById error:', error);
+    return {
+      success: false,
+      data: null,
+      error: error.response?.data?.message || error.message || 'Lỗi tải thông tin khách hàng',
+    };
+  }
+};
+
+/**
+ * Update a customer's status (active / banned).
+ * PUT /api/manager/customers/:id/status
+ * @param {string} customerId
+ * @param {string} status - 'active' | 'banned' | 'inactive'
+ */
+export const updateCustomerStatus = async (customerId, status) => {
+  try {
+    if (!customerId) return { success: false, error: 'Customer ID is required' };
+    const response = await axiosInstance.put(
+      ENDPOINTS.MANAGER_CUSTOMERS.UPDATE_STATUS(customerId),
+      { status }
+    );
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('updateCustomerStatus error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi cập nhật trạng thái',
+    };
+  }
+};
+
+// ============================================================================
+// FEEDBACK (MANAGER VIEW)
+// ============================================================================
+
+/**
+ * Get all feedbacks (manager view, paginated).
+ * GET /api/feedback/all?page=1&limit=10
+ * @param {Object} [params]
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=50]
+ */
+export const getAllFeedbacks = async (params = {}) => {
+  try {
+    const { page = 1, limit = 50 } = params;
+    const response = await axiosInstance.get(ENDPOINTS.FEEDBACK.ALL, {
+      params: { page, limit },
+    });
+    const raw = response.data?.data || response.data;
+    const feedbacks = raw?.feedbacks || raw || [];
+    const total = raw?.total || feedbacks.length;
+    return { success: true, data: feedbacks, total };
+  } catch (error) {
+    console.error('getAllFeedbacks error:', error);
+    return {
+      success: false,
+      data: [],
+      total: 0,
+      error: error.response?.data?.message || error.message || 'Lỗi tải danh sách feedback',
+    };
+  }
+};
+
+/**
+ * Delete a feedback by ID (manager action).
+ * DELETE /api/feedback/delete/:feedbackId
+ * @param {string} feedbackId
+ */
+export const deleteFeedback = async (feedbackId) => {
+  try {
+    if (!feedbackId) return { success: false, error: 'Feedback ID is required' };
+    await axiosInstance.delete(ENDPOINTS.FEEDBACK.DELETE(feedbackId));
+    return { success: true };
+  } catch (error) {
+    console.error('deleteFeedback error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi xóa feedback',
+    };
+  }
+};
+
+// ============================================================================
+// FIELD MANAGEMENT (MANAGER)
+// ============================================================================
+
+/**
+ * Get categories list for manager.
+ * GET /api/manager/field/categories
+ */
+export const getManagerCategories = async () => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_FIELDS.CATEGORIES);
+    const raw = response.data?.data || response.data;
+    const categories = raw?.categories || raw || [];
+    return { success: true, data: categories };
+  } catch (error) {
+    console.error('getManagerCategories error:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.response?.data?.message || error.message || 'Lỗi tải danh mục',
+    };
+  }
+};
+
+/**
+ * Get field types for a specific category (manager).
+ * GET /api/manager/field/types/category/:categoryId
+ * @param {string} categoryId
+ */
+export const getManagerTypesByCategory = async (categoryId) => {
+  try {
+    if (!categoryId) return { success: false, data: [], error: 'Category ID is required' };
+    const response = await axiosInstance.get(
+      ENDPOINTS.MANAGER_FIELDS.TYPES_BY_CATEGORY(categoryId)
+    );
+    const raw = response.data?.data || response.data;
+    const fieldTypes = raw?.fieldTypes || raw || [];
+    return { success: true, data: fieldTypes };
+  } catch (error) {
+    console.error('getManagerTypesByCategory error:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.response?.data?.message || error.message || 'Lỗi tải loại sân',
+    };
+  }
+};
+
+/**
+ * Get field create form data (categories + types).
+ * GET /api/manager/field/create-form
+ */
+export const getFieldCreateForm = async () => {
+  try {
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_FIELDS.CREATE_FORM);
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getFieldCreateForm error:', error);
+    return {
+      success: false,
+      data: null,
+      error: error.response?.data?.message || error.message || 'Lỗi tải form tạo sân',
+    };
+  }
+};
+
+/**
+ * Get a single field by ID (manager view — includes private details).
+ * GET /api/manager/field/:id
+ * @param {string} fieldId
+ */
+export const getManagerFieldById = async (fieldId) => {
+  try {
+    if (!fieldId) return { success: false, data: null, error: 'Field ID is required' };
+    const response = await axiosInstance.get(ENDPOINTS.MANAGER_FIELDS.DETAIL(fieldId));
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('getManagerFieldById error:', error);
+    return {
+      success: false,
+      data: null,
+      error:
+        error.response?.status === 404
+          ? 'Không tìm thấy sân'
+          : error.response?.data?.message || error.message || 'Lỗi tải thông tin sân',
+    };
+  }
+};
+
+/**
+ * Create a new field.
+ * POST /api/manager/field/create
+ * @param {FormData|Object} payload
+ */
+export const createField = async (payload) => {
+  try {
+    const isFormData = payload instanceof FormData;
+    const response = await axiosInstance.post(ENDPOINTS.MANAGER_FIELDS.CREATE, payload, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('createField error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi tạo sân',
+    };
+  }
+};
+
+/**
+ * Update an existing field.
+ * PUT /api/manager/field/:id
+ * @param {string} fieldId
+ * @param {FormData|Object} payload
+ */
+export const updateField = async (fieldId, payload) => {
+  try {
+    if (!fieldId) return { success: false, error: 'Field ID is required' };
+    const isFormData = payload instanceof FormData;
+    const response = await axiosInstance.put(ENDPOINTS.MANAGER_FIELDS.UPDATE(fieldId), payload, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+    const data = response.data?.data || response.data;
+    return { success: true, data };
+  } catch (error) {
+    console.error('updateField error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi cập nhật sân',
+    };
+  }
+};
+
+/**
+ * Delete a field.
+ * DELETE /api/manager/field/:id
+ * @param {string} fieldId
+ */
+export const deleteField = async (fieldId) => {
+  try {
+    if (!fieldId) return { success: false, error: 'Field ID is required' };
+    await axiosInstance.delete(ENDPOINTS.MANAGER_FIELDS.DELETE(fieldId));
+    return { success: true };
+  } catch (error) {
+    console.error('deleteField error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Lỗi xóa sân',
+    };
+  }
+};

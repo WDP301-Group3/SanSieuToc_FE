@@ -107,14 +107,15 @@ export const API_CONFIG = {
     // ==========================================
     // FEEDBACK
     // router.use('/api/feedback', feedbackRoutes)
+    // Routes: POST /create, PUT /update/:id, DELETE /delete/:id
     // ==========================================
     FEEDBACK: {
-      ALL:            '/api/feedback/all',                               // GET  ?page=1&limit=10
-      BY_FIELD: (fieldId) => `/api/feedback/field/${fieldId}`,           // GET  ?page=1&limit=10
-      STATS:    (fieldId) => `/api/feedback/stats/field/${fieldId}`,     // GET  - avg rating
-      CREATE:         '/api/feedback/create',                            // POST (auth, customer)
-      UPDATE: (feedbackId) => `/api/feedback/update/${feedbackId}`,      // PUT  (auth, customer)
-      DELETE: (feedbackId) => `/api/feedback/delete/${feedbackId}`,      // DELETE (auth, customer)
+      ALL:            '/api/feedback/all',                                      // GET  ?page=1&limit=10
+      BY_FIELD: (fieldId) => `/api/feedback/field/${fieldId}`,                  // GET  ?page=1&limit=10
+      STATS:    (fieldId) => `/api/feedback/stats/field/${fieldId}`,            // GET  - avg rating
+      CREATE:         '/api/feedback/create',                                   // POST (auth, customer)
+      UPDATE: (feedbackId) => `/api/feedback/update/${feedbackId}`,             // PUT  (auth, customer)
+      DELETE: (feedbackId) => `/api/feedback/delete/${feedbackId}`,             // DELETE (auth, customer)
     },
 
     // ==========================================

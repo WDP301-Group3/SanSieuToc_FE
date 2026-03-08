@@ -4,9 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getUserAvatar } from '../../utils/defaultAvatar';
 import logo from '../../assets/images/logo.png';
-import '../../styles/AdminLayout.css';
+import '../../styles/ManagerLayout.css';
 
-const AdminLayout = () => {
+const ManagerLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
@@ -31,58 +31,56 @@ const AdminLayout = () => {
   }
 
   const menuItems = [
-    
     { path: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
-    { path: '/admin/fields', icon: 'stadium', label: 'Manage Fields' },
-    { path: '/admin/customers', icon: 'group', label: 'Manage Customers' },
-    { path: '/admin/feedback', icon: 'chat_bubble', label: 'Manage Feedback' },
-    { path: '/settings', icon: 'settings', label: 'Settings' },
-    
+    { path: '/admin/fields', icon: 'stadium', label: 'Quản lý Sân' },
+    { path: '/admin/customers', icon: 'group', label: 'Quản lý Khách hàng' },
+    { path: '/admin/feedback', icon: 'chat_bubble', label: 'Quản lý Đánh giá' },
+    { path: '/admin/settings', icon: 'settings', label: 'Cài đặt' },
   ];
 
   const isActive = (path) => location.pathname.startsWith(path);
 
   return (
-    <div className="admin-layout">
+    <div className="manager-layout">
       {/* Sidebar */}
-      <aside className="admin-sidebar">
+      <aside className="manager-sidebar">
         {/* Logo */}
-        <div className="admin-sidebar-logo">
-          <img src={logo} alt="Sân Siêu Tốc" className="admin-logo-img" />
+        <div className="manager-sidebar-logo">
+          <img src={logo} alt="Sân Siêu Tốc" className="manager-logo-img" />
           <div>
-            <h1 className="admin-logo-title">Sân Siêu Tốc</h1>
-            <p className="admin-logo-subtitle">Admin Panel</p>
+            <h1 className="manager-logo-title">Sân Siêu Tốc</h1>
+            <p className="manager-logo-subtitle">Manager Panel</p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="admin-sidebar-nav">
+        <nav className="manager-sidebar-nav">
           {menuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`admin-nav-item ${isActive(item.path) ? 'active' : ''}`}
+              className={`manager-nav-item ${isActive(item.path) ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="admin-nav-label">{item.label}</span>
+              <span className="manager-nav-label">{item.label}</span>
             </Link>
           ))}
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="admin-main">
+      <main className="manager-main">
         {/* Top Header */}
-        <header className="admin-header">
-          <div className="admin-header-left">
-            <h2 className="admin-header-title">
+        <header className="manager-header">
+          <div className="manager-header-left">
+            <h2 className="manager-header-title">
               {menuItems.find(item => isActive(item.path))?.label || 'Dashboard'}
             </h2>
-            <p className="admin-header-subtitle">Chào mừng trở lại, Quản trị viên</p>
+            <p className="manager-header-subtitle">Chào mừng trở lại, {user?.name || 'Quản lý'}</p>
           </div>
-          <div className="admin-header-right">
+          <div className="manager-header-right">
             <button
-              className="admin-notification-btn"
+              className="manager-notification-btn"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
@@ -90,49 +88,58 @@ const AdminLayout = () => {
                 {isDark ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
-            <button className="admin-notification-btn">
+            {/* <button className="manager-notification-btn">
               <span className="material-symbols-outlined">notifications</span>
-              <span className="admin-notification-dot" />
-            </button>
-            <div className="admin-header-divider" />
-            <div className="admin-avatar-wrapper" ref={dropdownRef}>
+              <span className="manager-notification-dot" />
+            </button> */}
+            <div className="manager-header-divider" />
+            <div className="manager-avatar-wrapper" ref={dropdownRef}>
               <button
-                className="admin-avatar-btn"
+                className="manager-avatar-btn"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <img
                   src={getUserAvatar(user?.image, user?.name)}
-                  alt={user?.name || 'Admin'}
-                  className="admin-avatar-img"
+                  alt={user?.name || 'Manager'}
+                  className="manager-avatar-img"
                 />
               </button>
 
               {showDropdown && (
-                <div className="admin-dropdown">
-                  <div className="admin-dropdown-header">
-                    <p className="admin-dropdown-name">{user?.name || 'Admin User'}</p>
-                    <p className="admin-dropdown-email">{user?.email || 'admin@sieutoc.vn'}</p>
+                <div className="manager-dropdown">
+                  <div className="manager-dropdown-header">
+                    <p className="manager-dropdown-name">{user?.name || 'Manager'}</p>
+                    <p className="manager-dropdown-email">{user?.email || ''}</p>
                   </div>
-                  <div className="admin-dropdown-divider" />
+                  <div className="manager-dropdown-divider" />
                   <Link
-                    to="/profile"
-                    className="admin-dropdown-item"
+                    to="/admin/dashboard"
+                    className="manager-dropdown-item"
                     onClick={() => setShowDropdown(false)}
                   >
-                    <span className="material-symbols-outlined">person</span>
-                    Profile
+                    <span className="material-symbols-outlined">dashboard</span>
+                    Dashboard
                   </Link>
                   <Link
+                    to="/admin/settings"
+                    className="manager-dropdown-item"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    <span className="material-symbols-outlined">settings</span>
+                    Cài đặt
+                  </Link>
+                  <div className="manager-dropdown-divider" />
+                  <Link
                     to="/"
-                    className="admin-dropdown-item"
+                    className="manager-dropdown-item"
                     onClick={() => setShowDropdown(false)}
                   >
                     <span className="material-symbols-outlined">home</span>
-                    Trang chủ
+                    Về trang chủ
                   </Link>
-                  <div className="admin-dropdown-divider" />
+                  <div className="manager-dropdown-divider" />
                   <button
-                    className="admin-dropdown-item logout"
+                    className="manager-dropdown-item logout"
                     onClick={() => { logout(); setShowDropdown(false); navigate('/login'); }}
                   >
                     <span className="material-symbols-outlined">logout</span>
@@ -145,7 +152,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div className="admin-content">
+        <div className="manager-content">
           <Outlet />
         </div>
       </main>
@@ -153,4 +160,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default ManagerLayout;

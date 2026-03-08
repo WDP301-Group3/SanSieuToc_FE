@@ -1,4 +1,4 @@
-/* ===== Admin Field Edit Page ===== */
+﻿/* ===== Admin Field Edit Page ===== */
 .edit-field-page {
   display: flex;
   flex-direction: column;
@@ -881,4 +881,160 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-field-edit,
+.dark .manager-field-create {
+  color: #f1f5f9;
+}
+
+.dark .field-edit-header h1,
+.dark .field-create-header h1 {
+  color: #f1f5f9;
+}
+
+.dark .field-edit-header p,
+.dark .field-create-header p {
+  color: #94a3b8;
+}
+
+.dark .back-btn {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .back-btn:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .form-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .form-card h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .form-group label {
+  color: #d1d5db;
+}
+
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .form-group input::placeholder,
+.dark .form-group textarea::placeholder {
+  color: #6b7280;
+}
+
+.dark .form-group input:focus,
+.dark .form-group select:focus,
+.dark .form-group textarea:focus {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.1);
+}
+
+.dark .form-group select option {
+  background: #1a2a1a;
+  color: #f1f5f9;
+}
+
+.dark .form-hint {
+  color: #6b7280;
+}
+
+.dark .image-upload-area {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .image-upload-area:hover {
+  border-color: #4ade80;
+  background: #152015;
+}
+
+.dark .image-preview-item {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+}
+
+.dark .image-remove-btn {
+  background: rgba(239,68,68,0.8);
+}
+
+.dark .price-grid .price-item {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+}
+
+.dark .price-item label {
+  color: #94a3b8;
+}
+
+.dark .price-item input {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .amenity-checkbox {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #d1d5db;
+}
+
+.dark .amenity-checkbox:hover {
+  border-color: #4ade80;
+  background: #152015;
+}
+
+.dark .amenity-checkbox.checked {
+  background: rgba(74,222,128,0.15);
+  border-color: #4ade80;
+  color: #86efac;
+}
+
+.dark .form-actions {
+  border-top-color: #2d4a2d;
+}
+
+.dark .btn-cancel {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .btn-cancel:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .loading-container {
+  color: #94a3b8;
+}
+
+.dark .error-msg {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+
+.dark .success-msg {
+  background: rgba(74,222,128,0.1);
+  border-color: rgba(74,222,128,0.3);
+  color: #86efac;
 }

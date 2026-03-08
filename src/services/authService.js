@@ -160,6 +160,23 @@ const authService = {
       throw authService.handleError(error);
     }
   },
+
+  /**
+   * Change manager password (requires authentication)
+   * @param {Object} passwordData - { currentPassword, newPassword, confirmNewPassword }
+   * @returns {Promise<Object>} - { success, message }
+   */
+  changePasswordManager: async (passwordData) => {
+    try {
+      const response = await axiosInstance.put(
+        ENDPOINTS.MANAGER_AUTH.CHANGE_PASSWORD,
+        passwordData
+      );
+      return response.data;
+    } catch (error) {
+      throw authService.handleError(error);
+    }
+  },
   
   // ============================================
   // ERROR HANDLER

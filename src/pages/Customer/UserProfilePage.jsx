@@ -28,6 +28,28 @@ const BOOKING_STATUS = {
   CANCELLED: 'Cancelled',
 };
 
+/**
+ * Xác định trạng thái hiển thị dựa trên thời gian thực:
+ * - Confirmed + endTime đã qua → hiển thị như Completed
+ * - Pending + endTime đã qua → hiển thị như Expired (quá hạn thanh toán)
+ */
+const resolveDisplayStatus = (booking) => {
+  const { status, bookingDetails } = booking;
+  if (status === BOOKING_STATUS.CANCELLED || status === BOOKING_STATUS.COMPLETED) return status;
+
+  const now = new Date();
+  const details = bookingDetails || [];
+  // Lấy endTime của slot cuối cùng
+  const lastDetail = details[details.length - 1];
+  const endTime = lastDetail?.endTime ? new Date(lastDetail.endTime) : null;
+
+  if (endTime && now > endTime) {
+    if (status === BOOKING_STATUS.CONFIRMED) return BOOKING_STATUS.COMPLETED;
+    if (status === BOOKING_STATUS.PENDING) return 'Expired'; // quá hạn mà chưa thanh toán
+  }
+  return status;
+};
+
 const UserProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -75,27 +97,35 @@ const UserProfilePage = () => {
 
   const activeTab = getTabFromPath();
 
-  // Calculate stats from API data
-  const stats = useMemo(() => {
-    return {
-      total: allBookings.length,
-      completed: allBookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length,
-      confirmed: allBookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length,
-      cancelled: allBookings.filter((b) => b.status === BOOKING_STATUS.CANCELLED).length,
-      pending: allBookings.filter((b) => b.status === BOOKING_STATUS.PENDING).length,
-    };
+  // Enrich bookings with resolved display status (client-side time check)
+  const enrichedBookings = useMemo(() => {
+    return allBookings.map((b) => ({
+      ...b,
+      displayStatus: resolveDisplayStatus(b),
+    }));
   }, [allBookings]);
 
-  // Upcoming bookings (Confirmed + Pending)
+  // Calculate stats from enriched display status
+  const stats = useMemo(() => {
+    return {
+      total: enrichedBookings.length,
+      completed: enrichedBookings.filter((b) => b.displayStatus === BOOKING_STATUS.COMPLETED).length,
+      confirmed: enrichedBookings.filter((b) => b.displayStatus === BOOKING_STATUS.CONFIRMED).length,
+      cancelled: enrichedBookings.filter((b) => b.displayStatus === BOOKING_STATUS.CANCELLED).length,
+      pending: enrichedBookings.filter((b) => b.displayStatus === BOOKING_STATUS.PENDING).length,
+      expired: enrichedBookings.filter((b) => b.displayStatus === 'Expired').length,
+    };
+  }, [enrichedBookings]);
+
+  // Upcoming bookings: Confirmed + Pending với endTime chưa qua
   const upcomingBookings = useMemo(() => {
-    return allBookings
-      .filter(
-        (b) =>
-          b.status === BOOKING_STATUS.CONFIRMED ||
-          b.status === BOOKING_STATUS.PENDING
+    return enrichedBookings
+      .filter((b) =>
+        b.displayStatus === BOOKING_STATUS.CONFIRMED ||
+        b.displayStatus === BOOKING_STATUS.PENDING
       )
       .slice(0, 4);
-  }, [allBookings]);
+  }, [enrichedBookings]);
 
   // Tab change handler
   const handleTabChange = (tabKey) => {
@@ -131,7 +161,7 @@ const UserProfilePage = () => {
 
           {activeTab === 'bookings' && (
             <BookingsTab
-              allBookings={allBookings}
+              allBookings={enrichedBookings}
               stats={stats}
               loading={bookingsLoading}
               onRefresh={fetchBookings}

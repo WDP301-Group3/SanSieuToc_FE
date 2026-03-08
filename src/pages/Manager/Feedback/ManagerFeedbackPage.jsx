@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { mockFeedbacks, mockFields } from '../../../data/mockData';
+﻿import { useState, useEffect, useMemo } from 'react';
+import { getAllFeedbacks, deleteFeedback } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
-import '../../../styles/AdminFeedbackPage.css';
+import '../../../styles/ManagerFeedbackPage.css';
 
 /**
  * Format date string to dd/MM/yyyy
@@ -13,11 +13,8 @@ const formatDate = (dateStr) => {
 
 /**
  * Build a map of fieldID → fieldName for quick lookup
+ * (used as fallback when API returns fieldID only)
  */
-const fieldNameMap = mockFields.reduce((map, field) => {
-  map[field._id] = field.fieldName;
-  return map;
-}, {});
 
 /**
  * Render star icons for a given rating
@@ -38,7 +35,7 @@ const renderStars = (rating) => {
   return stars;
 };
 
-const AdminFeedbackPage = () => {
+const ManagerFeedbackPage = () => {
   const notification = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -46,17 +43,41 @@ const AdminFeedbackPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
+  // API state
+  const [rawFeedbacks, setRawFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const feedbacksPerPage = 8;
 
-  // All feedbacks enriched with fieldName
+  // Fetch all feedbacks on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      const res = await getAllFeedbacks({ page: 1, limit: 500 });
+      if (res.success) setRawFeedbacks(res.data || []);
+      else setError(res.error);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  // Normalise and enrich feedbacks from API
   const allFeedbacks = useMemo(() => {
-    return mockFeedbacks
+    return rawFeedbacks
       .map((fb) => ({
         ...fb,
-        fieldName: fieldNameMap[fb.fieldID] || 'Không xác định',
+        // Support various BE field shapes
+        userName: fb.userName || fb.customer?.name || fb.customerID?.name || 'Ẩn danh',
+        userImage: fb.userImage || fb.customer?.image || fb.customerID?.image || null,
+        fieldName: fb.fieldName || fb.field?.fieldName || fb.fieldID?.fieldName || 'N/A',
+        rating: fb.rating || fb.rate || 0,
+        comment: fb.comment || fb.content || '',
+        createdAt: fb.createdAt,
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, []);
+  }, [rawFeedbacks]);
 
   // Filtered feedbacks
   const filteredFeedbacks = useMemo(() => {
@@ -68,15 +89,12 @@ const AdminFeedbackPage = () => {
         fb.comment.toLowerCase().includes(term);
 
       let matchDate = true;
-      if (dateFrom) {
-        matchDate = matchDate && new Date(fb.createdAt) >= new Date(dateFrom);
-      }
+      if (dateFrom) matchDate = matchDate && new Date(fb.createdAt) >= new Date(dateFrom);
       if (dateTo) {
         const to = new Date(dateTo);
         to.setHours(23, 59, 59, 999);
         matchDate = matchDate && new Date(fb.createdAt) <= to;
       }
-
       return matchSearch && matchDate;
     });
   }, [allFeedbacks, searchTerm, dateFrom, dateTo]);
@@ -84,10 +102,9 @@ const AdminFeedbackPage = () => {
   // Stats
   const stats = useMemo(() => {
     const total = allFeedbacks.length;
-    const avgRating =
-      total > 0
-        ? Math.round((allFeedbacks.reduce((sum, fb) => sum + fb.rating, 0) / total) * 10) / 10
-        : 0;
+    const avgRating = total > 0
+      ? Math.round((allFeedbacks.reduce((sum, fb) => sum + fb.rating, 0) / total) * 10) / 10
+      : 0;
     const lowRating = allFeedbacks.filter((fb) => fb.rating <= 2).length;
     return { total, avgRating, lowRating };
   }, [allFeedbacks]);
@@ -99,47 +116,40 @@ const AdminFeedbackPage = () => {
     currentPage * feedbacksPerPage
   );
 
+  const handleSearch = (value) => { setSearchTerm(value); setCurrentPage(1); };
+  const handleDateFromChange = (value) => { setDateFrom(value); setCurrentPage(1); };
+  const handleDateToChange = (value) => { setDateTo(value); setCurrentPage(1); };
+  const handleDelete = (feedback) => setConfirmDelete(feedback);
 
-  // Reset page when filters change
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
-  const handleDateFromChange = (value) => {
-    setDateFrom(value);
-    setCurrentPage(1);
-  };
-
-  const handleDateToChange = (value) => {
-    setDateTo(value);
-    setCurrentPage(1);
-  };
-
-  // Delete action
-  const handleDelete = (feedback) => {
-    setConfirmDelete(feedback);
-  };
-
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
+    const res = await deleteFeedback(confirmDelete._id);
+    if (res.success) {
+      setRawFeedbacks((prev) => prev.filter((fb) => fb._id !== confirmDelete._id));
+      notification.success('Đã xóa feedback thành công.');
+    } else {
+      notification.error(res.error || 'Xóa feedback thất bại.');
+    }
     setConfirmDelete(null);
-    notification.success('Đã xóa feedback thành công.');
   };
-
-  // Pagination helpers
 
   return (
-    <div className="admin-feedback-page">
+    <div className="manager-feedback-page">
       {/* Header */}
       <div className="feedback-top-bar">
         <div>
-          <h2 className="feedback-page-title">Quản lý Feedback</h2> 
+          <h2 className="feedback-page-title">Quản lý Feedback</h2>
           <p className="feedback-page-subtitle">
             Xem và quản lý các ý kiến phản hồi từ người dùng hệ thống
           </p>
         </div>
-        
       </div>
+
+      {error && (
+        <div className="feedback-error-banner">
+          <span className="material-symbols-outlined">error</span> {error}
+        </div>
+      )}
 
       {/* Stats Summary */}
       <div className="feedback-stats">
@@ -211,6 +221,12 @@ const AdminFeedbackPage = () => {
 
       {/* Feedback Table */}
       <div className="feedback-table-card">
+        {loading ? (
+          <div className="feedback-loading">
+            <span className="material-symbols-outlined loading-spin">progress_activity</span>
+            <p>Đang tải danh sách feedback...</p>
+          </div>
+        ) : (
         <div className="feedback-table-wrapper">
           <table className="feedback-table">
             <thead>
@@ -274,6 +290,7 @@ const AdminFeedbackPage = () => {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Pagination */}
         {filteredFeedbacks.length > 0 && (
@@ -346,4 +363,4 @@ const AdminFeedbackPage = () => {
   );
 };
 
-export default AdminFeedbackPage;
+export default ManagerFeedbackPage;

@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { mockUsers, mockBookings, USER_ROLES } from '../../../data/mockData';
+import { getCustomers, getCustomerStats, updateCustomerStatus } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
-import '../../../styles/AdminCustomersPage.css';
+import '../../../styles/ManagerCustomersPage.css';
 
 /**
  * Format date string to dd/MM/yyyy
@@ -31,68 +31,85 @@ const STATUS_CONFIG = {
   banned: { label: 'Đã bị khóa', className: 'banned' },
 };
 
-const AdminCustomersPage = () => {
+const ManagerCustomersPage = () => {
   const notification = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [confirmModal, setConfirmModal] = useState(null); // { type: 'toggle'|'ban', customer }
+  const [confirmModal, setConfirmModal] = useState(null);
+
+  // API state
+  const [rawCustomers, setRawCustomers] = useState([]);
+  const [apiStats, setApiStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const customersPerPage = 8;
 
-  // Transform mockUsers → only customers (exclude admin & manager roles)
-  const allCustomers = useMemo(() => {
-    // Simulate a few "banned" and "inactive" users for variety
-    const bannedIds = new Set(['u_review_09', 'u_review_15']);
-    const inactiveIds = new Set(['u_review_05', 'u_review_12']);
-
-    return mockUsers
-      .filter((u) => u.role === USER_ROLES.CUSTOMER)
-      .map((user) => {
-        let status = 'active';
-        if (bannedIds.has(user._id)) status = 'banned';
-        else if (inactiveIds.has(user._id) || !user.isActive) status = 'inactive';
-
-        // Count bookings for this user
-        const userBookings = mockBookings.filter(
-          (b) => b.user?._id === user._id || b.user === user._id
-        );
-
-        return {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          image: user.image,
-          address: user.address,
-          status,
-          totalBookings: userBookings.length,
-          createdAt: user.createdAt,
-        };
-      });
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      const [custRes, statsRes] = await Promise.all([
+        getCustomers({ limit: 200 }),
+        getCustomerStats(),
+      ]);
+      if (custRes.success) setRawCustomers(custRes.data || []);
+      else setError(custRes.error);
+      if (statsRes.success) setApiStats(statsRes.data);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
-  // Filter logic
-  const filteredCustomers = useMemo(() => {
-    return allCustomers.filter((customer) => {
-      const term = searchTerm.toLowerCase();
-      const matchSearch =
-        customer.name.toLowerCase().includes(term) ||
-        customer.email.toLowerCase().includes(term) ||
-        customer.phone.includes(term);
-      const matchStatus = !statusFilter || customer.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [allCustomers, searchTerm, statusFilter]);
+  // Normalise API customers
+  const allCustomers = useMemo(() => rawCustomers.map((user) => {
+    // BE may return 'Active'/'Banned'/'Inactive' (capitalised) or lowercase
+    const rawStatus = (user.status || user.accountStatus || 'active').toLowerCase();
+    let status = 'active';
+    if (rawStatus === 'banned') status = 'banned';
+    else if (rawStatus === 'inactive') status = 'inactive';
 
-  // Stats
+    return {
+      id: user._id,
+      name: user.name || user.fullName || 'N/A',
+      email: user.email,
+      phone: user.phone || 'N/A',
+      image: user.image || user.avatar,
+      status,
+      createdAt: user.createdAt,
+    };
+  }), [rawCustomers]);
+
+  // Filter logic
+  const filteredCustomers = useMemo(() => allCustomers.filter((customer) => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch =
+      customer.name.toLowerCase().includes(term) ||
+      customer.email.toLowerCase().includes(term) ||
+      customer.phone.includes(term);
+    const matchStatus = !statusFilter || customer.status === statusFilter;
+    return matchSearch && matchStatus;
+  }), [allCustomers, searchTerm, statusFilter]);
+
+  // Stats from API or derived from data
   const stats = useMemo(() => {
-    const total = allCustomers.length;
-    const active = allCustomers.filter((c) => c.status === 'active').length;
-    const inactive = allCustomers.filter((c) => c.status === 'inactive').length;
-    const banned = allCustomers.filter((c) => c.status === 'banned').length;
-    return { total, active, inactive, banned };
-  }, [allCustomers]);
+    if (apiStats) {
+      return {
+        total: apiStats.total ?? apiStats.totalCustomers ?? allCustomers.length,
+        active: apiStats.active ?? apiStats.activeCustomers ?? allCustomers.filter((c) => c.status === 'active').length,
+        inactive: apiStats.inactive ?? apiStats.inactiveCustomers ?? allCustomers.filter((c) => c.status === 'inactive').length,
+        banned: apiStats.banned ?? apiStats.bannedCustomers ?? allCustomers.filter((c) => c.status === 'banned').length,
+      };
+    }
+    return {
+      total: allCustomers.length,
+      active: allCustomers.filter((c) => c.status === 'active').length,
+      inactive: allCustomers.filter((c) => c.status === 'inactive').length,
+      banned: allCustomers.filter((c) => c.status === 'banned').length,
+    };
+  }, [apiStats, allCustomers]);
 
   // Pagination
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
@@ -101,32 +118,44 @@ const AdminCustomersPage = () => {
     currentPage * customersPerPage
   );
 
-  // Action handlers
-  const handleToggleStatus = (customer) => {
-    setConfirmModal({ type: 'toggle', customer });
-  };
+  const handleToggleStatus = (customer) => setConfirmModal({ type: 'toggle', customer });
+  const handleBan = (customer) => setConfirmModal({ type: 'ban', customer });
 
-  const handleBan = (customer) => {
-    setConfirmModal({ type: 'ban', customer });
-  };
+  const handleConfirm = async () => {
+    if (!confirmModal) return;
+    const { type, customer } = confirmModal;
+    let newStatus;
+    if (type === 'ban') newStatus = 'banned';
+    else if (customer.status === 'active') newStatus = 'inactive';
+    else newStatus = 'active';
 
-  const handleConfirm = () => {
-    // In real app, call API here
+    const res = await updateCustomerStatus(customer.id, newStatus);
+    if (res.success) {
+      setRawCustomers((prev) =>
+        prev.map((u) => u._id === customer.id ? { ...u, status: newStatus } : u)
+      );
+      notification.success('Trạng thái tài khoản đã được cập nhật.');
+    } else {
+      notification.error(res.error || 'Cập nhật thất bại.');
+    }
     setConfirmModal(null);
-    notification.success('Thao tác đã được thực hiện.');
   };
 
   return (
-    <div className="admin-customers-page">
+    <div className="manager-customers-page">
       {/* Top Bar */}
       <div className="customers-top-bar">
         <div>
           <h2 className="customers-page-title">Quản lý khách hàng</h2>
-          <p className="customers-page-subtitle">
-            Danh sách tài khoản người dùng trên hệ thống
-          </p>
+          <p className="customers-page-subtitle">Danh sách tài khoản người dùng trên hệ thống</p>
         </div>
       </div>
+
+      {error && (
+        <div className="customers-error-banner">
+          <span className="material-symbols-outlined">error</span> {error}
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="customers-stats">
@@ -399,4 +428,4 @@ const AdminCustomersPage = () => {
   );
 };
 
-export default AdminCustomersPage;
+export default ManagerCustomersPage;

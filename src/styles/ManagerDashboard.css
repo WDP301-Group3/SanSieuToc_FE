@@ -1,6 +1,6 @@
-/* ===== Admin Dashboard Page ===== */
+﻿/* ===== Admin Dashboard Page ===== */
 /* Matches: home_dashboard_admin.html */
-.admin-dashboard {
+.manager-dashboard {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -389,7 +389,7 @@
 }
 
 @media (max-width: 640px) {
-  .admin-dashboard {
+  .manager-dashboard {
     gap: 1.5rem;
   }
 
@@ -409,4 +409,131 @@
   .dashboard-table td {
     padding: 0.75rem 1rem;
   }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-dashboard {
+  color: #f1f5f9;
+}
+
+.dark .dashboard-welcome h2 {
+  color: #f1f5f9;
+}
+
+.dark .dashboard-welcome p {
+  color: #94a3b8;
+}
+
+.dark .stat-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .stat-card:hover {
+  border-color: #4ade80;
+  box-shadow: 0 8px 24px rgba(74,222,128,0.1);
+}
+
+.dark .stat-label {
+  color: #94a3b8;
+}
+
+.dark .stat-value {
+  color: #f1f5f9;
+}
+
+.dark .stat-change {
+  color: #86efac;
+}
+
+.dark .shortcut-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #d1d5db;
+}
+
+.dark .shortcut-card:hover {
+  background: #243524;
+  border-color: #4ade80;
+  box-shadow: 0 4px 16px rgba(74,222,128,0.1);
+}
+
+.dark .shortcut-card h3 {
+  color: #f1f5f9;
+}
+
+.dark .shortcut-card p {
+  color: #94a3b8;
+}
+
+.dark .shortcut-icon {
+  background: rgba(74,222,128,0.15);
+}
+
+.dark .dashboard-table-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .table-card-header {
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .table-card-header h3 {
+  color: #f1f5f9;
+}
+
+.dark .dashboard-table th {
+  background: #152015;
+  color: #94a3b8;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .dashboard-table td {
+  color: #d1d5db;
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .dashboard-table tbody tr:hover {
+  background: #1e2e1e;
+}
+
+.dark .dashboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dark .status-badge {
+  background: rgba(74,222,128,0.15);
+  color: #86efac;
+}
+
+.dark .status-badge.pending {
+  background: rgba(251,191,36,0.15);
+  color: #fde68a;
+}
+
+.dark .status-badge.cancelled {
+  background: rgba(248,113,113,0.15);
+  color: #fca5a5;
+}
+
+.dark .view-all-link {
+  color: #4ade80;
+}
+
+.dark .view-all-link:hover {
+  color: #86efac;
+}
+
+.dark .dashboard-loading {
+  color: #94a3b8;
+}
+
+.dark .dashboard-error {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: #fca5a5;
 }

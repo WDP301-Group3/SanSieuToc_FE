@@ -1,4 +1,4 @@
-/* ============================
+﻿/* ============================
    Admin Field Detail Page
    ============================ */
 
@@ -789,4 +789,125 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-field-detail {
+  color: #f1f5f9;
+}
+
+.dark .field-detail-header {
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .field-detail-header h1 {
+  color: #f1f5f9;
+}
+
+.dark .back-btn {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .back-btn:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .field-detail-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .field-detail-card h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .detail-label {
+  color: #94a3b8;
+}
+
+.dark .detail-value {
+  color: #f1f5f9;
+}
+
+.dark .detail-row {
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .detail-row:last-child {
+  border-bottom: none;
+}
+
+.dark .price-highlight {
+  color: #4ade80;
+}
+
+.dark .status-badge {
+  background: rgba(74,222,128,0.15);
+  color: #86efac;
+}
+
+.dark .status-badge.inactive {
+  background: rgba(248,113,113,0.15);
+  color: #fca5a5;
+}
+
+.dark .status-badge.maintenance {
+  background: rgba(251,191,36,0.15);
+  color: #fde68a;
+}
+
+.dark .field-images-section {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .field-images-section h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .field-image-placeholder {
+  background: #152015;
+  border-color: #2d4a2d;
+  color: #6b7280;
+}
+
+.dark .field-bookings-section {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .field-bookings-section h2 {
+  color: #f1f5f9;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .bookings-table th {
+  background: #152015;
+  color: #94a3b8;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .bookings-table td {
+  color: #d1d5db;
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .bookings-table tbody tr:hover {
+  background: #1e2e1e;
+}
+
+.dark .loading-container {
+  color: #94a3b8;
+}
+
+.dark .error-container {
+  color: #fca5a5;
 }

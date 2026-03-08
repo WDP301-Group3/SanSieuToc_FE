@@ -1,5 +1,5 @@
-/* ===== Admin Feedback Page ===== */
-.admin-feedback-page {
+﻿/* ===== Admin Feedback Page ===== */
+.manager-feedback-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -592,4 +592,180 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-feedback-page {
+  color: #f1f5f9;
+}
+
+.dark .feedback-page-header h1 {
+  color: #f1f5f9;
+}
+
+.dark .feedback-page-header p {
+  color: #94a3b8;
+}
+
+.dark .feedback-stats-row .stat-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .feedback-stats-row .stat-card:hover {
+  border-color: #4ade80;
+}
+
+.dark .feedback-stats-row .stat-label {
+  color: #94a3b8;
+}
+
+.dark .feedback-stats-row .stat-value {
+  color: #f1f5f9;
+}
+
+.dark .feedback-toolbar {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .feedback-toolbar input {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .feedback-toolbar input::placeholder {
+  color: #6b7280;
+}
+
+.dark .feedback-toolbar select {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .feedback-table-container {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .feedback-table th {
+  background: #152015;
+  color: #94a3b8;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .feedback-table td {
+  color: #d1d5db;
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .feedback-table tbody tr:hover {
+  background: #1e2e1e;
+}
+
+.dark .feedback-comment {
+  color: #d1d5db;
+}
+
+.dark .feedback-customer-name {
+  color: #f1f5f9;
+}
+
+.dark .star-rating .filled {
+  color: #facc15;
+}
+
+.dark .star-rating .empty {
+  color: #374151;
+}
+
+.dark .btn-delete {
+  background: #0f1a0f;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark .btn-delete:hover {
+  background: #2d1f1f;
+}
+
+.dark .feedback-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .feedback-card:hover {
+  border-color: #4ade80;
+  box-shadow: 0 4px 16px rgba(74,222,128,0.1);
+}
+
+.dark .feedback-card-customer {
+  color: #f1f5f9;
+}
+
+.dark .feedback-card-date {
+  color: #6b7280;
+}
+
+.dark .feedback-card-field {
+  color: #4ade80;
+}
+
+.dark .feedback-card-comment {
+  color: #d1d5db;
+}
+
+.dark .pagination-container {
+  border-top-color: #2d4a2d;
+}
+
+.dark .pagination-btn {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .pagination-btn:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .pagination-btn.active {
+  background: #14532d;
+  color: #4ade80;
+  border-color: #166534;
+}
+
+.dark .modal-overlay {
+  background: rgba(0,0,0,0.7);
+}
+
+.dark .confirm-modal {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .confirm-modal h3 {
+  color: #f1f5f9;
+}
+
+.dark .confirm-modal p {
+  color: #94a3b8;
+}
+
+.dark .empty-state {
+  color: #6b7280;
+}
+
+.dark .empty-state h3 {
+  color: #94a3b8;
+}
+
+.dark .loading-container {
+  color: #94a3b8;
 }

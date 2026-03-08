@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { mockFields, FIELD_STATUS } from '../../../data/mockData';
-import '../../../styles/AdminFieldDetailPage.css';
+import '../../../styles/ManagerFieldDetailPage.css';
 
 // Utility key → { icon, label }
 const utilityMap = {
@@ -24,7 +24,7 @@ const statusMap = {
   [FIELD_STATUS.MAINTENANCE]: { label: 'Bảo trì', className: 'maintenance' },
 };
 
-const AdminFieldDetailPage = () => {
+const ManagerFieldDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -269,4 +269,4 @@ const AdminFieldDetailPage = () => {
   );
 };
 
-export default AdminFieldDetailPage;
+export default ManagerFieldDetailPage;

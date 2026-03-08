@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import AdminLayout from './components/layout/AdminLayout';
+import ManagerLayout from './components/layout/ManagerLayout';
 
 // Pages
 import HomePage from './pages/Home/HomePage';
@@ -17,15 +17,16 @@ import FieldDetailPage from './pages/Field/FieldDetailPage';
 import UserProfilePage from './pages/Customer/UserProfilePage';
 import BookingDetailPage from './pages/Customer/BookingDetailPage';
 
-// Admin Pages
-import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
-import AdminFieldsPage from './pages/Admin/Field/AdminFieldsPage';
-import AdminFieldDetailPage from './pages/Admin/Field/AdminFieldDetailPage';
-import AdminFieldCreatePage from './pages/Admin/Field/AdminFieldCreatePage';
-import AdminFieldEditPage from './pages/Admin/Field/AdminFieldEditPage';
-import AdminCustomersPage from './pages/Admin/Customer/AdminCustomersPage';
-import AdminCustomerDetailPage from './pages/Admin/Customer/AdminCustomerDetailPage';
-import AdminFeedbackPage from './pages/Admin/Feedback/AdminFeedbackPage';
+// Manager Pages
+import ManagerDashboardPage from './pages/Manager/ManagerDashboardPage';
+import ManagerSettingsPage from './pages/Manager/ManagerSettingsPage';
+import ManagerFieldsPage from './pages/Manager/Field/ManagerFieldsPage';
+import ManagerFieldDetailPage from './pages/Manager/Field/ManagerFieldDetailPage';
+import ManagerFieldCreatePage from './pages/Manager/Field/ManagerFieldCreatePage';
+import ManagerFieldEditPage from './pages/Manager/Field/ManagerFieldEditPage';
+import ManagerCustomersPage from './pages/Manager/Customer/ManagerCustomersPage';
+import ManagerCustomerDetailPage from './pages/Manager/Customer/ManagerCustomerDetailPage';
+import ManagerFeedbackPage from './pages/Manager/Feedback/ManagerFeedbackPage';
 
 function App() {
   return (
@@ -52,17 +53,18 @@ function App() {
           <Route path="/settings" element={<UserProfilePage />} />
         </Route>
 
-        {/* Admin Routes with AdminLayout */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Manager Routes with ManagerLayout */}
+        <Route path="/admin" element={<ManagerLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="fields" element={<AdminFieldsPage />} />
-          <Route path="fields/create" element={<AdminFieldCreatePage />} />
-          <Route path="fields/:id" element={<AdminFieldDetailPage />} />
-          <Route path="fields/:id/edit" element={<AdminFieldEditPage />} />
-          <Route path="customers" element={<AdminCustomersPage />} />
-          <Route path="customers/:id" element={<AdminCustomerDetailPage />} />
-          <Route path="feedback" element={<AdminFeedbackPage />} />
+          <Route path="dashboard" element={<ManagerDashboardPage />} />
+          <Route path="fields" element={<ManagerFieldsPage />} />
+          <Route path="fields/create" element={<ManagerFieldCreatePage />} />
+          <Route path="fields/:id" element={<ManagerFieldDetailPage />} />
+          <Route path="fields/:id/edit" element={<ManagerFieldEditPage />} />
+          <Route path="customers" element={<ManagerCustomersPage />} />
+          <Route path="customers/:id" element={<ManagerCustomerDetailPage />} />
+          <Route path="feedback" element={<ManagerFeedbackPage />} />
+          <Route path="settings" element={<ManagerSettingsPage />} />
         </Route>
 
         {/* 404 Not Found */}

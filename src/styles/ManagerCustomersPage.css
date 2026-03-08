@@ -1,5 +1,5 @@
-/* ===== Admin Customers Page ===== */
-.admin-customers-page {
+﻿/* ===== Admin Customers Page ===== */
+.manager-customers-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -572,4 +572,160 @@
     gap: 0.75rem;
     align-items: center;
   }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark .manager-customers-page {
+  color: #f1f5f9;
+}
+
+.dark .customers-page-header h1 {
+  color: #f1f5f9;
+}
+
+.dark .customers-page-header p {
+  color: #94a3b8;
+}
+
+.dark .customers-stats-row .stat-card {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customers-stats-row .stat-card:hover {
+  border-color: #4ade80;
+}
+
+.dark .customers-stats-row .stat-label {
+  color: #94a3b8;
+}
+
+.dark .customers-stats-row .stat-value {
+  color: #f1f5f9;
+}
+
+.dark .customers-toolbar {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customers-toolbar input {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .customers-toolbar input::placeholder {
+  color: #6b7280;
+}
+
+.dark .customers-toolbar select {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #f1f5f9;
+}
+
+.dark .customers-table-container {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+}
+
+.dark .customers-table th {
+  background: #152015;
+  color: #94a3b8;
+  border-bottom-color: #2d4a2d;
+}
+
+.dark .customers-table td {
+  color: #d1d5db;
+  border-bottom-color: #1e3a1e;
+}
+
+.dark .customers-table tbody tr:hover {
+  background: #1e2e1e;
+}
+
+.dark .customer-name {
+  color: #f1f5f9;
+}
+
+.dark .customer-email {
+  color: #6b7280;
+}
+
+.dark .status-badge {
+  background: rgba(74,222,128,0.15);
+  color: #86efac;
+}
+
+.dark .status-badge.inactive,
+.dark .status-badge.banned {
+  background: rgba(248,113,113,0.15);
+  color: #fca5a5;
+}
+
+.dark .btn-view {
+  background: #0f1a0f;
+  border-color: #2d4a2d;
+  color: #4ade80;
+}
+
+.dark .btn-view:hover {
+  background: #1e3a1e;
+}
+
+.dark .btn-ban {
+  background: #0f1a0f;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark .btn-ban:hover {
+  background: #2d1f1f;
+}
+
+.dark .btn-unban {
+  background: #0f1a0f;
+  border-color: #14532d;
+  color: #4ade80;
+}
+
+.dark .btn-unban:hover {
+  background: #1e3a1e;
+}
+
+.dark .pagination-container {
+  border-top-color: #2d4a2d;
+}
+
+.dark .pagination-btn {
+  background: #1a2a1a;
+  border-color: #2d4a2d;
+  color: #94a3b8;
+}
+
+.dark .pagination-btn:hover {
+  background: #243524;
+  color: #f1f5f9;
+}
+
+.dark .pagination-btn.active {
+  background: #14532d;
+  color: #4ade80;
+  border-color: #166534;
+}
+
+.dark .empty-state {
+  color: #6b7280;
+}
+
+.dark .empty-state h3 {
+  color: #94a3b8;
+}
+
+.dark .loading-container {
+  color: #94a3b8;
 }

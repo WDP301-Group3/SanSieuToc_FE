@@ -123,24 +123,41 @@ const Header = () => {
                     <div className="header-dropdown-header">
                       <p className="header-dropdown-name">{user?.name || 'User'}</p>
                       <p className="header-dropdown-email">{user?.email || ''}</p>
+                      {(user?.role === 'manager' || user?.role === 'admin') && (
+                        <span className="header-dropdown-role-badge">Quản lý</span>
+                      )}
                     </div>
                     <div className="header-dropdown-divider" />
-                    <button
-                      className="header-dropdown-item"
-                      onClick={() => { setShowDropdown(false); handleNavClick('/profile'); }}
-                    >
-                      <span className="material-icons-outlined">person</span>
-                      {t('nav.profile')}
-                    </button>
-                    {user?.role === 'admin' && (
+
+                    {/* Manager: chỉ hiện Dashboard + Cài đặt */}
+                    {(user?.role === 'manager' || user?.role === 'admin') ? (
+                      <>
+                        <button
+                          className="header-dropdown-item"
+                          onClick={() => { setShowDropdown(false); handleNavClick('/admin/dashboard'); }}
+                        >
+                          <span className="material-icons-outlined">dashboard</span>
+                          Dashboard quản lý
+                        </button>
+                        <button
+                          className="header-dropdown-item"
+                          onClick={() => { setShowDropdown(false); handleNavClick('/admin/settings'); }}
+                        >
+                          <span className="material-icons-outlined">settings</span>
+                          Cài đặt
+                        </button>
+                      </>
+                    ) : (
+                      /* Customer: chỉ hiện Hồ sơ */
                       <button
                         className="header-dropdown-item"
-                        onClick={() => { setShowDropdown(false); handleNavClick('/admin'); }}
+                        onClick={() => { setShowDropdown(false); handleNavClick('/customer/dashboard'); }}
                       >
-                        <span className="material-icons-outlined">dashboard</span>
-                        Dashboard
+                        <span className="material-icons-outlined">person</span>
+                        {t('nav.profile')}
                       </button>
                     )}
+
                     <div className="header-dropdown-divider" />
                     <button
                       className="header-dropdown-item logout"

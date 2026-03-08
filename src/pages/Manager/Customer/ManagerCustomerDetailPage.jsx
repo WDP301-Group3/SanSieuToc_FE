@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mockUsers, mockBookings, USER_ROLES } from '../../../data/mockData';
 import { useNotification } from '../../../context/NotificationContext';
-import '../../../styles/AdminCustomerDetailPage.css';
+import '../../../styles/ManagerCustomerDetailPage.css';
 
 /**
  * Format date string to dd/MM/yyyy
@@ -58,7 +58,7 @@ const getCustomerRank = (completedCount) => {
   return 'Bronze';
 };
 
-const AdminCustomerDetailPage = () => {
+const ManagerCustomerDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -126,7 +126,7 @@ const AdminCustomerDetailPage = () => {
   }
 
   return (
-    <div className="admin-customer-detail-page">
+    <div className="manager-customer-detail-page">
       {/* Breadcrumbs & Header */}
       <div className="customer-detail-header">
         <nav className="customer-detail-breadcrumb">
@@ -309,4 +309,4 @@ const AdminCustomerDetailPage = () => {
   );
 };
 
-export default AdminCustomerDetailPage;
+export default ManagerCustomerDetailPage;

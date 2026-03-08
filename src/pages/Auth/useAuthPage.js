@@ -28,6 +28,7 @@ const useAuthPage = () => {
   };
 
   const [authMode, setAuthMode] = useState(getInitialAuthMode());
+  const [loginRole, setLoginRole] = useState('customer'); // 'customer' | 'manager'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -189,7 +190,7 @@ const useAuthPage = () => {
         return;
       }
 
-      const { customer, token } = response.data;
+      const { customer, token, accessToken } = response.data;
       const userData = {
         id: customer._id,
         name: customer.name,
@@ -199,12 +200,58 @@ const useAuthPage = () => {
         role: 'customer',
       };
 
-      login(userData, token);
+      login(userData, token || accessToken);
       notification.success('Đăng nhập thành công!');
       navigate('/');
     } catch (error) {
       setErrors({ submit: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
       console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManagerLoginSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    const newErrors = {};
+    if (!loginData.email.trim()) newErrors.email = 'Vui lòng nhập email';
+    if (!loginData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authService.loginManager({
+        email: loginData.email.trim(),
+        password: loginData.password,
+      });
+
+      if (!response.success) {
+        setErrors({ submit: response.message || 'Đăng nhập thất bại.' });
+        setLoading(false);
+        return;
+      }
+
+      const { manager, token, accessToken } = response.data;
+      const userData = {
+        id: manager._id,
+        name: manager.name,
+        email: manager.email,
+        phone: manager.phone || '',
+        image: manager.image || '',
+        role: 'manager',
+      };
+
+      login(userData, token || accessToken);
+      notification.success('Đăng nhập thành công! Chào mừng trở lại.');
+      navigate('/admin/dashboard');
+    } catch (error) {
+      setErrors({ submit: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      console.error('Manager login error:', error);
     } finally {
       setLoading(false);
     }
@@ -280,6 +327,8 @@ const useAuthPage = () => {
 
   return {
     authMode,
+    loginRole,
+    setLoginRole,
     showPassword,
     setShowPassword,
     showConfirmPassword,
@@ -297,6 +346,7 @@ const useAuthPage = () => {
     handleRegisterChange,
     switchAuthMode,
     handleLoginSubmit,
+    handleManagerLoginSubmit,
     handleRegisterSubmit,
     handleForgotPasswordSubmit,
   };

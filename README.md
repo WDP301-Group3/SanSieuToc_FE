@@ -2,8 +2,9 @@
 
 Hệ thống đặt sân thể thao trực tuyến - Frontend Application
 
-**Last Updated**: February 27, 2026  
-**Status**: ✅ Core Features Complete | 🔄 API Integration In Progress  
+**Last Updated**: March 8, 2026  
+**Status**: ✅ Core + API Integration ~90% Complete | 🔄 Final Polish In Progress  
+**Build**: ✅ 272 modules — 0 errors  
 **Branch**: quoc_minh
 
 ---
@@ -12,11 +13,184 @@ Hệ thống đặt sân thể thao trực tuyến - Frontend Application
 
 - **React 19** - UI Framework
 - **Vite** - Build Tool
-- **Tailwind CSS v3.4** - Styling (Stable version)
-- **React Router DOM** - Routing
-- **Redux Toolkit** - State Management
-- **Axios** - HTTP Client
+- **Tailwind CSS v3.4** - Styling
+- **React Router DOM** - Routing (28 routes)
+- **Axios** - HTTP Client (with interceptors + auto token)
 - **React Hook Form** - Form Management
+
+## 📁 Project Structure
+
+```
+src/
+├── assets/          # Images, icons, static files
+├── components/      # Reusable components
+│   └── layout/      # Header, Footer, MainLayout, AdminLayout, ManagerLayout
+├── context/         # AuthContext, ThemeContext, AppContext, NotificationContext
+├── data/            # mockData.js (being phased out — 3 pages remain)
+├── pages/
+│   ├── Home/        # HomePage
+│   ├── Auth/        # AuthPage (3-tab: login/register/manager), ForgotPasswordPage
+│   ├── Field/       # FieldListPage, FieldDetailPage
+│   ├── Customer/    # UserDashboardPage, UserProfilePage, BookingDetailPage
+│   └── Manager/     # Dashboard, Settings, Field/, Customer/, Feedback/
+├── services/        # 6 service files (axios, auth, booking, feedback, field, manager)
+├── styles/          # 27 CSS files (all Manager files include .dark selectors)
+├── utils/           # tokenManager, validators, qrGenerator, etc.
+├── App.jsx          # 28 routes
+└── main.jsx
+```
+
+## ✨ Current Features
+
+### 👤 Authentication
+- Unified `AuthPage` — 3 tabs: **Đăng nhập** | **Đăng ký** | **Quản lý đăng nhập**
+- JWT token management via `tokenManager` (localStorage)
+- Role-based routing: customer → `/`, manager → `/manager/dashboard`
+- Forgot password with email OTP flow
+
+### 🏟️ Field Listing & Search
+- Filter by category, field type, price range, location, date/time
+- Real API from `fieldService.js` — pagination, search, availability
+- Responsive grid (3-col desktop, 2-col tablet, 1-col mobile)
+
+### 📅 Booking Flow
+- Real-time available time slots from API
+- Multi-slot selection, price calculation (+ 30% deposit)
+- QR code payment display
+- Booking detail page with feedback form
+
+### 👤 Customer Dashboard
+- Tabbed: **Profile** | **Booking History** | **Settings**
+- Real API for profile update, booking history, booking detail
+- Change password via API
+
+### 🛠️ Manager Dashboard
+- **Dashboard**: Stats overview + recent bookings (real API)
+- **Fields**: List, filter, delete with confirm modal (real API)
+- **Customers**: List, stats, ban/unban (real API)
+- **Feedback**: List, delete (real API)
+- **Settings**: Profile update + change password (real API)
+- Dark mode: all pages support `.dark` CSS selectors
+
+### 🌙 Dark Mode
+- Toggle in ManagerSettings and Customer Settings
+- Persisted via `ThemeContext` + `localStorage`
+- All 27 CSS files have dark mode selectors
+
+---
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js >= 18.x
+- npm or yarn
+- Backend running on `http://localhost:9999`
+
+### Installation
+
+```bash
+npm install
+npm run dev      # Development (http://localhost:5173)
+npm run build    # Production build
+npm run preview  # Preview production build
+```
+
+---
+
+## 📋 Routes
+
+### Public Routes
+- `/` — Homepage
+- `/auth` — Login / Register / Manager Login
+- `/forgot-password` — Password recovery
+- `/fields` — Field listing with filters
+- `/fields/:id` — Field detail + booking
+
+### Customer Routes (requires login)
+- `/customer/dashboard` — Tabbed dashboard (profile, bookings, settings)
+- `/customer/profile` — Profile page
+- `/customer/bookings/:id` — Booking detail
+
+### Manager Routes (requires manager login)
+- `/manager/dashboard` — Overview stats + recent bookings
+- `/manager/settings` — Profile + dark mode + change password
+- `/manager/fields` — Field list (search, delete)
+- `/manager/fields/:id` — Field detail
+- `/manager/fields/:id/edit` — Field edit form
+- `/manager/fields/create` — Create new field
+- `/manager/customers` — Customer list (ban/unban)
+- `/manager/customers/:id` — Customer detail
+- `/manager/feedback` — Feedback list (delete)
+
+---
+
+## 🔧 Development Progress
+
+### Phase 1: UI/UX Core ✅ COMPLETED (Jan–Feb 2026)
+- ✅ Project structure, layouts, routing
+- ✅ HomePage, Auth pages, FieldListPage, FieldDetailPage
+- ✅ Glass morphism, neon glow, responsive design
+
+### Phase 2: API Infrastructure ✅ COMPLETED (Feb 27, 2026)
+- ✅ Axios instance with interceptors
+- ✅ Token manager (localStorage, JWT decode)
+- ✅ `authService.js`, `bookingService.js`, `fieldService.js`, `feedbackService.js`
+- ✅ `.env` configuration
+
+### Phase 3: Full API Integration ✅ COMPLETED (Mar 2026)
+- ✅ Auth flow (login, register, change-password — customer + manager)
+- ✅ Protected routes (28 routes in App.jsx)
+- ✅ Customer pages (profile, booking history, booking detail, settings)
+- ✅ Field pages (list, detail, real time slots)
+- ✅ Feedback service
+
+### Phase 4: Manager Dashboard ✅ COMPLETED (Mar 8, 2026)
+- ✅ `managerService.js` created (NEW)
+- ✅ Dark mode for all 9 Manager CSS files
+- ✅ `ManagerDashboardPage` — real API
+- ✅ `ManagerFieldsPage` — real API + delete confirm modal
+- ✅ `ManagerCustomersPage` — real API + ban/unban
+- ✅ `ManagerFeedbackPage` — real API + delete
+- ✅ `ManagerSettingsPage` — profile + change password API
+- ✅ Build: 272 modules, 0 errors
+
+### Phase 5: Final Polish 🔄 IN PROGRESS
+- 🔲 `ManagerFieldDetailPage` — replace mock with `getManagerFieldById()`
+- 🔲 `ManagerFieldEditPage` — replace mock with `updateField()` + `getFieldCreateForm()`
+- 🔲 `ManagerCustomerDetailPage` — replace mock with `getCustomerById()`
+- 🔲 End-to-end testing all flows
+- 🔲 Error boundary, 404 handling
+
+---
+
+## 📊 Current Statistics (Mar 8, 2026)
+
+| Metric | Count |
+|--------|-------|
+| Total JSX files | 52 |
+| Total CSS files | 27 |
+| Service files | 6 |
+| Page components | 39 |
+| App routes | 28 |
+| Lines of code | ~31,646 |
+| Build modules | 272 |
+
+**Completion**:
+- ✅ UI/UX: 100%
+- ✅ API Integration: ~95% (3 Manager detail pages remain)
+- 🔄 Testing & Polish: 30%
+- 📊 **Overall: ~90% Complete**
+
+---
+
+## 📚 Documentation
+
+- **[API_INTEGRATION_ROADMAP.md](./API_INTEGRATION_ROADMAP.md)** — API integration plan (phases + status)
+- **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)** — Comprehensive project documentation
+
+## 👥 Team
+
+WDP301 - Group 3
 
 ## 📁 Project Structure
 

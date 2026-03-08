@@ -3,6 +3,7 @@ import useAuthPage from './useAuthPage';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
+import ManagerLoginForm from './components/ManagerLoginForm';
 
 /**
  * AuthPage Component - Unified Authentication Interface
@@ -11,6 +12,8 @@ import ForgotPasswordForm from './components/ForgotPasswordForm';
 const AuthPage = () => {
   const {
     authMode,
+    loginRole,
+    setLoginRole,
     showPassword,
     setShowPassword,
     showConfirmPassword,
@@ -28,6 +31,7 @@ const AuthPage = () => {
     handleRegisterChange,
     switchAuthMode,
     handleLoginSubmit,
+    handleManagerLoginSubmit,
     handleRegisterSubmit,
     handleForgotPasswordSubmit,
   } = useAuthPage();
@@ -41,23 +45,33 @@ const AuthPage = () => {
           <div className="auth-mode-tabs">
             <button
               type="button"
-              onClick={() => switchAuthMode('login')}
-              className={`auth-mode-tab ${authMode === 'login' ? 'active' : ''}`}
+              onClick={() => { switchAuthMode('login'); setLoginRole('customer'); }}
+              className={`auth-mode-tab ${authMode === 'login' && loginRole === 'customer' ? 'active' : ''}`}
             >
-              Đăng nhập
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>person</span>
+              Người dùng
             </button>
             <button
               type="button"
-              onClick={() => switchAuthMode('register')}
+              onClick={() => { switchAuthMode('register'); }}
               className={`auth-mode-tab ${authMode === 'register' ? 'active' : ''}`}
             >
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>person_add</span>
               Đăng ký
+            </button>
+            <button
+              type="button"
+              onClick={() => { switchAuthMode('login'); setLoginRole('manager'); setErrors({}); }}
+              className={`auth-mode-tab manager-tab ${authMode === 'login' && loginRole === 'manager' ? 'active manager-tab-active' : ''}`}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>manage_accounts</span>
+              Quản lý sân
             </button>
           </div>
 
           {/* Auth Card */}
           <div className="auth-card">
-            {authMode === 'login' && (
+            {authMode === 'login' && loginRole === 'customer' && (
               <LoginForm
                 loginData={loginData}
                 errors={errors}
@@ -67,6 +81,17 @@ const AuthPage = () => {
                 handleLoginChange={handleLoginChange}
                 handleLoginSubmit={handleLoginSubmit}
                 switchAuthMode={switchAuthMode}
+              />
+            )}
+            {authMode === 'login' && loginRole === 'manager' && (
+              <ManagerLoginForm
+                loginData={loginData}
+                errors={errors}
+                loading={loading}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                handleLoginChange={handleLoginChange}
+                handleManagerLoginSubmit={handleManagerLoginSubmit}
               />
             )}
             {authMode === 'register' && (

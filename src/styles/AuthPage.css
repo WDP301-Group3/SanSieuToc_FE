@@ -94,6 +94,22 @@
   box-shadow: 0 4px 6px rgba(0, 229, 54, 0.2);
 }
 
+/* Manager tab — distinct amber/orange accent */
+.auth-mode-tab.manager-tab:hover:not(.active) {
+  color: #92400e;
+  background-color: #fffbeb;
+}
+
+.dark .auth-mode-tab.manager-tab:hover:not(.active) {
+  color: #fbbf24;
+  background-color: #451a03;
+}
+
+.auth-mode-tab.manager-tab-active {
+  background: linear-gradient(135deg, #f59e0b 0%, #92400e 100%) !important;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.25) !important;
+}
+
 .auth-mode-tab:hover:not(.active) {
   color: rgb(22 101 52);
   background-color: rgb(240 253 244);
@@ -110,6 +126,85 @@
     padding: 0.625rem 0.5rem;
     font-size: 0.75rem;
   }
+}
+
+/* ============================================================================
+   MANAGER LOGIN SPECIFIC STYLES
+   ============================================================================ */
+
+.manager-login-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.875rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.dark .manager-login-badge {
+  background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+  color: #fbbf24;
+  border-color: #92400e;
+}
+
+.manager-login-badge .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+.manager-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3) !important;
+}
+
+.manager-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+}
+
+.manager-login-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.dark .manager-login-note {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.manager-login-note p {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.dark .manager-login-note p {
+  color: #9ca3af;
+}
+
+/* Spinner inside button */
+.auth-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
 }
 
 /* ============================================================================
