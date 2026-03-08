@@ -400,7 +400,7 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
+ 
 .edit-image-upload:hover {
   border-color: #19e62b;
   background: rgba(25, 230, 43, 0.04);

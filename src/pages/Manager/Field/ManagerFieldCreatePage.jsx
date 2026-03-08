@@ -1,14 +1,7 @@
-﻿import { useState, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useNotification } from '../../../context/NotificationContext';
-import {
-  mockCategories,
-  mockFieldTypes,
-  mockManagers,
-  ALL_UTILITIES,
-  ALL_DISTRICTS,
-  FIELD_STATUS,
-} from '../../../data/mockData';
+import { getFieldCreateForm, createField } from '../../../services/managerService';
 import '../../../styles/ManagerFieldEditPage.css';
 
 /**
@@ -29,6 +22,8 @@ const utilityLabelMap = {
   Scoreboard: { label: 'Bảng điểm', icon: 'scoreboard' },
 };
 
+const ALL_UTILITIES = Object.keys(utilityLabelMap);
+
 const ManagerFieldCreatePage = () => {
   const navigate = useNavigate();
   const notification = useNotification();
@@ -36,7 +31,6 @@ const ManagerFieldCreatePage = () => {
   /* ---------- Form state — all empty / default ---------- */
   const [fieldName, setFieldName] = useState('');
   const [address, setAddress] = useState('');
-  const [district, setDistrict] = useState('');
   const [description, setDescription] = useState('');
   const [hourlyPrice, setHourlyPrice] = useState(0);
   const [slotDuration, setSlotDuration] = useState(60);
@@ -44,103 +38,121 @@ const ManagerFieldCreatePage = () => {
   const [closingTime, setClosingTime] = useState('23:00');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedFieldTypeId, setSelectedFieldTypeId] = useState('');
-  const [selectedManagerId, setSelectedManagerId] = useState('');
-  const [status, setStatus] = useState(true); // default: available
   const [utilities, setUtilities] = useState([]);
   const [images, setImages] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  /* ---------- API form data ---------- */
+  const [categories, setCategories] = useState([]);
+  const [allFieldTypes, setAllFieldTypes] = useState([]);
+  const [formLoading, setFormLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchForm = async () => {
+      setFormLoading(true);
+      const res = await getFieldCreateForm();
+      if (res.success && res.data) {
+        const cats = res.data.categories || [];
+        const types = res.data.fieldTypes || [];
+        setCategories(cats);
+        setAllFieldTypes(types);
+        if (cats.length > 0) setSelectedCategoryId(cats[0]._id);
+      }
+      setFormLoading(false);
+    };
+    fetchForm();
+  }, []);
 
   /* ---------- Derived ---------- */
   const availableFieldTypes = useMemo(() => {
-    if (!selectedCategoryId) return mockFieldTypes;
-    return mockFieldTypes.filter((ft) => ft.categoryID === selectedCategoryId);
-  }, [selectedCategoryId]);
+    if (!selectedCategoryId) return allFieldTypes;
+    return allFieldTypes.filter(
+      (ft) =>
+        ft.categoryID === selectedCategoryId ||
+        ft.categoryID?._id === selectedCategoryId
+    );
+  }, [selectedCategoryId, allFieldTypes]);
 
   /* ---------- Handlers ---------- */
 
-  /** Toggle a utility on/off */
   const toggleUtility = (util) => {
     setUtilities((prev) =>
       prev.includes(util) ? prev.filter((u) => u !== util) : [...prev, util]
     );
   };
 
-  /** Handle category change — auto-reset fieldType */
   const handleCategoryChange = (catId) => {
     setSelectedCategoryId(catId);
-    const typesForCat = mockFieldTypes.filter((ft) => ft.categoryID === catId);
-    if (typesForCat.length > 0) {
-      setSelectedFieldTypeId(typesForCat[0]._id);
-    } else {
-      setSelectedFieldTypeId('');
-    }
+    const typesForCat = allFieldTypes.filter(
+      (ft) => ft.categoryID === catId || ft.categoryID?._id === catId
+    );
+    setSelectedFieldTypeId(typesForCat.length > 0 ? typesForCat[0]._id : '');
   };
 
-  /** Remove an image from the list */
   const removeImage = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /** Handle file upload (mock — create object URLs) */
+  /** Handle file upload — store File objects for upload */
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newUrls = files.map((file) => URL.createObjectURL(file));
-    setImages((prev) => [...prev, ...newUrls]);
+    setImages((prev) => [...prev, ...files]);
   };
 
-  /** Format price with thousand separators */
-  const formatPriceDisplay = (price) => {
-    return Number(price).toLocaleString('vi-VN');
-  };
+  const formatPriceDisplay = (price) => Number(price).toLocaleString('vi-VN');
 
-  /** Handle price input — strip non-numeric chars */
   const handlePriceChange = (e) => {
     const raw = e.target.value.replace(/[^0-9]/g, '');
     setHourlyPrice(Number(raw) || 0);
   };
 
-  /** Handle form submission (mock) */
-  const handleSubmit = (e) => {
+  /** Handle form submission — POST to API */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const selectedManager = mockManagers.find((m) => m._id === selectedManagerId);
-    const selectedFieldType = mockFieldTypes.find((ft) => ft._id === selectedFieldTypeId);
-    const selectedCategory = mockCategories.find((c) => c._id === selectedCategoryId);
+    if (!selectedFieldTypeId) {
+      notification.error('Vui lòng chọn loại sân!');
+      return;
+    }
 
-    const newField = {
-      _id: `field_new_${Date.now()}`,
-      fieldName,
-      address,
-      district,
-      description,
-      hourlyPrice,
-      slotDuration,
-      openingTime,
-      closingTime,
-      status: status ? FIELD_STATUS.AVAILABLE : FIELD_STATUS.MAINTENANCE,
-      utilities,
-      image: images,
-      fieldType: selectedFieldType
-        ? {
-            _id: selectedFieldType._id,
-            typeName: selectedFieldType.typeName,
-            category: selectedCategory
-              ? { _id: selectedCategory._id, categoryName: selectedCategory.categoryName }
-              : null,
-          }
-        : null,
-      manager: selectedManager
-        ? {
-            _id: selectedManager._id,
-            name: selectedManager.name,
-            phone: selectedManager.phone,
-            image: selectedManager.image,
-          }
-        : null,
-    };
+    setSubmitting(true);
 
-    notification.success(`Tạo sân "${fieldName}" thành công!`);
-    navigate('/admin/fields');
+    // Build FormData to support file uploads
+    const formData = new FormData();
+    formData.append('fieldName', fieldName);
+    formData.append('address', address);
+    formData.append('description', description);
+    formData.append('hourlyPrice', hourlyPrice);
+    formData.append('slotDuration', slotDuration);
+    formData.append('openingTime', openingTime);
+    formData.append('closingTime', closingTime);
+    formData.append('fieldTypeID', selectedFieldTypeId);
+    utilities.forEach((u) => formData.append('utilities[]', u));
+    images.forEach((img) => {
+      if (img instanceof File) formData.append('image', img);
+    });
+
+    const res = await createField(formData);
+    setSubmitting(false);
+
+    if (res.success) {
+      notification.success(`Tạo sân "${fieldName}" thành công!`);
+      navigate('/admin/fields');
+    } else {
+      notification.error(res.error || 'Tạo sân thất bại. Vui lòng thử lại.');
+    }
   };
+
+  if (formLoading) {
+    return (
+      <div className="edit-field-page">
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>sync</span>
+          <p>Đang tải form...</p>
+        </div>
+      </div>
+    );
+  }
 
   /* ---------- Render ---------- */
   return (
@@ -190,24 +202,9 @@ const ManagerFieldCreatePage = () => {
                     required
                   />
                 </div>
-                {/* Quận/Huyện */}
-                <div className="edit-form-group">
-                  <label className="edit-label">Quận/Huyện</label>
-                  <select
-                    className="edit-select"
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    required
-                  >
-                    <option value="">-- Chọn quận/huyện --</option>
-                    {ALL_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
 
                 {/* Địa chỉ */}
-                <div className="edit-form-group">
+                <div className="edit-form-group full-width">
                   <label className="edit-label">Địa chỉ</label>
                   <input
                     type="text"
@@ -219,8 +216,6 @@ const ManagerFieldCreatePage = () => {
                   />
                 </div>
 
-                
-
                 {/* Môn thể thao */}
                 <div className="edit-form-group">
                   <label className="edit-label">Môn thể thao</label>
@@ -231,7 +226,7 @@ const ManagerFieldCreatePage = () => {
                     required
                   >
                     <option value="">-- Chọn môn --</option>
-                    {mockCategories.map((cat) => (
+                    {categories.map((cat) => (
                       <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
                     ))}
                   </select>
@@ -249,22 +244,6 @@ const ManagerFieldCreatePage = () => {
                     <option value="">-- Chọn loại sân --</option>
                     {availableFieldTypes.map((ft) => (
                       <option key={ft._id} value={ft._id}>{ft.typeName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Chủ sân */}
-                <div className="edit-form-group">
-                  <label className="edit-label">Chủ sân (Quản lý)</label>
-                  <select
-                    className="edit-select"
-                    value={selectedManagerId}
-                    onChange={(e) => setSelectedManagerId(e.target.value)}
-                    required
-                  >
-                    <option value="">-- Chọn chủ sân --</option>
-                    {mockManagers.map((mgr) => (
-                      <option key={mgr._id} value={mgr._id}>{mgr.name} — {mgr.phone}</option>
                     ))}
                   </select>
                 </div>
@@ -330,7 +309,7 @@ const ManagerFieldCreatePage = () => {
                     className="edit-textarea"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Nhập mô tả về sân, tiện ích đi kèm (nước uống, áo tập, ...)..."
+                    placeholder="Nhập mô tả về sân, tiện ích đi kèm..."
                     rows={5}
                   />
                 </div>
@@ -344,7 +323,6 @@ const ManagerFieldCreatePage = () => {
                 Hình ảnh sân
               </h3>
 
-              {/* Dropzone upload area */}
               <label className="edit-dropzone">
                 <span className="material-symbols-outlined edit-dropzone-icon">cloud_upload</span>
                 <p className="edit-dropzone-text">
@@ -360,28 +338,35 @@ const ManagerFieldCreatePage = () => {
                 />
               </label>
 
-              {/* Preview uploaded images */}
               {images.length > 0 && (
                 <div className="edit-upload-list">
-                  {images.map((img, index) => (
-                    <div key={index} className="edit-upload-item">
-                      <div
-                        className="edit-upload-thumb"
-                        style={{ backgroundImage: `url(${img})` }}
-                      />
-                      <div className="edit-upload-info">
-                        <p className="edit-upload-name">ảnh-sân-{index + 1}.jpg</p>
-                        <p className="edit-upload-size">Đã tải lên</p>
+                  {images.map((img, index) => {
+                    const previewUrl = img instanceof File ? URL.createObjectURL(img) : img;
+                    const fileName = img instanceof File ? img.name : `ảnh-sân-${index + 1}.jpg`;
+                    return (
+                      <div key={index} className="edit-upload-item">
+                        <div
+                          className="edit-upload-thumb"
+                          style={{ backgroundImage: `url(${previewUrl})` }}
+                        />
+                        <div className="edit-upload-info">
+                          <p className="edit-upload-name">{fileName}</p>
+                          <p className="edit-upload-size">
+                            {img instanceof File
+                              ? `${(img.size / 1024).toFixed(0)} KB`
+                              : 'Đã tải lên'}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="edit-upload-remove"
+                          onClick={() => removeImage(index)}
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        className="edit-upload-remove"
-                        onClick={() => removeImage(index)}
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -395,37 +380,12 @@ const ManagerFieldCreatePage = () => {
                 Thiết lập
               </h3>
 
-              {/* Status Toggle */}
-              <div className="edit-setting-row">
-                <div>
-                  <label className="edit-setting-label">Trạng thái sân</label>
-                  <p className="edit-setting-hint">Tắt để đặt sân ở chế độ bảo trì</p>
-                </div>
-                <label className="edit-toggle">
-                  <input
-                    type="checkbox"
-                    checked={status}
-                    onChange={() => setStatus(!status)}
-                  />
-                  <span className="edit-toggle-slider" />
-                </label>
-              </div>
-
-              <div className="edit-setting-status">
-                <span className={`edit-status-dot ${status ? 'active' : 'maintenance'}`} />
-                <span className={`edit-status-text ${status ? 'active' : 'maintenance'}`}>
-                  {status ? 'Đang hoạt động' : 'Bảo trì'}
-                </span>
-              </div>
-
-              <hr className="edit-divider" />
-
               {/* Utilities */}
               <div className="edit-utilities-section">
                 <label className="edit-setting-label">Tiện ích đi kèm</label>
                 <div className="edit-utilities-list">
                   {ALL_UTILITIES.map((util) => {
-                    const info = utilityLabelMap[util] || { label: util, icon: 'check_circle' };
+                    const info = utilityLabelMap[util];
                     return (
                       <label key={util} className="edit-utility-item">
                         <input
@@ -484,12 +444,15 @@ const ManagerFieldCreatePage = () => {
             type="button"
             className="edit-btn-cancel"
             onClick={() => navigate('/admin/fields')}
+            disabled={submitting}
           >
             Hủy bỏ
           </button>
-          <button type="submit" className="edit-btn-save">
-            <span className="material-symbols-outlined">add_circle</span>
-            Thêm sân
+          <button type="submit" className="edit-btn-save" disabled={submitting}>
+            <span className="material-symbols-outlined">
+              {submitting ? 'sync' : 'add_circle'}
+            </span>
+            {submitting ? 'Đang tạo...' : 'Thêm sân'}
           </button>
         </div>
       </form>

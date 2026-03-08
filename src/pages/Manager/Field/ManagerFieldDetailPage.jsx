@@ -1,6 +1,6 @@
-﻿import { useMemo } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { mockFields, FIELD_STATUS } from '../../../data/mockData';
+import { getManagerFieldById } from '../../../services/managerService';
 import '../../../styles/ManagerFieldDetailPage.css';
 
 // Utility key → { icon, label }
@@ -19,24 +19,55 @@ const utilityMap = {
   'Scoreboard': { icon: 'scoreboard', label: 'Bảng điểm' },
 };
 
-const statusMap = {
-  [FIELD_STATUS.AVAILABLE]: { label: 'Đang hoạt động', className: 'active' },
-  [FIELD_STATUS.MAINTENANCE]: { label: 'Bảo trì', className: 'maintenance' },
+const getStatusInfo = (status) => {
+  switch ((status || '').toLowerCase()) {
+    case 'available': return { label: 'Đang hoạt động', className: 'active' };
+    case 'maintenance': return { label: 'Bảo trì', className: 'maintenance' };
+    default: return { label: 'Ngưng hoạt động', className: 'closed' };
+  }
 };
 
 const ManagerFieldDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const field = useMemo(() => mockFields.find((f) => f._id === id), [id]);
+  const [field, setField] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!field) {
+  useEffect(() => {
+    const fetchField = async () => {
+      setLoading(true);
+      setError(null);
+      const res = await getManagerFieldById(id);
+      if (res.success) {
+        setField(res.data);
+      } else {
+        setError(res.error || 'Không thể tải thông tin sân');
+      }
+      setLoading(false);
+    };
+    fetchField();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="afd-page">
+        <div className="afd-not-found">
+          <span className="material-symbols-outlined afd-not-found-icon" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
+          <p>Đang tải thông tin sân...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !field) {
     return (
       <div className="afd-page">
         <div className="afd-not-found">
           <span className="material-symbols-outlined afd-not-found-icon">search_off</span>
           <h2>Không tìm thấy sân</h2>
-          <p>Sân không tồn tại hoặc đã bị xóa.</p>
+          <p>{error || 'Sân không tồn tại hoặc đã bị xóa.'}</p>
           <Link to="/admin/fields" className="afd-btn-back">
             <span className="material-symbols-outlined">arrow_back</span>
             Quay lại danh sách sân
@@ -46,20 +77,24 @@ const ManagerFieldDetailPage = () => {
     );
   }
 
-  const status = statusMap[field.status] || { label: 'Ngưng hoạt động', className: 'closed' };
-  const typeName = field.fieldType?.typeName || '';
-  const categoryName = field.fieldType?.category?.categoryName || '';
-  const managerName = field.manager?.name || '';
-  const managerPhone = field.manager?.phone || '';
-  const images = field.image || [];
-  const amenities = (field.utilities || []).map((u) => utilityMap[u] || { icon: 'check_circle', label: u });
+  const status = getStatusInfo(field.status);
+  // BE populates: field.fieldTypeID.typeName, field.fieldTypeID.categoryID.categoryName
+  const typeName = field.fieldTypeID?.typeName || field.fieldType?.typeName || '';
+  const categoryName =
+    field.fieldTypeID?.categoryID?.categoryName ||
+    field.fieldType?.category?.categoryName || '';
+  const managerName = field.managerID?.name || field.manager?.name || '';
+  const managerPhone = field.managerID?.phone || field.manager?.phone || '';
+  const images = Array.isArray(field.image) ? field.image : field.image ? [field.image] : [];
+  const amenities = (field.utilities || []).map(
+    (u) => utilityMap[u] || { icon: 'check_circle', label: u }
+  );
 
-  const formatPrice = (price) => price.toLocaleString('vi-VN') + 'đ';
+  const formatPrice = (price) => Number(price || 0).toLocaleString('vi-VN') + 'đ';
 
-  // Build specs list dynamically
   const specs = [
-    { icon: 'sports_soccer', title: 'Loại sân', value: typeName },
-    { icon: 'category', title: 'Môn thể thao', value: categoryName },
+    { icon: 'sports_soccer', title: 'Loại sân', value: typeName || '—' },
+    { icon: 'category', title: 'Môn thể thao', value: categoryName || '—' },
     { icon: 'schedule', title: 'Thời gian mở cửa', value: `${field.openingTime} - ${field.closingTime}` },
     { icon: 'timer', title: 'Thời lượng slot', value: `${field.slotDuration} phút` },
   ];
@@ -138,15 +173,13 @@ const ManagerFieldDetailPage = () => {
       <div className="afd-content-grid">
         {/* Left Column */}
         <div className="afd-left-col">
-          {/* Description */}
           <section className="afd-section">
             <h2 className="afd-section-title">Thông tin chi tiết</h2>
-            <p className="afd-description">{field.description}</p>
+            <p className="afd-description">{field.description || 'Chưa có mô tả.'}</p>
           </section>
 
           <hr className="afd-divider" />
 
-          {/* Specs */}
           <section className="afd-section">
             <h3 className="afd-section-title">Thông số kỹ thuật</h3>
             <div className="afd-specs-grid">
@@ -164,7 +197,7 @@ const ManagerFieldDetailPage = () => {
             </div>
           </section>
 
-          {/* Manager Info */}
+          {/* Manager Info — only if populated */}
           {managerName && (
             <>
               <hr className="afd-divider" />
@@ -172,8 +205,11 @@ const ManagerFieldDetailPage = () => {
                 <h3 className="afd-section-title">Quản lý sân</h3>
                 <div className="afd-manager-card">
                   <div className="afd-manager-avatar">
-                    {field.manager?.image ? (
-                      <img src={field.manager.image} alt={managerName} />
+                    {(field.managerID?.image || field.manager?.image) ? (
+                      <img
+                        src={field.managerID?.image || field.manager?.image}
+                        alt={managerName}
+                      />
                     ) : (
                       <span className="material-symbols-outlined">person</span>
                     )}
@@ -212,7 +248,6 @@ const ManagerFieldDetailPage = () => {
         {/* Right Column */}
         <div className="afd-right-col">
           <div className="afd-price-card">
-            {/* Price */}
             <div className="afd-price-header">
               <div>
                 <p className="afd-price-label">Giá thuê</p>
@@ -226,19 +261,6 @@ const ManagerFieldDetailPage = () => {
               </div>
             </div>
 
-            {/* Price tiers */}
-            <div className="afd-price-tiers">
-              <div className="afd-price-tier">
-                <span>Giờ vàng (17h - 21h)</span>
-                <span className="afd-price-tier-value">{formatPrice(Math.round(field.hourlyPrice * 1.3))}/h</span>
-              </div>
-              <div className="afd-price-tier">
-                <span>Cuối tuần</span>
-                <span className="afd-price-tier-value">+50.000đ/h</span>
-              </div>
-            </div>
-
-            {/* Rules */}
             <div className="afd-rules">
               <h4 className="afd-rules-title">Quy định đặt sân</h4>
               <ul className="afd-rules-list">
@@ -257,10 +279,15 @@ const ManagerFieldDetailPage = () => {
               </ul>
             </div>
 
-            {/* Action Buttons */}
             <div className="afd-card-actions">
-              <button className="afd-btn-primary full">Quản lý lịch đặt</button>
-              <button className="afd-btn-secondary full">Cập nhật giá</button>
+              <Link to={`/admin/fields/${id}/edit`} className="afd-btn-primary full">
+                <span className="material-symbols-outlined">edit</span>
+                Chỉnh sửa sân
+              </Link>
+              <button className="afd-btn-secondary full" onClick={() => navigate('/admin/fields')}>
+                <span className="material-symbols-outlined">list</span>
+                Danh sách sân
+              </button>
             </div>
           </div>
         </div>

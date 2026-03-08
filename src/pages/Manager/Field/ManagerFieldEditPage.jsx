@@ -1,15 +1,7 @@
-﻿import { useState, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useNotification } from '../../../context/NotificationContext';
-import {
-  mockFields,
-  mockCategories,
-  mockFieldTypes,
-  mockManagers,
-  ALL_UTILITIES,
-  ALL_DISTRICTS,
-  FIELD_STATUS,
-} from '../../../data/mockData';
+import { getManagerFieldById, getFieldCreateForm, updateField } from '../../../services/managerService';
 import '../../../styles/ManagerFieldEditPage.css';
 
 /**
@@ -30,44 +22,201 @@ const utilityLabelMap = {
   Scoreboard: { label: 'Bảng điểm', icon: 'scoreboard' },
 };
 
+const ALL_UTILITIES = Object.keys(utilityLabelMap);
+
 const ManagerFieldEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const notification = useNotification();
 
-  // Find field from mockData
-  const field = mockFields.find((f) => f._id === id);
+  /* ---------- Loading & error state ---------- */
+  const [pageLoading, setPageLoading] = useState(true);
+  const [pageError, setPageError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Form state — initialized from field data
-  const [fieldName, setFieldName] = useState(field?.fieldName || '');
-  const [address, setAddress] = useState(field?.address || '');
-  const [district, setDistrict] = useState(field?.district || '');
-  const [description, setDescription] = useState(field?.description || '');
-  const [hourlyPrice, setHourlyPrice] = useState(field?.hourlyPrice || 0);
-  const [slotDuration, setSlotDuration] = useState(field?.slotDuration || 60);
-  const [openingTime, setOpeningTime] = useState(field?.openingTime || '06:00');
-  const [closingTime, setClosingTime] = useState(field?.closingTime || '23:00');
-  const [selectedCategoryId, setSelectedCategoryId] = useState(field?.fieldType?.category?._id || '');
-  const [selectedFieldTypeId, setSelectedFieldTypeId] = useState(field?.fieldType?._id || '');
-  const [selectedManagerId, setSelectedManagerId] = useState(field?.manager?._id || '');
-  const [status, setStatus] = useState(field?.status === FIELD_STATUS.AVAILABLE);
-  const [utilities, setUtilities] = useState(field?.utilities || []);
-  const [images, setImages] = useState(field?.image || []);
+  /* ---------- Form data from API ---------- */
+  const [categories, setCategories] = useState([]);
+  const [allFieldTypes, setAllFieldTypes] = useState([]);
 
-  // Filter field types based on selected category
+  /* ---------- Form fields ---------- */
+  const [fieldName, setFieldName] = useState('');
+  const [address, setAddress] = useState('');
+  const [description, setDescription] = useState('');
+  const [hourlyPrice, setHourlyPrice] = useState(0);
+  const [slotDuration, setSlotDuration] = useState(60);
+  const [openingTime, setOpeningTime] = useState('06:00');
+  const [closingTime, setClosingTime] = useState('23:00');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedFieldTypeId, setSelectedFieldTypeId] = useState('');
+  const [status, setStatus] = useState(true); // true = Available
+  const [utilities, setUtilities] = useState([]);
+  const [images, setImages] = useState([]); // string URLs (existing) or File objects (new)
+  const [fieldIdReal, setFieldIdReal] = useState(null);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      setPageLoading(true);
+      setPageError(null);
+
+      const [fieldRes, formRes] = await Promise.all([
+        getManagerFieldById(id),
+        getFieldCreateForm(),
+      ]);
+
+      if (!fieldRes.success) {
+        setPageError(fieldRes.error || 'Không tìm thấy sân');
+        setPageLoading(false);
+        return;
+      }
+
+      const f = fieldRes.data;
+      setFieldIdReal(f._id);
+      setFieldName(f.fieldName || '');
+      setAddress(f.address || '');
+      setDescription(f.description || '');
+      setHourlyPrice(f.hourlyPrice || 0);
+      setSlotDuration(f.slotDuration || 60);
+      setOpeningTime(f.openingTime || '06:00');
+      setClosingTime(f.closingTime || '23:00');
+      setStatus((f.status || '').toLowerCase() !== 'maintenance');
+      setUtilities(f.utilities || []);
+      setImages(
+        Array.isArray(f.image) ? f.image : f.image ? [f.image] : []
+      );
+
+      // Resolve category/fieldType IDs from populated object or plain ID
+      const currentTypeId =
+        (f.fieldTypeID?._id || f.fieldTypeID || f.fieldType?._id || '').toString();
+      const currentCatId = (
+        f.fieldTypeID?.categoryID?._id ||
+        f.fieldTypeID?.categoryID ||
+        f.fieldType?.category?._id ||
+        ''
+      ).toString();
+
+      if (formRes.success && formRes.data) {
+        const cats = formRes.data.categories || [];
+        const types = formRes.data.fieldTypes || [];
+        setCategories(cats);
+        setAllFieldTypes(types);
+        setSelectedCategoryId(currentCatId);
+        setSelectedFieldTypeId(currentTypeId);
+      }
+
+      setPageLoading(false);
+    };
+    fetchAll();
+  }, [id]);
+
+  /* ---------- Derived ---------- */
   const availableFieldTypes = useMemo(() => {
-    if (!selectedCategoryId) return mockFieldTypes;
-    return mockFieldTypes.filter((ft) => ft.categoryID === selectedCategoryId);
-  }, [selectedCategoryId]);
+    if (!selectedCategoryId) return allFieldTypes;
+    return allFieldTypes.filter(
+      (ft) =>
+        ft.categoryID === selectedCategoryId ||
+        ft.categoryID?._id === selectedCategoryId
+    );
+  }, [selectedCategoryId, allFieldTypes]);
 
-  // 404 — field not found
-  if (!field) {
+  /* ---------- Handlers ---------- */
+
+  const toggleUtility = (util) => {
+    setUtilities((prev) =>
+      prev.includes(util) ? prev.filter((u) => u !== util) : [...prev, util]
+    );
+  };
+
+  const handleCategoryChange = (catId) => {
+    setSelectedCategoryId(catId);
+    const typesForCat = allFieldTypes.filter(
+      (ft) => ft.categoryID === catId || ft.categoryID?._id === catId
+    );
+    if (typesForCat.length > 0 && !typesForCat.find((ft) => ft._id === selectedFieldTypeId)) {
+      setSelectedFieldTypeId(typesForCat[0]._id);
+    }
+  };
+
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...files]);
+  };
+
+  const formatPriceDisplay = (price) => Number(price).toLocaleString('vi-VN');
+
+  const handlePriceChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    setHourlyPrice(Number(raw) || 0);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedFieldTypeId) {
+      notification.error('Vui lòng chọn loại sân!');
+      return;
+    }
+
+    setSubmitting(true);
+
+    const formData = new FormData();
+    formData.append('fieldName', fieldName);
+    formData.append('address', address);
+    formData.append('description', description);
+    formData.append('hourlyPrice', hourlyPrice);
+    formData.append('slotDuration', slotDuration);
+    formData.append('openingTime', openingTime);
+    formData.append('closingTime', closingTime);
+    formData.append('fieldTypeID', selectedFieldTypeId);
+    formData.append('status', status ? 'Available' : 'Maintenance');
+    utilities.forEach((u) => formData.append('utilities[]', u));
+
+    // Existing image URLs (keep them)
+    images.filter((img) => typeof img === 'string').forEach((url) => {
+      formData.append('existingImages[]', url);
+    });
+    // New file uploads
+    images.filter((img) => img instanceof File).forEach((file) => {
+      formData.append('image', file);
+    });
+
+    const res = await updateField(fieldIdReal || id, formData);
+    setSubmitting(false);
+
+    if (res.success) {
+      notification.success(`Cập nhật sân "${fieldName}" thành công!`);
+      navigate(`/admin/fields/${fieldIdReal || id}`);
+    } else {
+      if (res.error?.includes('409') || res.error?.includes('booking')) {
+        notification.error('Không thể thay đổi giờ hoạt động vì có lịch đặt đang hoạt động.');
+      } else {
+        notification.error(res.error || 'Cập nhật sân thất bại. Vui lòng thử lại.');
+      }
+    }
+  };
+
+  /* ---------- Loading / Error states ---------- */
+  if (pageLoading) {
+    return (
+      <div className="edit-field-page">
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>sync</span>
+          <p>Đang tải thông tin sân...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (pageError) {
     return (
       <div className="edit-field-page">
         <div className="edit-not-found">
           <span className="material-symbols-outlined">search_off</span>
           <h2>Không tìm thấy sân</h2>
-          <p>Sân bạn muốn chỉnh sửa không tồn tại hoặc đã bị xóa.</p>
+          <p>{pageError}</p>
           <Link to="/admin/fields" className="edit-btn-back">
             <span className="material-symbols-outlined">arrow_back</span>
             Quay lại danh sách sân
@@ -76,100 +225,6 @@ const ManagerFieldEditPage = () => {
       </div>
     );
   }
-
-  /**
-   * Toggle a utility on/off
-   */
-  const toggleUtility = (util) => {
-    setUtilities((prev) =>
-      prev.includes(util) ? prev.filter((u) => u !== util) : [...prev, util]
-    );
-  };
-
-  /**
-   * Handle category change — reset fieldType if it no longer belongs to selected category
-   */
-  const handleCategoryChange = (catId) => {
-    setSelectedCategoryId(catId);
-    const typesForCat = mockFieldTypes.filter((ft) => ft.categoryID === catId);
-    if (typesForCat.length > 0 && !typesForCat.find((ft) => ft._id === selectedFieldTypeId)) {
-      setSelectedFieldTypeId(typesForCat[0]._id);
-    }
-  };
-
-  /**
-   * Remove an image from the list
-   */
-  const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  /**
-   * Handle file upload (mock — just add placeholder URLs)
-   */
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newUrls = files.map((file) => URL.createObjectURL(file));
-    setImages((prev) => [...prev, ...newUrls]);
-  };
-
-  /**
-   * Format price with thousand separators
-   */
-  const formatPriceDisplay = (price) => {
-    return Number(price).toLocaleString('vi-VN');
-  };
-
-  /**
-   * Handle price input — strip non-numeric chars
-   */
-  const handlePriceChange = (e) => {
-    const raw = e.target.value.replace(/[^0-9]/g, '');
-    setHourlyPrice(Number(raw) || 0);
-  };
-
-  /**
-   * Handle form submission (mock)
-   */
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const selectedManager = mockManagers.find((m) => m._id === selectedManagerId);
-    const selectedFieldType = mockFieldTypes.find((ft) => ft._id === selectedFieldTypeId);
-    const selectedCategory = mockCategories.find((c) => c._id === selectedCategoryId);
-
-    const updatedField = {
-      _id: field._id,
-      fieldName,
-      address,
-      district,
-      description,
-      hourlyPrice,
-      slotDuration,
-      openingTime,
-      closingTime,
-      status: status ? FIELD_STATUS.AVAILABLE : FIELD_STATUS.MAINTENANCE,
-      utilities,
-      image: images,
-      fieldType: selectedFieldType ? {
-        _id: selectedFieldType._id,
-        typeName: selectedFieldType.typeName,
-        category: selectedCategory ? {
-          _id: selectedCategory._id,
-          categoryName: selectedCategory.categoryName,
-        } : field.fieldType?.category,
-      } : field.fieldType,
-      manager: selectedManager ? {
-        _id: selectedManager._id,
-        name: selectedManager.name,
-        phone: selectedManager.phone,
-        image: selectedManager.image,
-      } : field.manager,
-    };
-
-    notification.success(`Cập nhật sân "${fieldName}" thành công!`);
-    navigate(`/admin/fields/${field._id}`);
-  };
 
   return (
     <div className="edit-field-page">
@@ -181,11 +236,11 @@ const ManagerFieldEditPage = () => {
           </button>
           <div>
             <h2 className="edit-page-title">Chỉnh sửa thông tin sân</h2>
-            <p className="edit-page-subtitle">Cập nhật thông tin chi tiết cho {field.fieldName}</p>
+            <p className="edit-page-subtitle">Cập nhật thông tin chi tiết cho {fieldName}</p>
           </div>
         </div>
         <div className="edit-header-right">
-          <Link to={`/admin/fields/${field._id}`} className="edit-view-link">
+          <Link to={`/admin/fields/${fieldIdReal || id}`} className="edit-view-link">
             <span className="material-symbols-outlined">visibility</span>
             Xem trang sân
           </Link>
@@ -230,21 +285,6 @@ const ManagerFieldEditPage = () => {
                   />
                 </div>
 
-                {/* Quận/Huyện */}
-                <div className="edit-form-group">
-                  <label className="edit-label">Quận/Huyện</label>
-                  <select
-                    className="edit-select"
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                  >
-                    <option value="">-- Chọn quận/huyện --</option>
-                    {ALL_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-
                 {/* Môn thể thao */}
                 <div className="edit-form-group">
                   <label className="edit-label">Môn thể thao</label>
@@ -254,7 +294,7 @@ const ManagerFieldEditPage = () => {
                     onChange={(e) => handleCategoryChange(e.target.value)}
                   >
                     <option value="">-- Chọn môn --</option>
-                    {mockCategories.map((cat) => (
+                    {categories.map((cat) => (
                       <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
                     ))}
                   </select>
@@ -271,21 +311,6 @@ const ManagerFieldEditPage = () => {
                     <option value="">-- Chọn loại sân --</option>
                     {availableFieldTypes.map((ft) => (
                       <option key={ft._id} value={ft._id}>{ft.typeName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Chủ sân */}
-                <div className="edit-form-group">
-                  <label className="edit-label">Chủ sân (Quản lý)</label>
-                  <select
-                    className="edit-select"
-                    value={selectedManagerId}
-                    onChange={(e) => setSelectedManagerId(e.target.value)}
-                  >
-                    <option value="">-- Chọn chủ sân --</option>
-                    {mockManagers.map((mgr) => (
-                      <option key={mgr._id} value={mgr._id}>{mgr.name} — {mgr.phone}</option>
                     ))}
                   </select>
                 </div>
@@ -365,27 +390,30 @@ const ManagerFieldEditPage = () => {
                 Hình ảnh
               </h3>
               <div className="edit-images-grid">
-                {images.map((img, index) => (
-                  <div key={index} className="edit-image-item">
-                    <img src={img} alt={`Ảnh ${index + 1}`} className="edit-image-preview" />
-                    <div className="edit-image-overlay">
-                      <button
-                        type="button"
-                        className="edit-image-action view"
-                        onClick={() => window.open(img, '_blank')}
-                      >
-                        <span className="material-symbols-outlined">visibility</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="edit-image-action delete"
-                        onClick={() => removeImage(index)}
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
+                {images.map((img, index) => {
+                  const src = img instanceof File ? URL.createObjectURL(img) : img;
+                  return (
+                    <div key={index} className="edit-image-item">
+                      <img src={src} alt={`Ảnh ${index + 1}`} className="edit-image-preview" />
+                      <div className="edit-image-overlay">
+                        <button
+                          type="button"
+                          className="edit-image-action view"
+                          onClick={() => window.open(src, '_blank')}
+                        >
+                          <span className="material-symbols-outlined">visibility</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="edit-image-action delete"
+                          onClick={() => removeImage(index)}
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <label className="edit-image-upload">
                   <span className="material-symbols-outlined">add_photo_alternate</span>
                   <span>Thêm ảnh</span>
@@ -440,7 +468,7 @@ const ManagerFieldEditPage = () => {
                 <label className="edit-setting-label">Tiện ích đi kèm</label>
                 <div className="edit-utilities-list">
                   {ALL_UTILITIES.map((util) => {
-                    const info = utilityLabelMap[util] || { label: util, icon: 'check_circle' };
+                    const info = utilityLabelMap[util];
                     return (
                       <label key={util} className="edit-utility-item">
                         <input
@@ -498,13 +526,16 @@ const ManagerFieldEditPage = () => {
           <button
             type="button"
             className="edit-btn-cancel"
-            onClick={() => navigate(`/admin/fields/${field._id}`)}
+            onClick={() => navigate(`/admin/fields/${fieldIdReal || id}`)}
+            disabled={submitting}
           >
             Hủy bỏ
           </button>
-          <button type="submit" className="edit-btn-save">
-            <span className="material-symbols-outlined">save</span>
-            Cập nhật
+          <button type="submit" className="edit-btn-save" disabled={submitting}>
+            <span className="material-symbols-outlined">
+              {submitting ? 'sync' : 'save'}
+            </span>
+            {submitting ? 'Đang lưu...' : 'Cập nhật'}
           </button>
         </div>
       </form>
