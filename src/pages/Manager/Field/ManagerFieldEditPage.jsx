@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useNotification } from '../../../context/NotificationContext';
-import { getManagerFieldById, getFieldCreateForm, updateField } from '../../../services/managerService';
+import { getFieldById } from '../../../services/fieldService';
+import { getFieldCreateForm, updateField } from '../../../services/managerService';
 import '../../../styles/ManagerFieldEditPage.css';
 
 /**
@@ -59,8 +60,8 @@ const ManagerFieldEditPage = () => {
       setPageError(null);
 
       const [fieldRes, formRes] = await Promise.all([
-        getManagerFieldById(id),
-        getFieldCreateForm(),
+        getFieldById(id),         // public API — load được bất kỳ sân nào
+        getFieldCreateForm(),     // danh sách category + fieldType để populate dropdown
       ]);
 
       if (!fieldRes.success) {
@@ -69,7 +70,8 @@ const ManagerFieldEditPage = () => {
         return;
       }
 
-      const f = fieldRes.data;
+      // getFieldById trả về { field, availability } — lấy field
+      const f = fieldRes.data?.field || fieldRes.data;
       setFieldIdReal(f._id);
       setFieldName(f.fieldName || '');
       setAddress(f.address || '');
@@ -80,23 +82,39 @@ const ManagerFieldEditPage = () => {
       setClosingTime(f.closingTime || '23:00');
       setStatus((f.status || '').toLowerCase() !== 'maintenance');
       setUtilities(f.utilities || []);
+      // public API trả về f.images; manager API trả về f.image — đều là array URL
       setImages(
-        Array.isArray(f.image) ? f.image : f.image ? [f.image] : []
+        Array.isArray(f.images) ? f.images
+          : Array.isArray(f.image) ? f.image
+          : f.image ? [f.image] : []
       );
 
-      // Resolve category/fieldType IDs from populated object or plain ID
-      const currentTypeId =
-        (f.fieldTypeID?._id || f.fieldTypeID || f.fieldType?._id || '').toString();
+      // Resolve IDs — public API: f.fieldType._id, f.category._id
+      //              manager API: f.fieldTypeID._id, f.fieldTypeID.categoryID._id
+      const currentTypeId = (
+        f.fieldType?._id ||
+        f.fieldTypeID?._id ||
+        f.fieldTypeID ||
+        ''
+      ).toString();
       const currentCatId = (
+        f.category?._id ||
+        f.fieldType?.category?._id ||
         f.fieldTypeID?.categoryID?._id ||
         f.fieldTypeID?.categoryID ||
-        f.fieldType?.category?._id ||
         ''
       ).toString();
 
       if (formRes.success && formRes.data) {
+        // BE trả về { categories: [{ _id, categoryName, fieldTypes: [...] }] }
+        // Mỗi category đã có fieldTypes lồng bên trong — cần tách ra flat array
         const cats = formRes.data.categories || [];
-        const types = formRes.data.fieldTypes || [];
+        const types = cats.flatMap((cat) =>
+          (cat.fieldTypes || []).map((ft) => ({
+            ...ft,
+            categoryID: { _id: cat._id, categoryName: cat.categoryName },
+          }))
+        );
         setCategories(cats);
         setAllFieldTypes(types);
         setSelectedCategoryId(currentCatId);
@@ -111,11 +129,10 @@ const ManagerFieldEditPage = () => {
   /* ---------- Derived ---------- */
   const availableFieldTypes = useMemo(() => {
     if (!selectedCategoryId) return allFieldTypes;
-    return allFieldTypes.filter(
-      (ft) =>
-        ft.categoryID === selectedCategoryId ||
-        ft.categoryID?._id === selectedCategoryId
-    );
+    return allFieldTypes.filter((ft) => {
+      const catId = (ft.categoryID?._id || ft.categoryID || '').toString();
+      return catId === selectedCategoryId.toString();
+    });
   }, [selectedCategoryId, allFieldTypes]);
 
   /* ---------- Handlers ---------- */
@@ -128,9 +145,10 @@ const ManagerFieldEditPage = () => {
 
   const handleCategoryChange = (catId) => {
     setSelectedCategoryId(catId);
-    const typesForCat = allFieldTypes.filter(
-      (ft) => ft.categoryID === catId || ft.categoryID?._id === catId
-    );
+    const typesForCat = allFieldTypes.filter((ft) => {
+      const ftCatId = (ft.categoryID?._id || ft.categoryID || '').toString();
+      return ftCatId === catId.toString();
+    });
     if (typesForCat.length > 0 && !typesForCat.find((ft) => ft._id === selectedFieldTypeId)) {
       setSelectedFieldTypeId(typesForCat[0]._id);
     }
@@ -159,39 +177,73 @@ const ManagerFieldEditPage = () => {
       notification.error('Vui lòng chọn loại sân!');
       return;
     }
+    if (!selectedCategoryId) {
+      notification.error('Vui lòng chọn môn thể thao!');
+      return;
+    }
+    if (images.length === 0) {
+      notification.error('Vui lòng giữ lại hoặc thêm ít nhất 1 ảnh sân!');
+      return;
+    }
 
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append('fieldName', fieldName);
-    formData.append('address', address);
-    formData.append('description', description);
-    formData.append('hourlyPrice', hourlyPrice);
-    formData.append('slotDuration', slotDuration);
-    formData.append('openingTime', openingTime);
-    formData.append('closingTime', closingTime);
-    formData.append('fieldTypeID', selectedFieldTypeId);
-    formData.append('status', status ? 'Available' : 'Maintenance');
-    utilities.forEach((u) => formData.append('utilities[]', u));
+    // Compress + convert File → base64 (giảm kích thước trước khi gửi JSON)
+    const compressToBase64 = (file, maxWidth = 1280, quality = 0.75) =>
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const scale = Math.min(1, maxWidth / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
 
-    // Existing image URLs (keep them)
-    images.filter((img) => typeof img === 'string').forEach((url) => {
-      formData.append('existingImages[]', url);
-    });
-    // New file uploads
-    images.filter((img) => img instanceof File).forEach((file) => {
-      formData.append('image', file);
-    });
+    let imageArray;
+    try {
+      imageArray = await Promise.all(
+        images.map((img) => (img instanceof File ? compressToBase64(img) : Promise.resolve(img)))
+      );
+    } catch {
+      notification.error('Lỗi đọc file ảnh. Vui lòng thử lại.');
+      setSubmitting(false);
+      return;
+    }
 
-    const res = await updateField(fieldIdReal || id, formData);
+    // Gửi JSON — BE updateField nhận req.body, không nhận FormData
+    // Tất cả trường khớp đúng với BE fieldService.updateField
+    const payload = {
+      fieldTypeID: selectedFieldTypeId,
+      fieldName,
+      address,
+      description,
+      hourlyPrice: Number(hourlyPrice),       // BE validate kiểu number
+      slotDuration: Number(slotDuration),     // BE validate integer >= 60
+      openingTime,
+      closingTime,
+      status: status ? 'Available' : 'Maintenance',
+      utilities,                              // array string
+      image: imageArray,                      // array URL hoặc base64 string
+    };
+
+    const res = await updateField(fieldIdReal || id, payload);
     setSubmitting(false);
 
     if (res.success) {
       notification.success(`Cập nhật sân "${fieldName}" thành công!`);
       navigate(`/admin/fields/${fieldIdReal || id}`);
     } else {
-      if (res.error?.includes('409') || res.error?.includes('booking')) {
+      if (res.error?.includes('409') || res.error?.toLowerCase().includes('booking')) {
         notification.error('Không thể thay đổi giờ hoạt động vì có lịch đặt đang hoạt động.');
+      } else if (res.error?.toLowerCase().includes('maintenance')) {
+        notification.error('Không thể chuyển sang bảo trì vì có lịch đặt đang hoạt động.');
       } else {
         notification.error(res.error || 'Cập nhật sân thất bại. Vui lòng thử lại.');
       }
@@ -339,9 +391,9 @@ const ManagerFieldEditPage = () => {
                       className="edit-input"
                       value={slotDuration}
                       onChange={(e) => setSlotDuration(Number(e.target.value))}
-                      min={30}
-                      max={180}
-                      step={15}
+                      min={60}
+                      max={480}
+                      step={60}
                     />
                     <span className="edit-suffix">phút</span>
                   </div>

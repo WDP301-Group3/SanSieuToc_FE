@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getCustomers, getCustomerStats, updateCustomerStatus } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerCustomersPage.css';
+import '../../../styles/ManagerFieldsPage.css';
 
 /**
  * Format date string to dd/MM/yyyy
@@ -14,21 +15,20 @@ const formatDate = (dateStr) => {
 
 /**
  * Customer status options for filter dropdown
+ * BE chỉ hỗ trợ Active và Banned
  */
 const CUSTOMER_STATUSES = [
   { key: '', label: 'Tất cả trạng thái' },
-  { key: 'active', label: 'Đang hoạt động' },
-  { key: 'inactive', label: 'Không hoạt động' },
-  { key: 'banned', label: 'Đã bị khóa' },
+  { key: 'Active', label: 'Đang hoạt động' },
+  { key: 'Banned', label: 'Đã bị khóa' },
 ];
 
 /**
- * Status display config
+ * Status display config — key khớp với BE (capitalized)
  */
 const STATUS_CONFIG = {
-  active: { label: 'Đang hoạt động', className: 'active' },
-  inactive: { label: 'Không hoạt động', className: 'inactive' },
-  banned: { label: 'Đã bị khóa', className: 'banned' },
+  Active: { label: 'Đang hoạt động', className: 'active' },
+  Banned: { label: 'Đã bị khóa', className: 'banned' },
 };
 
 const ManagerCustomersPage = () => {
@@ -41,21 +41,22 @@ const ManagerCustomersPage = () => {
   // API state
   const [rawCustomers, setRawCustomers] = useState([]);
   const [apiStats, setApiStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);  // eslint-disable-line no-unused-vars
   const [error, setError] = useState(null);
 
   const customersPerPage = 8;
 
-  // Fetch data on mount
+  // Fetch data on mount — dùng server-side params thay vì load tất cả rồi filter FE
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       const [custRes, statsRes] = await Promise.all([
-        getCustomers({ limit: 200 }),
+        getCustomers({ limit: 1000 }),   // tải đủ để search/filter phía FE
         getCustomerStats(),
       ]);
-      if (custRes.success) setRawCustomers(custRes.data || []);
+      // BE trả về { success, data: [...], pagination }
+      if (custRes.success) setRawCustomers(Array.isArray(custRes.data) ? custRes.data : []);
       else setError(custRes.error);
       if (statsRes.success) setApiStats(statsRes.data);
       setLoading(false);
@@ -63,13 +64,10 @@ const ManagerCustomersPage = () => {
     fetchData();
   }, []);
 
-  // Normalise API customers
+  // Normalise API customers — giữ nguyên status từ BE (capitalized: Active/Banned)
   const allCustomers = useMemo(() => rawCustomers.map((user) => {
-    // BE may return 'Active'/'Banned'/'Inactive' (capitalised) or lowercase
-    const rawStatus = (user.status || user.accountStatus || 'active').toLowerCase();
-    let status = 'active';
-    if (rawStatus === 'banned') status = 'banned';
-    else if (rawStatus === 'inactive') status = 'inactive';
+    // BE trả về status: 'Active' hoặc 'Banned'
+    const status = user.status || 'Active';
 
     return {
       id: user._id,
@@ -93,21 +91,19 @@ const ManagerCustomersPage = () => {
     return matchSearch && matchStatus;
   }), [allCustomers, searchTerm, statusFilter]);
 
-  // Stats from API or derived from data
+  // Stats từ API hoặc derive từ data
   const stats = useMemo(() => {
     if (apiStats) {
       return {
-        total: apiStats.total ?? apiStats.totalCustomers ?? allCustomers.length,
-        active: apiStats.active ?? apiStats.activeCustomers ?? allCustomers.filter((c) => c.status === 'active').length,
-        inactive: apiStats.inactive ?? apiStats.inactiveCustomers ?? allCustomers.filter((c) => c.status === 'inactive').length,
-        banned: apiStats.banned ?? apiStats.bannedCustomers ?? allCustomers.filter((c) => c.status === 'banned').length,
+        total: apiStats.totalCustomers ?? allCustomers.length,
+        active: apiStats.activeCustomers ?? allCustomers.filter((c) => c.status === 'Active').length,
+        banned: apiStats.bannedCustomers ?? allCustomers.filter((c) => c.status === 'Banned').length,
       };
     }
     return {
       total: allCustomers.length,
-      active: allCustomers.filter((c) => c.status === 'active').length,
-      inactive: allCustomers.filter((c) => c.status === 'inactive').length,
-      banned: allCustomers.filter((c) => c.status === 'banned').length,
+      active: allCustomers.filter((c) => c.status === 'Active').length,
+      banned: allCustomers.filter((c) => c.status === 'Banned').length,
     };
   }, [apiStats, allCustomers]);
 
@@ -124,16 +120,33 @@ const ManagerCustomersPage = () => {
   const handleConfirm = async () => {
     if (!confirmModal) return;
     const { type, customer } = confirmModal;
+
+    // BE chỉ hỗ trợ 'Active' và 'Banned' (capitalized)
     let newStatus;
-    if (type === 'ban') newStatus = 'banned';
-    else if (customer.status === 'active') newStatus = 'inactive';
-    else newStatus = 'active';
+    if (type === 'ban') {
+      newStatus = 'Banned';
+    } else {
+      // toggle: Active ↔ Banned
+      newStatus = customer.status === 'Active' ? 'Banned' : 'Active';
+    }
 
     const res = await updateCustomerStatus(customer.id, newStatus);
     if (res.success) {
+      // Cập nhật local state ngay không cần refetch
       setRawCustomers((prev) =>
         prev.map((u) => u._id === customer.id ? { ...u, status: newStatus } : u)
       );
+      // Cập nhật stats
+      setApiStats((prev) => {
+        if (!prev) return prev;
+        const wasActive = customer.status === 'Active';
+        const wasBanned = customer.status === 'Banned';
+        return {
+          ...prev,
+          activeCustomers: prev.activeCustomers + (newStatus === 'Active' ? 1 : wasActive ? -1 : 0),
+          bannedCustomers: prev.bannedCustomers + (newStatus === 'Banned' ? 1 : wasBanned ? -1 : 0),
+        };
+      });
       notification.success('Trạng thái tài khoản đã được cập nhật.');
     } else {
       notification.error(res.error || 'Cập nhật thất bại.');
@@ -159,40 +172,31 @@ const ManagerCustomersPage = () => {
 
       {/* Stats Cards */}
       <div className="customers-stats">
-        <div className="stat-card">
-          <div className="stat-icon total">
+        <div className="field-stat-card">
+          <div className="field-stat-icon total">
             <span className="material-symbols-outlined">group</span>
           </div>
           <div>
-            <div className="stat-value">{stats.total}</div>
-            <div className="stat-label">Tổng khách hàng</div>
+            <div className="field-stat-value">{stats.total}</div>
+            <div className="field-stat-label">Tổng khách hàng</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon active">
+        <div className="field-stat-card">
+          <div className="field-stat-icon active">
             <span className="material-symbols-outlined">check_circle</span>
           </div>
           <div>
-            <div className="stat-value">{stats.active}</div>
-            <div className="stat-label">Đang hoạt động</div>
+            <div className="field-stat-value">{stats.active}</div>
+            <div className="field-stat-label">Đang hoạt động</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon inactive">
-            <span className="material-symbols-outlined">pause_circle</span>
-          </div>
-          <div>
-            <div className="stat-value">{stats.inactive}</div>
-            <div className="stat-label">Không hoạt động</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon banned">
+        <div className="field-stat-card">
+          <div className="field-stat-icon closed">
             <span className="material-symbols-outlined">block</span>
           </div>
           <div>
-            <div className="stat-value">{stats.banned}</div>
-            <div className="stat-label">Đã bị khóa</div>
+            <div className="field-stat-value">{stats.banned}</div>
+            <div className="field-stat-label">Đã bị khóa</div>
           </div>
         </div>
       </div>
@@ -286,17 +290,8 @@ const ManagerCustomersPage = () => {
                         >
                           <span className="material-symbols-outlined">visibility</span>
                         </Link>
-                        {customer.status !== 'banned' ? (
+                        {customer.status !== 'Banned' ? (
                           <>
-                            <button
-                              className="customer-action-btn toggle"
-                              title={customer.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                              onClick={() => handleToggleStatus(customer)}
-                            >
-                              <span className="material-symbols-outlined">
-                                {customer.status === 'active' ? 'toggle_on' : 'toggle_off'}
-                              </span>
-                            </button>
                             <button
                               className="customer-action-btn ban"
                               title="Khóa tài khoản"
@@ -399,24 +394,20 @@ const ManagerCustomersPage = () => {
             ) : (
               <>
                 <div className="modal-icon warning">
-                  <span className="material-symbols-outlined">swap_horiz</span>
+                  <span className="material-symbols-outlined">lock_open</span>
                 </div>
-                <h3 className="modal-title">Thay đổi trạng thái</h3>
+                <h3 className="modal-title">Mở khóa tài khoản</h3>
                 <p className="modal-description">
-                  Bạn có chắc muốn{' '}
-                  {confirmModal.customer.status === 'active'
-                    ? 'vô hiệu hóa'
-                    : confirmModal.customer.status === 'banned'
-                    ? 'mở khóa'
-                    : 'kích hoạt'}{' '}
-                  tài khoản của <strong>{confirmModal.customer.name}</strong>?
+                  Bạn có chắc muốn mở khóa tài khoản của{' '}
+                  <strong>{confirmModal.customer.name}</strong>? Người dùng sẽ có thể đăng nhập
+                  và sử dụng dịch vụ trở lại.
                 </p>
                 <div className="modal-actions">
                   <button className="modal-btn cancel" onClick={() => setConfirmModal(null)}>
                     Hủy bỏ
                   </button>
                   <button className="modal-btn confirm-toggle" onClick={handleConfirm}>
-                    Xác nhận
+                    Mở khóa
                   </button>
                 </div>
               </>

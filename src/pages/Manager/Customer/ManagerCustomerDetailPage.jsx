@@ -1,50 +1,45 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getCustomerById, updateCustomerStatus } from '../../../services/managerService';
+import { getCustomerById, updateCustomerStatus, getManagerBookings } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerCustomerDetailPage.css';
 
-/**
- * Format date string to dd/MM/yyyy
- */
 const formatDate = (dateStr) => {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  });
 };
 
-/**
- * Format currency
- */
-const formatCurrency = (amount) => {
-  return Number(amount || 0).toLocaleString('vi-VN') + 'đ';
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
 };
 
+const formatCurrency = (amount) =>
+  Number(amount || 0).toLocaleString('vi-VN') + 'đ';
+
 /**
- * Status display config for customer
+ * Status config — khớp với BE: 'Active' | 'Banned'
  */
 const STATUS_CONFIG = {
-  active: { label: 'Hoạt động', className: 'customer-status-active' },
-  inactive: { label: 'Không hoạt động', className: 'customer-status-inactive' },
-  banned: { label: 'Đã bị khóa', className: 'customer-status-banned' },
+  Active: { label: 'Hoạt động', className: 'customer-status-active' },
+  Banned: { label: 'Đã bị khóa', className: 'customer-status-banned' },
 };
 
-/**
- * Booking status display config
- */
 const BOOKING_STATUS_CONFIG = {
   Confirmed: { label: 'Đã xác nhận', className: 'booking-status-confirmed' },
   Completed: { label: 'Hoàn thành', className: 'booking-status-completed' },
   Cancelled: { label: 'Đã hủy', className: 'booking-status-cancelled' },
-  Pending: { label: 'Chờ xử lý', className: 'booking-status-pending' },
+  Pending:   { label: 'Chờ xử lý', className: 'booking-status-pending' },
 };
 
-/**
- * Determine customer rank based on total completed bookings
- */
 const getCustomerRank = (completedCount) => {
   if (completedCount >= 10) return 'Gold';
-  if (completedCount >= 5) return 'Silver';
+  if (completedCount >= 5)  return 'Silver';
   return 'Bronze';
 };
 
@@ -65,17 +60,23 @@ const ManagerCustomerDetailPage = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const res = await getCustomerById(id);
-      if (res.success && res.data) {
-        const data = res.data;
-        // BE may return customer + bookings wrapped together
-        const cust = data.customer || data;
-        const bks = data.bookings || data.bookingHistory || [];
-        setCustomer(cust);
-        setBookings(bks);
+      // Gọi song song: thông tin customer + bookings của customer này
+      const [custRes, bookingsRes] = await Promise.all([
+        getCustomerById(id),
+        getManagerBookings({ customerId: id }),
+      ]);
+
+      if (custRes.success && custRes.data) {
+        // BE trả về customer object trực tiếp (không wrap thêm)
+        setCustomer(custRes.data.customer || custRes.data);
       } else {
-        setError(res.error || 'Không tìm thấy khách hàng');
+        setError(custRes.error || 'Không tìm thấy khách hàng');
       }
+
+      if (bookingsRes.success) {
+        setBookings(bookingsRes.data);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -106,46 +107,32 @@ const ManagerCustomerDetailPage = () => {
     );
   }
 
-  // Normalise status from BE (may be 'Active'/'Banned'/'Inactive')
-  const rawStatus = (customer.status || customer.accountStatus || 'active').toLowerCase();
-  const customerStatus = ['active', 'inactive', 'banned'].includes(rawStatus) ? rawStatus : 'active';
+  // Normalise status từ BE: 'Active' hoặc 'Banned'
+  const customerStatus = (customer?.status === 'Banned') ? 'Banned' : 'Active';
   const statusConfig = STATUS_CONFIG[customerStatus];
 
   const sortedBookings = [...bookings].sort(
-    (a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
   const completedCount = sortedBookings.filter((b) => b.status === 'Completed').length;
   const rank = getCustomerRank(completedCount);
   const displayedBookings = showAllBookings ? sortedBookings : sortedBookings.slice(0, 5);
 
-  const handleToggleStatus = () => setConfirmModal({ type: 'toggle' });
   const handleBanAccount = () => setConfirmModal({ type: 'ban' });
 
   const handleConfirm = async () => {
-    if (confirmModal?.type === 'toggle') {
-      setActionLoading(true);
-      const newStatus = customerStatus === 'active' ? 'inactive' : 'active';
-      const res = await updateCustomerStatus(id, newStatus);
-      setActionLoading(false);
-      if (res.success) {
-        setCustomer((prev) => ({ ...prev, status: newStatus }));
-        notification.success('Đã thay đổi trạng thái tài khoản.');
-      } else {
-        notification.error(res.error || 'Thay đổi trạng thái thất bại.');
-      }
-    } else if (confirmModal?.type === 'ban') {
-      setActionLoading(true);
-      const newStatus = customerStatus === 'banned' ? 'active' : 'banned';
-      const res = await updateCustomerStatus(id, newStatus);
-      setActionLoading(false);
-      if (res.success) {
-        setCustomer((prev) => ({ ...prev, status: newStatus }));
-        notification.success(newStatus === 'banned' ? 'Đã khóa tài khoản.' : 'Đã mở khóa tài khoản.');
-      } else {
-        notification.error(res.error || 'Cập nhật trạng thái thất bại.');
-      }
+    setActionLoading(true);
+    // BE chỉ nhận 'Active' và 'Banned' (capitalized)
+    const newStatus = confirmModal?.type === 'ban' ? 'Banned' : 'Active';
+    const res = await updateCustomerStatus(id, newStatus);
+    setActionLoading(false);
+    if (res.success) {
+      setCustomer((prev) => ({ ...prev, status: newStatus }));
+      notification.success(
+        newStatus === 'Banned' ? 'Đã khóa tài khoản.' : 'Đã mở khóa tài khoản.'
+      );
     } else {
-      notification.success('Thao tác đã được thực hiện.');
+      notification.error(res.error || 'Cập nhật trạng thái thất bại.');
     }
     setConfirmModal(null);
   };
@@ -248,18 +235,25 @@ const ManagerCustomerDetailPage = () => {
                     label: booking.status,
                     className: '',
                   };
-                  const fieldName =
-                    booking.fieldName ||
-                    booking.fieldID?.fieldName ||
-                    booking.field?.fieldName ||
-                    '—';
+                  // BE response shape: { id, status, totalPrice, createdAt, bookingDetails: [{ fieldName, startTime, endTime }] }
+                  const firstDetail = booking.bookingDetails?.[0];
+                  const fieldName = firstDetail?.fieldName || '—';
+                  const timeDisplay = firstDetail?.startTime
+                    ? `${formatDateTime(firstDetail.startTime)}${firstDetail.endTime ? ' – ' + formatDateTime(firstDetail.endTime) : ''}`
+                    : '—';
+                  const detailCount = booking.bookingDetails?.length || 1;
                   return (
-                    <tr key={booking._id}>
-                      <td className="td-date">{formatDate(booking.date || booking.bookingDate)}</td>
-                      <td className="td-field">{fieldName}</td>
-                      <td className="td-time">
-                        {booking.startTime || '—'} - {booking.endTime || '—'}
+                    <tr key={booking.id || booking._id}>
+                      <td className="td-date">{formatDate(booking.createdAt)}</td>
+                      <td className="td-field">
+                        {fieldName}
+                        {detailCount > 1 && (
+                          <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: 4 }}>
+                            (+{detailCount - 1})
+                          </span>
+                        )}
                       </td>
+                      <td className="td-time">{timeDisplay}</td>
                       <td className="td-price">{formatCurrency(booking.totalPrice)}</td>
                       <td className="td-status text-right">
                         <span className={`booking-status-badge ${bStatus.className}`}>
@@ -282,24 +276,25 @@ const ManagerCustomerDetailPage = () => {
           Các hành động quản trị viên có thể thực hiện đối với tài khoản khách hàng này.
         </p>
         <div className="account-actions-buttons">
-          <button
-            className="btn-action btn-toggle-status"
-            onClick={handleToggleStatus}
-            disabled={actionLoading}
-          >
-            <span className="material-symbols-outlined">sync</span>
-            {customerStatus === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt lại'}
-          </button>
-          <button
-            className="btn-action btn-delete-account"
-            onClick={handleBanAccount}
-            disabled={actionLoading}
-          >
-            <span className="material-symbols-outlined">
-              {customerStatus === 'banned' ? 'lock_open' : 'lock'}
-            </span>
-            {customerStatus === 'banned' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
-          </button>
+          {customerStatus === 'Active' ? (
+            <button
+              className="btn-action btn-delete-account"
+              onClick={handleBanAccount}
+              disabled={actionLoading}
+            >
+              <span className="material-symbols-outlined">lock</span>
+              Khóa tài khoản
+            </button>
+          ) : (
+            <button
+              className="btn-action btn-toggle-status"
+              onClick={() => setConfirmModal({ type: 'unban' })}
+              disabled={actionLoading}
+            >
+              <span className="material-symbols-outlined">lock_open</span>
+              Mở khóa tài khoản
+            </button>
+          )}
         </div>
       </div>
 
@@ -309,28 +304,23 @@ const ManagerCustomerDetailPage = () => {
           <div className="confirm-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="confirm-modal-icon">
               <span className="material-symbols-outlined">
-                {confirmModal.type === 'ban' ? 'warning' : 'help'}
+                {confirmModal.type === 'ban' ? 'lock' : 'lock_open'}
               </span>
             </div>
             <h3 className="confirm-modal-title">
-              {confirmModal.type === 'toggle' && 'Thay đổi trạng thái?'}
-              {confirmModal.type === 'ban' &&
-                (customerStatus === 'banned' ? 'Mở khóa tài khoản?' : 'Khóa tài khoản?')}
+              {confirmModal.type === 'ban' ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?'}
             </h3>
             <p className="confirm-modal-desc">
-              {confirmModal.type === 'toggle' &&
-                `Bạn có chắc muốn thay đổi trạng thái tài khoản của "${customer.name}"?`}
-              {confirmModal.type === 'ban' && customerStatus !== 'banned' &&
-                `Tài khoản của "${customer.name}" sẽ bị khóa và không thể đăng nhập.`}
-              {confirmModal.type === 'ban' && customerStatus === 'banned' &&
-                `Tài khoản của "${customer.name}" sẽ được mở khóa.`}
+              {confirmModal.type === 'ban'
+                ? `Tài khoản của "${customer.name}" sẽ bị khóa và không thể đăng nhập.`
+                : `Tài khoản của "${customer.name}" sẽ được mở khóa và có thể sử dụng dịch vụ trở lại.`}
             </p>
             <div className="confirm-modal-actions">
               <button className="btn-modal-cancel" onClick={() => setConfirmModal(null)}>
                 Hủy
               </button>
               <button
-                className={`btn-modal-confirm ${confirmModal.type === 'ban' && customerStatus !== 'banned' ? 'btn-danger' : ''}`}
+                className={`btn-modal-confirm ${confirmModal.type === 'ban' ? 'btn-danger' : ''}`}
                 onClick={handleConfirm}
                 disabled={actionLoading}
               >

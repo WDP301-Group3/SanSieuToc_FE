@@ -10,8 +10,149 @@
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* 6-column stats layout: hàng 1 = 4 card, hàng 2 = 2 card (doanh thu + cọc) */
+.dashboard-stats-6 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 2 card cuối (index 4 và 5) chiếm 2 cột, tự căn giữa hàng 2 */
+.dashboard-stats-6 .field-stat-card:nth-child(5),
+.dashboard-stats-6 .field-stat-card:nth-child(6) {
+  grid-column: span 2;
+}
+
+/* Màu bổ sung cho dashboard icons */
+.field-stat-icon.teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+.field-stat-icon.purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+.field-stat-icon.orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+.field-stat-icon.blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.field-stat-icon.green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.field-stat-icon.amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-stats-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-stats-6 .field-stat-card:nth-child(5),
+  .dashboard-stats-6 .field-stat-card:nth-child(6) {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-stats-6 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats-6 .field-stat-card:nth-child(5),
+  .dashboard-stats-6 .field-stat-card:nth-child(6) {
+    grid-column: span 1;
+  }
+}
+
+/* --- Top Grid (Top Fields + Top Customers side by side) --- */
+.dashboard-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
+
+@media (max-width: 1024px) {
+  .dashboard-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Rank Badge --- */
+.rank-cell {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.rank-badge.rank-1 { background: #fef9c3; color: #92400e; border: 1.5px solid #fde047; }
+.rank-badge.rank-2 { background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; }
+.rank-badge.rank-3 { background: #fef3c7; color: #92400e; border: 1.5px solid #fdba74; }
+.rank-badge        { background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; }
+
+/* --- Customer email sub-text --- */
+.customer-email {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin: 0;
+  margin-top: 0.1rem;
+}
+
+/* --- Count cell --- */
+.count-cell {
+  color: #64748b;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* --- Table title with icon --- */
+.table-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.table-title .material-symbols-outlined {
+  font-size: 1.15rem;
+  color: #16a34a;
+}
+
+/* --- Stat icon extra colors --- */
+.stat-icon.purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-icon.teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.stat-icon.orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
 
 .stat-card {
   background: #fff;

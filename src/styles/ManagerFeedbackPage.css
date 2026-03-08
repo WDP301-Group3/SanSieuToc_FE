@@ -257,6 +257,42 @@
   font-size: 0.875rem;
 }
 
+/* User cell: avatar + name */
+.feedback-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.feedback-user-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.feedback-user-avatar--placeholder {
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feedback-user-avatar--placeholder .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: #4caf50;
+}
+
+/* Customer name in feedback table */
+.feedback-customer-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary, #1a1a2e);
+  white-space: nowrap;
+}
+
 /* Star rating */
 .feedback-stars {
   display: flex;
@@ -379,7 +415,7 @@
 /* --- Stats Cards (Đồng bộ với customer/field) --- */
 .feedback-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 0.5rem;
 }

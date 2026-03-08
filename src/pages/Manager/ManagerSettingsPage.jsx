@@ -109,13 +109,7 @@ const ManagerSettingsPage = () => {
 
   return (
     <div className="ms-page">
-      <div className="ms-page-header">
-        <h1 className="ms-page-title">
-          <span className="material-symbols-outlined">settings</span>
-          Cài đặt
-        </h1>
-        <p className="ms-page-subtitle">Quản lý tài khoản và tùy chỉnh hệ thống</p>
-      </div>
+      
 
       <div className="ms-grid">
         {/* ── Profile Info Card ── */}

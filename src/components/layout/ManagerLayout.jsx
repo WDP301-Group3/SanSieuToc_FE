@@ -9,7 +9,7 @@ import '../../styles/ManagerLayout.css';
 const ManagerLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, loading, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -25,7 +25,16 @@ const ManagerLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Redirect non-manager users
+  // Redirect non-manager users — chờ loading xong mới kiểm tra
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '1rem' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite', color: '#16a34a' }}>progress_activity</span>
+        <p style={{ color: '#64748b', fontSize: '0.95rem' }}>Đang xác thực...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'manager')) {
     return <Navigate to="/login" replace />;
   }
