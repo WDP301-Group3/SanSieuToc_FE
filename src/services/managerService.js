@@ -241,6 +241,50 @@ export const getManagerBookings = async (params = {}) => {
   }
 };
 
+/**
+ * Confirm deposit received (Pending → Confirmed).
+ * PUT /api/manager/bookings/:bookingId/confirm-deposit
+ */
+export const confirmDeposit = async (bookingId) => {
+  try {
+    const response = await axiosInstance.put(
+      ENDPOINTS.MANAGER_BOOKINGS.CONFIRM_DEPOSIT(bookingId),
+    );
+    return { success: true, data: response.data?.data };
+  } catch (error) {
+    console.error("confirmDeposit error:", error);
+    return {
+      success: false,
+      error:
+        error.response?.data?.message ||
+        error.message ||
+        "Lỗi xác nhận tiền cọc",
+    };
+  }
+};
+
+/**
+ * Confirm payment received (Confirmed+Unpaid → Paid).
+ * PUT /api/manager/bookings/:bookingId/confirm-payment
+ */
+export const confirmPayment = async (bookingId) => {
+  try {
+    const response = await axiosInstance.put(
+      ENDPOINTS.MANAGER_BOOKINGS.CONFIRM_PAYMENT(bookingId),
+    );
+    return { success: true, data: response.data?.data };
+  } catch (error) {
+    console.error("confirmPayment error:", error);
+    return {
+      success: false,
+      error:
+        error.response?.data?.message ||
+        error.message ||
+        "Lỗi xác nhận thanh toán",
+    };
+  }
+};
+
 // ============================================================================
 // FEEDBACK (MANAGER VIEW)
 // ============================================================================

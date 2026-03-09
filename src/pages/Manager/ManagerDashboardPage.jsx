@@ -5,6 +5,8 @@ import {
   getRecentBookings,
   getTopFields,
   getTopCustomers,
+  confirmDeposit,
+  confirmPayment,
 } from '../../services/managerService';
 import '../../styles/ManagerDashboard.css';
 import '../../styles/ManagerFieldsPage.css';
@@ -19,6 +21,11 @@ const formatDateTime = (dateStr) => {
   const time = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   const date = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   return `${time} - ${date}`;
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  return new Date(dateStr).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
 const formatCurrency = (amount) => {
@@ -67,13 +74,56 @@ const ManagerDashboardPage = () => {
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState(null);
 
+  // Pagination for Recent Bookings
+  const [bookingPage, setBookingPage] = useState(1);
+  const BOOKINGS_PER_PAGE = 8;
+
+  // Booking detail modal
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionMsg, setActionMsg] = useState(null);
+
+  const handleConfirmDeposit = async () => {
+    if (!selectedBooking) return;
+    setActionLoading(true);
+    setActionMsg(null);
+    const res = await confirmDeposit(selectedBooking._id);
+    if (res.success) {
+      setRecentBookings(prev => prev.map(b =>
+        b._id === selectedBooking._id ? { ...b, status: 'Confirmed' } : b
+      ));
+      setSelectedBooking(prev => ({ ...prev, status: 'Confirmed' }));
+      setActionMsg({ type: 'success', text: 'Xác nhận tiền cọc thành công!' });
+    } else {
+      setActionMsg({ type: 'error', text: res.error || 'Xác nhận thất bại.' });
+    }
+    setActionLoading(false);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedBooking) return;
+    setActionLoading(true);
+    setActionMsg(null);
+    const res = await confirmPayment(selectedBooking._id);
+    if (res.success) {
+      setRecentBookings(prev => prev.map(b =>
+        b._id === selectedBooking._id ? { ...b, statusPayment: 'Paid' } : b
+      ));
+      setSelectedBooking(prev => ({ ...prev, statusPayment: 'Paid' }));
+      setActionMsg({ type: 'success', text: 'Xác nhận thanh toán thành công!' });
+    } else {
+      setActionMsg({ type: 'error', text: res.error || 'Xác nhận thất bại.' });
+    }
+    setActionLoading(false);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       const [summaryRes, bookingsRes, topFieldsRes, topCustomersRes] = await Promise.all([
         getDashboardSummary(),
-        getRecentBookings(10),
+        getRecentBookings(1000),
         getTopFields(5),
         getTopCustomers(5),
       ]);
@@ -81,7 +131,12 @@ const ManagerDashboardPage = () => {
       if (summaryRes.success)      setSummary(summaryRes.data);
       else                         setError(summaryRes.error);
 
-      if (bookingsRes.success)     setRecentBookings(bookingsRes.data || []);
+      if (bookingsRes.success) {
+        const sorted = (bookingsRes.data || []).slice().sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setRecentBookings(sorted);
+      }
       if (topFieldsRes.success)    setTopFields(topFieldsRes.data || []);
       if (topCustomersRes.success) setTopCustomers(topCustomersRes.data || []);
 
@@ -208,7 +263,7 @@ const ManagerDashboardPage = () => {
               <span className="material-symbols-outlined">emoji_events</span>
               Top sân doanh thu cao
             </h3>
-            <Link to="/admin/fields" className="table-view-all">Xem tất cả</Link>
+            
           </div>
           <div className="table-wrapper">
             {topFields.length === 0 ? (
@@ -250,7 +305,7 @@ const ManagerDashboardPage = () => {
               <span className="material-symbols-outlined">workspace_premium</span>
               Top khách hàng chi tiêu nhiều
             </h3>
-            <Link to="/admin/customers" className="table-view-all">Xem tất cả</Link>
+            
           </div>
           <div className="table-wrapper">
             {topCustomers.length === 0 ? (
@@ -278,7 +333,13 @@ const ManagerDashboardPage = () => {
                         </td>
                         <td>
                           <div className="customer-cell">
-                            <div className="customer-initials">{getInitials(name)}</div>
+                            <div className="customer-initials">
+                              {customer.image ? (
+                                <img src={customer.image} alt={name} className="customer-avatar-img" />
+                              ) : (
+                                getInitials(name)
+                              )}
+                            </div>
                             <div>
                               <span className="customer-name">{name}</span>
                               {customer.email && (
@@ -303,7 +364,6 @@ const ManagerDashboardPage = () => {
       <div className="dashboard-table-card">
         <div className="table-header">
           <h3 className="table-title">Đặt sân gần đây</h3>
-          <Link to="/admin/bookings" className="table-view-all">Xem tất cả</Link>
         </div>
         <div className="table-wrapper">
           {recentBookings.length === 0 ? (
@@ -311,60 +371,242 @@ const ManagerDashboardPage = () => {
               <span className="material-symbols-outlined">calendar_today</span>
               <p>Chưa có đặt sân nào gần đây.</p>
             </div>
-          ) : (
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Khách hàng</th>
-                  <th>Số lượt</th>
-                  <th>Tổng tiền</th>
-                  <th>Trạng thái</th>
-                  <th>Thanh toán</th>
-                  <th>Ngày tạo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentBookings.map((booking, idx) => {
-                  const customerName =
-                    booking.customerName || booking.customer?.name ||
-                    booking.customerID?.name || 'Khách hàng';
-                  const timeStr     = formatDateTime(booking.createdAt);
-                  const statusInfo  = getStatusInfo(booking.status);
-                  const payInfo     = getPaymentStatusInfo(booking.statusPayment);
-                  return (
-                    <tr key={booking._id || idx}>
-                      <td>
-                        <div className="customer-cell">
-                          <div className="customer-initials">{getInitials(customerName)}</div>
-                          <div>
-                            <span className="customer-name">{customerName}</span>
-                            {booking.email && (
-                              <p className="customer-email">{booking.email}</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="count-cell">{booking.bookingCount ?? 1}</td>
-                      <td className="price-cell">{formatCurrency(booking.totalPrice ?? 0)}</td>
-                      <td>
-                        <span className={`status-badge ${statusInfo.key}`}>
-                          {statusInfo.label}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${payInfo.key}`}>
-                          {payInfo.label}
-                        </span>
-                      </td>
-                      <td className="time-cell">{timeStr}</td>
+          ) : (() => {
+            const totalPages = Math.ceil(recentBookings.length / BOOKINGS_PER_PAGE);
+            const paginated  = recentBookings.slice(
+              (bookingPage - 1) * BOOKINGS_PER_PAGE,
+              bookingPage * BOOKINGS_PER_PAGE
+            );
+            return (
+              <>
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Khách hàng</th>
+                      <th>Số lượt</th>
+                      <th>Tổng tiền</th>
+                      <th>Trạng thái</th>
+                      <th>Thanh toán</th>
+                      <th>Ngày tạo</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+                  </thead>
+                  <tbody>
+                    {paginated.map((booking, idx) => {
+                      const customerName =
+                        booking.customerName || booking.customer?.name ||
+                        booking.customerID?.name || 'Khách hàng';
+                      const timeStr    = formatDateTime(booking.createdAt);
+                      const statusInfo = getStatusInfo(booking.status);
+                      const payInfo    = getPaymentStatusInfo(booking.statusPayment);
+                      return (
+                        <tr key={booking._id || idx}
+                          className="db-row-clickable"
+                          onClick={() => { setSelectedBooking(booking); setActionMsg(null); }}
+                        >
+                          <td>
+                            <div className="customer-cell">
+                              <div className="customer-initials">
+                                {booking.image ? (
+                                  <img src={booking.image} alt={customerName} className="customer-avatar-img" />
+                                ) : (
+                                  getInitials(customerName)
+                                )}
+                              </div>
+                              <div>
+                                <span className="customer-name">{customerName}</span>
+                                {booking.email && (
+                                  <p className="customer-email">{booking.email}</p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="count-cell">{booking.bookingCount ?? 1}</td>
+                          <td className="price-cell">{formatCurrency(booking.totalPrice ?? 0)}</td>
+                          <td>
+                            <span className={`status-badge ${statusInfo.key}`}>{statusInfo.label}</span>
+                          </td>
+                          <td>
+                            <span className={`status-badge ${payInfo.key}`}>{payInfo.label}</span>
+                          </td>
+                          <td className="time-cell">{timeStr}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="fields-pagination">
+                    <div className="fields-pagination-info">
+                      Hiển thị{' '}
+                      <span className="fields-pagination-bold">
+                        {(bookingPage - 1) * BOOKINGS_PER_PAGE + 1}–{Math.min(bookingPage * BOOKINGS_PER_PAGE, recentBookings.length)}
+                      </span>{' '}
+                      của{' '}
+                      <span className="fields-pagination-bold">{recentBookings.length}</span> đơn đặt sân
+                    </div>
+                    <div className="fields-pagination-buttons">
+                      <button
+                        className="fields-page-btn"
+                        disabled={bookingPage === 1}
+                        onClick={() => setBookingPage(p => p - 1)}
+                      >Trước</button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          className={`fields-page-btn ${bookingPage === page ? 'active' : ''}`}
+                          onClick={() => setBookingPage(page)}
+                        >{page}</button>
+                      ))}
+                      <button
+                        className="fields-page-btn"
+                        disabled={bookingPage === totalPages}
+                        onClick={() => setBookingPage(p => p + 1)}
+                      >Sau</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
+
+      {/* ===== Booking Detail Modal ===== */}
+      {selectedBooking && (() => {
+        const b = selectedBooking;
+        const customerName = b.customerName || b.customer?.name || 'Khách hàng';
+        const statusInfo = getStatusInfo(b.status);
+        const payInfo    = getPaymentStatusInfo(b.statusPayment);
+        const canConfirmDeposit  = b.status === 'Pending';
+        const canConfirmPayment  = b.status === 'Confirmed' && b.statusPayment === 'Unpaid';
+        return (
+          <div className="db-modal-overlay" onClick={() => setSelectedBooking(null)}>
+            <div className="db-modal" onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="db-modal-header">
+                <h3 className="db-modal-title">
+                  <span className="material-symbols-outlined">receipt_long</span>
+                  Chi tiết đơn đặt sân
+                </h3>
+                <button className="db-modal-close" onClick={() => setSelectedBooking(null)}>
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div className="db-modal-body">
+                {/* Customer Info */}
+                <div className="db-modal-section">
+                  <div className="db-modal-section-title">
+                    <span className="material-symbols-outlined">person</span>
+                    Thông tin khách hàng
+                  </div>
+                  <div className="db-modal-customer">
+                    <div className="db-modal-avatar">
+                      {b.image
+                        ? <img src={b.image} alt={customerName} />
+                        : <span>{getInitials(customerName)}</span>
+                      }
+                    </div>
+                    <div className="db-modal-customer-info">
+                      <div className="db-modal-customer-name">{customerName}</div>
+                      <div className="db-modal-customer-meta">
+                        <span className="material-symbols-outlined">email</span>
+                        {b.email || '—'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booking Info */}
+                <div className="db-modal-section">
+                  <div className="db-modal-section-title">
+                    <span className="material-symbols-outlined">event_note</span>
+                    Thông tin đặt sân
+                  </div>
+                  <div className="db-modal-grid">
+                    <div className="db-modal-field db-modal-field-full">
+                      <span className="db-modal-label">Sân đã đặt</span>
+                      <span className="db-modal-value">
+                        {(b.fieldNames && b.fieldNames.length > 0)
+                          ? b.fieldNames.join(', ')
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Ngày đặt</span>
+                      <span className="db-modal-value">{formatDate(b.bookingDate)}</span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Ngày tạo đơn</span>
+                      <span className="db-modal-value">{formatDateTime(b.createdAt)}</span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Tổng tiền</span>
+                      <span className="db-modal-value db-modal-price">{formatCurrency(b.totalPrice ?? 0)}</span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Số lượt</span>
+                      <span className="db-modal-value">{b.bookingCount ?? 1} lượt</span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Trạng thái</span>
+                      <span className={`status-badge ${statusInfo.key}`}>{statusInfo.label}</span>
+                    </div>
+                    <div className="db-modal-field">
+                      <span className="db-modal-label">Thanh toán</span>
+                      <span className={`status-badge ${payInfo.key}`}>{payInfo.label}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Message */}
+                {actionMsg && (
+                  <div className={`db-modal-msg ${actionMsg.type}`}>
+                    <span className="material-symbols-outlined">
+                      {actionMsg.type === 'success' ? 'check_circle' : 'error'}
+                    </span>
+                    {actionMsg.text}
+                  </div>
+                )}
+
+                {/* Actions */}
+                {(canConfirmDeposit || canConfirmPayment) && (
+                  <div className="db-modal-section">
+                    <div className="db-modal-section-title">
+                      <span className="material-symbols-outlined">manage_accounts</span>
+                      Thay đổi trạng thái
+                    </div>
+                    <div className="db-modal-actions">
+                      {canConfirmDeposit && (
+                        <button
+                          className="db-modal-btn confirm-deposit"
+                          disabled={actionLoading}
+                          onClick={handleConfirmDeposit}
+                        >
+                          <span className="material-symbols-outlined">payments</span>
+                          {actionLoading ? 'Đang xử lý...' : 'Xác nhận đã nhận cọc'}
+                        </button>
+                      )}
+                      {canConfirmPayment && (
+                        <button
+                          className="db-modal-btn confirm-payment"
+                          disabled={actionLoading}
+                          onClick={handleConfirmPayment}
+                        >
+                          <span className="material-symbols-outlined">paid</span>
+                          {actionLoading ? 'Đang xử lý...' : 'Xác nhận thanh toán đầy đủ'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getFieldById } from '../../../services/fieldService';
+import { getManagerBookings } from '../../../services/managerService';
 import '../../../styles/ManagerFieldDetailPage.css';
 
 // Utility key → { icon, label }
@@ -35,6 +36,10 @@ const ManagerFieldDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Bookings state
+  const [bookings, setBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+
   useEffect(() => {
     const fetchField = async () => {
       setLoading(true);
@@ -50,6 +55,35 @@ const ManagerFieldDetailPage = () => {
       setLoading(false);
     };
     fetchField();
+  }, [id]);
+
+  // Fetch bookings for this field
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setBookingsLoading(true);
+      const res = await getManagerBookings();
+      if (res.success) {
+        // Chỉ giữ booking có ít nhất 1 bookingDetail thuộc đúng sân này
+        const filtered = res.data.filter((b) =>
+          b.bookingDetails?.some(
+            (d) => d.fieldId?.toString() === id
+          )
+        );
+        // Chỉ hiển thị Pending (chờ xác nhận) và Confirmed/Completed (đã hoàn thành)
+        const relevant = filtered.filter((b) =>
+          ['Pending', 'Confirmed', 'Completed'].includes(b.status)
+        );
+        // Sắp xếp theo startTime của detail sân này (mới nhất lên đầu)
+        relevant.sort((a, b) => {
+          const aDetail = a.bookingDetails?.find((d) => d.fieldId?.toString() === id);
+          const bDetail = b.bookingDetails?.find((d) => d.fieldId?.toString() === id);
+          return new Date(bDetail?.startTime || 0) - new Date(aDetail?.startTime || 0);
+        });
+        setBookings(relevant);
+      }
+      setBookingsLoading(false);
+    };
+    if (id) fetchBookings();
   }, [id]);
 
   if (loading) {
@@ -292,7 +326,128 @@ const ManagerFieldDetailPage = () => {
             </div>
           </div>
         </div>
+      </div>{/* end afd-content-grid */}
+
+      {/* ===== Bookings Section ===== */}
+      <div className="afd-bookings-section">
+        <div className="afd-bookings-header">
+          <span className="material-symbols-outlined">event_available</span>
+          <h2 className="afd-bookings-title">Lịch sử đặt sân</h2>
+          <span className="afd-bookings-subtitle">Đơn đang chờ xác nhận &amp; đã hoàn thành</span>
+        </div>
+
+        {bookingsLoading ? (
+          <div className="afd-bookings-loading">
+            <span className="material-symbols-outlined afd-spin">progress_activity</span>
+            <span>Đang tải danh sách đặt sân...</span>
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="afd-bookings-empty">
+            <span className="material-symbols-outlined">inbox</span>
+            <p>Chưa có đơn đặt sân nào cho sân này.</p>
+          </div>
+        ) : (
+          <div className="afd-bookings-table-wrapper">
+            <table className="afd-bookings-table">
+              <thead>
+                <tr>
+                  <th>Khách hàng</th>
+                  <th>Liên hệ</th>
+                  <th>Thời gian đặt</th>
+                  <th>Khung giờ</th>
+                  <th>Tổng tiền</th>
+                  <th>Trạng thái</th>
+                  <th>Thanh toán</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((b) => {
+                  // Lấy bookingDetail của đúng sân này
+                  const detail = b.bookingDetails?.find(
+                    (d) => d.fieldId?.toString() === id
+                  ) || b.bookingDetails?.[0];
+
+                  const bookingStatusMap = {
+                    Pending:   { label: 'Chờ xác nhận', cls: 'afd-bs-pending' },
+                    Confirmed: { label: 'Đã xác nhận',  cls: 'afd-bs-confirmed' },
+                    Completed: { label: 'Hoàn thành',   cls: 'afd-bs-completed' },
+                    Cancelled: { label: 'Đã hủy',       cls: 'afd-bs-cancelled' },
+                  };
+                  const paymentStatusMap = {
+                    Unpaid:  { label: 'Chưa thanh toán', cls: 'afd-ps-unpaid' },
+                    Paid:    { label: 'Đã thanh toán',   cls: 'afd-ps-paid' },
+                    Refunded:{ label: 'Đã hoàn tiền',    cls: 'afd-ps-refunded' },
+                  };
+                  const bStatus = bookingStatusMap[b.status] || { label: b.status, cls: '' };
+                  const pStatus = paymentStatusMap[b.statusPayment] || { label: b.statusPayment || '—', cls: '' };
+
+                  const formatDT = (dt) => {
+                    if (!dt) return '—';
+                    const d = new Date(dt);
+                    return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                  };
+                  const formatDate = (dt) => {
+                    if (!dt) return '—';
+                    return new Date(dt).toLocaleDateString('vi-VN');
+                  };
+
+                  return (
+                    <tr key={b.id}>
+                      <td>
+                        <div className="afd-booking-customer">
+                          <div className="afd-booking-avatar">
+                            {b.customer?.image ? (
+                              <img src={b.customer.image} alt={b.customer.name} className="afd-booking-avatar-img" />
+                            ) : (
+                              <span className="afd-booking-avatar-initials">
+                                {(b.customer?.name || '?').charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <div className="afd-booking-name">{b.customer?.name || '—'}</div>
+                            <div className="afd-booking-email">{b.customer?.email || ''}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="afd-booking-phone">
+                          <span className="material-symbols-outlined">phone</span>
+                          {b.customer?.phone || '—'}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="afd-booking-date">{formatDate(b.createdAt)}</div>
+                      </td>
+                      <td>
+                        {detail ? (
+                          <div className="afd-booking-slot">
+                            <div>{formatDT(detail.startTime)}</div>
+                            <div className="afd-booking-slot-sep">→</div>
+                            <div>{formatDT(detail.endTime)}</div>
+                          </div>
+                        ) : '—'}
+                      </td>
+                      <td>
+                        <div className="afd-booking-price">
+                          {Number(b.totalPrice || 0).toLocaleString('vi-VN')}đ
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`afd-booking-badge ${bStatus.cls}`}>{bStatus.label}</span>
+                      </td>
+                      <td>
+                        <span className={`afd-booking-badge ${pStatus.cls}`}>{pStatus.label}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };
