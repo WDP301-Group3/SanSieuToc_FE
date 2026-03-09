@@ -372,7 +372,7 @@ const ManagerFieldEditPage = () => {
 
                 {/* Giá thuê */}
                 <div className="edit-form-group">
-                  <label className="edit-label">Giá thuê (VND/giờ)</label>
+                  <label className="edit-label">Giá thuê (VND/slot)</label>
                   <div className="edit-input-suffix">
                     <input
                       type="text"
@@ -396,7 +396,7 @@ const ManagerFieldEditPage = () => {
                       onChange={(e) => setSlotDuration(Number(e.target.value))}
                       min={60}
                       max={480}
-                      step={60}
+                      step={30}
                     />
                     <span className="edit-suffix">phút</span>
                   </div>
