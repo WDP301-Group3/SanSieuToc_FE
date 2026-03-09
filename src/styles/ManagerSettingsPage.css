@@ -1,0 +1,414 @@
+/* ManagerSettingsPage.css */
+
+.ms-page {
+  padding: 1.5rem;
+  max-width: 900px;
+}
+
+.ms-page-header {
+  margin-bottom: 2rem;
+}
+
+.ms-page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  margin: 0 0 0.25rem;
+}
+
+.ms-page-title .material-symbols-outlined {
+  font-size: 1.6rem;
+  color: #16a34a;
+}
+
+.ms-page-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dark .ms-page-title {
+  color: #f9fafb;
+}
+
+/* ── Grid ── */
+.ms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .ms-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card ── */
+.ms-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.875rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.ms-card-full {
+  grid-column: 1 / -1;
+}
+
+.dark .ms-card {
+  background: #1a2a1a;
+  border-color: #2d3f2d;
+}
+
+.ms-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dark .ms-card-header {
+  border-bottom-color: #2d3f2d;
+}
+
+.ms-card-icon {
+  font-size: 1.25rem;
+  color: #16a34a;
+}
+
+.ms-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.dark .ms-card-title {
+  color: #f9fafb;
+}
+
+.ms-card-desc {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+/* ── Profile row ── */
+.ms-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ms-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #d1fae5;
+  flex-shrink: 0;
+}
+
+.ms-profile-info {
+  flex: 1;
+}
+
+.ms-profile-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.2rem;
+}
+
+.dark .ms-profile-name {
+  color: #f9fafb;
+}
+
+.ms-profile-email,
+.ms-profile-phone {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 0.2rem;
+}
+
+.ms-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dark .ms-role-badge {
+  background: #14532d;
+  color: #86efac;
+}
+
+/* ── Setting row (for appearance) ── */
+.ms-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ms-setting-row:last-child {
+  border-bottom: none;
+}
+
+.dark .ms-setting-row {
+  border-bottom-color: #2d3f2d;
+}
+
+.ms-setting-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 0 0.15rem;
+}
+
+.dark .ms-setting-label {
+  color: #d1d5db;
+}
+
+.ms-setting-desc {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.ms-theme-icon {
+  font-size: 1.3rem;
+  color: #f59e0b;
+}
+
+/* ── Toggle switch ── */
+.ms-toggle-btn {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  background: #d1d5db;
+  transition: background 0.25s;
+  flex-shrink: 0;
+}
+
+.ms-toggle-btn.active {
+  background: #16a34a;
+}
+
+.ms-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ms-toggle-btn.active .ms-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* ── Password form ── */
+.ms-pw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ms-pw-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .ms-pw-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ms-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ms-form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.dark .ms-form-label {
+  color: #d1d5db;
+}
+
+.ms-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ms-input {
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #f9fafb;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ms-input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  background: #ffffff;
+}
+
+.dark .ms-input {
+  background: #111827;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.dark .ms-input:focus {
+  border-color: #22c55e;
+  background: #1f2937;
+}
+
+.ms-toggle-password {
+  position: absolute;
+  right: 0.625rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  padding: 0;
+}
+
+.ms-toggle-password:hover {
+  color: #374151;
+}
+
+.ms-toggle-password .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* ── Actions ── */
+.ms-pw-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.ms-btn-cancel {
+  padding: 0.55rem 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ms-btn-cancel:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.ms-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.375rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #16a34a;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ms-btn-submit:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.ms-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Banners ── */
+.ms-success-banner,
+.ms-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.ms-success-banner {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.ms-error-banner {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.ms-success-banner .material-symbols-outlined,
+.ms-error-banner .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* ── Spinner ── */
+.ms-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: ms-spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes ms-spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đăng nhập - Sân Siêu Tốc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec13",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102210",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display">
+<!-- TopNavBar -->
+<header class="w-full border-b border-solid border-[#e7f3e7] dark:border-[#1a331a] bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-10 py-3 flex items-center justify-between whitespace-nowrap">
+<div class="flex items-center gap-4 text-[#0d1b0d] dark:text-[#f8fcf8]">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-[#0d1b0d] dark:text-[#f8fcf8] text-xl font-bold leading-tight tracking-[-0.015em]">Sân Siêu Tốc</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-9">
+<a class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Trang chủ</a>
+<a class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Tìm sân</a>
+<a class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Tin tức</a>
+<a class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Liên hệ</a>
+</nav>
+<button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#0d1b0d] text-sm font-bold leading-normal tracking-[0.015em] hover:brightness-110 transition-all">
+<span>Đăng ký</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center px-4 py-12">
+<!-- Login Card Container -->
+<div class="w-full max-w-[480px] bg-white dark:bg-[#152a15] rounded-xl shadow-xl border border-[#cfe7cf] dark:border-[#1a331a] overflow-hidden">
+<div class="pt-10 pb-6">
+<!-- HeadlineText -->
+<h1 class="text-[#0d1b0d] dark:text-[#f8fcf8] tracking-tight text-[32px] font-bold leading-tight px-8 text-center pb-2">Chào mừng trở lại!</h1>
+<!-- BodyText -->
+<p class="text-[#4c9a4c] dark:text-[#a0cfa0] text-base font-normal leading-normal px-8 text-center">Đặt sân nhanh chóng, thi đấu hết mình cùng Sân Siêu Tốc.</p>
+</div>
+<form class="px-8 pb-10 flex flex-col gap-5">
+<!-- TextField: Email/Username -->
+<div class="flex flex-col gap-2">
+<label class="flex flex-col w-full">
+<p class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-semibold leading-normal pb-2">Email hoặc Tên đăng nhập</p>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4c9a4c]">person</span>
+<input class="form-input flex w-full rounded-lg text-[#0d1b0d] dark:text-[#f8fcf8] focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe7cf] dark:border-[#1a331a] bg-[#f8fcf8] dark:bg-[#0d1b0d] h-14 placeholder:text-[#4c9a4c]/60 pl-12 pr-4 text-base font-normal" placeholder="example@gmail.com" type="text"/>
+</div>
+</label>
+</div>
+<!-- TextField: Password -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<p class="text-[#0d1b0d] dark:text-[#f8fcf8] text-sm font-semibold leading-normal">Mật khẩu</p>
+<a class="text-xs font-medium text-primary hover:underline" href="#">Quên mật khẩu?</a>
+</div>
+<div class="flex w-full items-stretch rounded-lg">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4c9a4c]">lock</span>
+<input class="form-input flex w-full rounded-lg text-[#0d1b0d] dark:text-[#f8fcf8] focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe7cf] dark:border-[#1a331a] bg-[#f8fcf8] dark:bg-[#0d1b0d] h-14 placeholder:text-[#4c9a4c]/60 pl-12 pr-12 text-base font-normal" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-[#4c9a4c] hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Remember Me (Bonus for UX) -->
+<div class="flex items-center gap-2 px-1">
+<input class="rounded border-[#cfe7cf] text-primary focus:ring-primary" id="remember" type="checkbox"/>
+<label class="text-sm text-[#4c9a4c] dark:text-[#a0cfa0] cursor-pointer" for="remember">Ghi nhớ đăng nhập</label>
+</div>
+<!-- Login Button -->
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-4 bg-primary text-[#0d1b0d] text-base font-bold leading-normal tracking-[0.015em] hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 mt-2" type="submit">
+<span class="truncate">Đăng nhập ngay</span>
+</button>
+<!-- Social Login Separator -->
+<div class="relative my-4">
+<div class="absolute inset-0 flex items-center"><span class="w-full border-t border-[#cfe7cf] dark:border-[#1a331a]"></span></div>
+<div class="relative flex justify-center text-xs uppercase"><span class="bg-white dark:bg-[#152a15] px-2 text-[#4c9a4c]">Hoặc đăng nhập với</span></div>
+</div>
+<!-- Social Login Buttons -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 h-12 rounded-lg border border-[#cfe7cf] dark:border-[#1a331a] hover:bg-background-light dark:hover:bg-[#0d1b0d] transition-colors" type="button">
+<img alt="" class="w-5 h-5" data-alt="Google colorful logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABmezG66udeZst9BQXmsir-Kn4fwPuGqIGzJrlIucYIkxxNAgWopqoN3C90H0cBXF9scvYishDe0aiTGjplOZGMQdPBTfeR2Vg5RVgml5b9JVpU562WpfIY-cugNzE22xXa08OtRCZ-F74v6t9zfg5bqcfwO33wTJLQhCv3OBwd2UUuA3MW6S64eINKxcrY9JMs5TDKuSk20yKuUUwLbu6gHtcQoB2L2acFz-SqgqpTPFT9FFLrBnuw5Fz3bPEtNM4RieYNsFp"/>
+<span class="text-sm font-medium text-[#0d1b0d] dark:text-[#f8fcf8]">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 h-12 rounded-lg border border-[#cfe7cf] dark:border-[#1a331a] hover:bg-background-light dark:hover:bg-[#0d1b0d] transition-colors" type="button">
+<img alt="" class="w-5 h-5" data-alt="Facebook blue logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijOO3-DEZz5BocU1gFWZhiTeJsn86t_PrNxlnJ8b-500RCGdPYZ7TfdFfAKw5J13O8bQyKQf-jzJQQdF4X4VXn24thvYBQDOj7yhz_DISB140bEQa6blrW1VJ9Hsla9DFjdUw1RTX2t3-SOxhzXxiQr_bZ73GcBrBjQY6OGop0jlGZ4ORrZF9Q-sHH91px89ml9gPl0LCLtrKGfyM1-ihzYn6oT6zOCTXI4WvW7yXPqP1Lrkx5km4YrwaBoFHr-3V13spA-7V"/>
+<span class="text-sm font-medium text-[#0d1b0d] dark:text-[#f8fcf8]">Facebook</span>
+</button>
+</div>
+</form></div>
+<!-- Registration Link -->
+<div class="bg-[#f8fcf8] dark:bg-[#0d1b0d] py-6 px-8 border-t border-[#cfe7cf] dark:border-[#1a331a] text-center">
+<p class="text-[#4c9a4c] dark:text-[#a0cfa0] text-sm">
+                    Bạn chưa có tài khoản? 
+                    <a class="text-primary font-bold hover:underline ml-1" href="#">Đăng ký ngay</a>
+</p>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="py-8 text-center text-[#4c9a4c] dark:text-[#a0cfa0] text-sm">
+<div class="flex justify-center gap-6 mb-4">
+<a class="hover:text-primary transition-colors" href="#">Điều khoản</a>
+<a class="hover:text-primary transition-colors" href="#">Bảo mật</a>
+<a class="hover:text-primary transition-colors" href="#">Hỗ trợ</a>
+</div>
+<p>© 2024 Sân Siêu Tốc. Bản quyền thuộc về đội ngũ phát triển.</p>
+</footer>
+<!-- Decorative Background Elements -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20 dark:opacity-10">
+<div class="absolute top-[10%] left-[5%] w-64 h-64 bg-primary/30 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[10%] right-[5%] w-96 h-96 bg-primary/20 rounded-full blur-[120px]"></div>
+</div>
+</body></html>

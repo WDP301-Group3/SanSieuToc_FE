@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Chi tiết sân - Sân Siêu Tốc</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#19e62b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112112",
+                        "neutral-light": "#e2e8e2",
+                        "neutral-dark": "#2a382a",
+                    },
+                    fontFamily: {
+                        display: ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header
+        class="flex items-center justify-between whitespace-nowrap border-b border-neutral-light dark:border-neutral-dark bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+        <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4">
+                <div class="size-8 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-3xl">sports_soccer</span>
+                </div>
+                <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Sân Siêu
+                    Tốc</h2>
+            </div>
+            <nav class="hidden md:flex items-center gap-9">
+                <a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
+                    href="#">Dashboard</a>
+                <a class="text-primary font-bold text-sm leading-normal" href="#">Quản lý sân</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
+                    href="#">Đặt sân</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
+                    href="#">Báo cáo</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="relative hidden sm:block">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <span class="material-symbols-outlined text-xl">search</span>
+                </span>
+                <input
+                    class="w-64 py-2 pl-10 pr-4 rounded-lg bg-neutral-light/50 dark:bg-neutral-dark/50 border-none text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-primary/50"
+                    placeholder="Tìm kiếm..." type="text" />
+            </div>
+            <div class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary/20">
+                <img alt="User Avatar" class="w-full h-full object-cover" data-alt="Portrait of a smiling man"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQJZFP0pprcp-Bg8UrgHVRKjuoTC6RPtWMd8LJRUBrYtmI8Sf_ofa9k1WpfU0oBlBYFQ-enMHJcxY3-_eslw9HCAz6CApAC_RWt33F3sAIfKu5B-9r17LryKmlk3ZclPPYwREHvWuynQVNHRWhl-qqe1juCyGz6c0Y6tum2VSZV5gckAYoFVT3g2TSo7OLbl7WBMD4O3ZebEKzqYrPiQSfIKR4LGWyK7ZHU5ggU_IjW9tqeTaVLwEx7YXSiZhFkYL0wDk-clkkXBw" />
+            </div>
+        </div>
+    </header>
+    <main class="flex-grow w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumbs -->
+        <nav aria-label="Breadcrumb" class="flex mb-6">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary dark:text-slate-400"
+                        href="#">
+                        <span class="material-symbols-outlined mr-2 text-lg">grid_view</span>
+                        Quản lý sân
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
+                        <span class="ml-1 text-sm font-medium text-slate-900 dark:text-white md:ml-2">Chi tiết
+                            sân</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div class="flex flex-col gap-2">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sân Bóng
+                    Đá Mini A1</h1>
+                <div class="flex items-center gap-3">
+                    <span class="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1">
+                        <span class="material-symbols-outlined text-lg">location_on</span>
+                        Khu Thể Thao, Quận 7, TP.HCM
+                    </span>
+                    <span
+                        class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-primary/20">
+                        <span class="size-1.5 rounded-full bg-primary mr-1.5"></span>
+                        Đang hoạt động
+                    </span>
+                </div>
+            </div>
+            <div class="flex gap-3 w-full md:w-auto">
+                <button
+                    class="flex-1 md:flex-none items-center justify-center rounded-lg border border-slate-300 dark:border-neutral-dark bg-white dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-neutral-dark/80 transition-colors">
+                    <span class="material-symbols-outlined text-lg mr-2 align-middle">arrow_back</span>
+                    Quay lại
+                </button>
+                <button
+                    class="flex-1 md:flex-none items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-slate-900 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-lg mr-2 align-middle">edit</span>
+                    Chỉnh sửa
+                </button>
+            </div>
+        </div>
+        <!-- Gallery Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-96 md:h-[480px] mb-10 overflow-hidden rounded-2xl">
+            <!-- Main large image -->
+            <div class="md:col-span-2 md:row-span-2 relative group h-full">
+                <img alt="Main view of the soccer field"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-alt="Overview of a green soccer field"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNk7kOSU019W93Mh7NaI_SGPnWEuyFc7FnF-UX-E-I8ID78a04HM-bW4pD_-mhlNeMsg1UfEQPdQK28GuQ7n1ZM8qLuOb0ueUy6CLsTbsuS6gQRJlUMYQl63W_lgZnOT3UmH--Bb2dMtCOCQr_6OL00mRxptpxiINQKKUGS99tMfFFVQXks2ZJHKp2iYpllGOHQ2c87WTdzJ-aWxHCD6yvl_U0cdK4NJYKwHtOwNKG41VU2Qm_EqtlVINZUHp8yedMUF4iJfAYpuY" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                    <span class="text-white font-medium">Toàn cảnh sân</span>
+                </div>
+            </div>
+            <!-- Top right image -->
+            <div class="md:col-span-2 md:row-span-1 relative group h-full">
+                <img alt="Close up of goal post"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-alt="Soccer goal net close up"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3q_jo11SCKk9KMCopEG_xqtOGB7ozTZLKpgnB_G78Fdvj6v4ABhNTBCZlr4shyPusu3b9E-F6exNWiXBollEuR-c9c1JdcfiWcQ6Irv7uorbLLTfHk3EitBVXJ6dgNzbFy3UQZliJojqH-H_GVfl1oMkYVDwB1e9_EkpLhQYX1h6GukaP1eTINvN814AyzKlLsl17n-z6oF2sH8GL-gDHlGGLgwyYL-jCmvsHoJy426dJfe_BfE8qCiCMDIGvwoHjsWOISRO-5Ow" />
+            </div>
+            <!-- Bottom left small -->
+            <div class="relative group h-full hidden md:block">
+                <img alt="Action shot on field"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-alt="Players playing soccer on grass"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUxfv2f2EzJu7zSn6Fb7GhJoq3LZBoNs-0GUvgaBVwe70MZj-QIGaElxjzgN9fTLbU8cnGX9aYG0s_Vt7EbI2Ab8BxBga20g4ypWrX39OQO4Zi7v88ypNM96oeYVc98qCIPSYAoaGG6XGsxKRcZsewRGOBvSmcfXnimqm1KFNllAiFhxz0R5gIhe8LtT4JLw5ZIG4JWYM3JvAM_H_XHRsNeCEkAGEAHsc6H6AP0bslhj6Z_s9QfOY_I732hpr_4dl2L5tUV8UAwWo" />
+            </div>
+            <!-- Bottom right small with overlay -->
+            <div class="relative group h-full hidden md:block cursor-pointer">
+                <img alt="Night view of field"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-alt="Stadium lights at night"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw1cibYXDb4AmE_574Cv2urskTvLKL-wSeQwOGmxVfpUYzGRqE6vQ2K3JC79DCF0WFZKxAuxUOvTDa6TIns2BvySc3xyhG8n0FPtSGNNC9h_7j7t77Q-HGYpo_IQx9L3DSOni9iGnjGwu2d8tYpcU_hVzXvP1luS7_c5qx9GO2nxuqdGimUHrOZ1hdUxcFMAW1pCs6RNxXiuCqkfq27-OI6O6197jPJcCyAA7W4yrtMT2jzXdPJ1RCkIeoMm614-Cj8hPQfdTsejY" />
+                <div
+                    class="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px] transition-colors hover:bg-black/50">
+                    <span class="text-white font-bold text-lg">+5 ảnh</span>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Details -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Description Section -->
+                <section>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Thông tin chi tiết</h2>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                        Sân bóng đá cỏ nhân tạo chất lượng cao A1 được thiết kế theo tiêu chuẩn FIFA, mang lại trải
+                        nghiệm thi đấu chuyên nghiệp cho người chơi. Mặt sân êm ái, độ đàn hồi tốt giúp giảm thiểu chấn
+                        thương. Hệ thống thoát nước hiện đại đảm bảo sân luôn khô ráo ngay cả sau những cơn mưa lớn.
+                    </p>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Thích hợp cho các giải đấu phong trào, tập luyện đội nhóm hoặc các trận giao hữu công ty. Hệ
+                        thống chiếu sáng LED 400W đảm bảo ánh sáng trung thực cho các trận đấu vào ban đêm.
+                    </p>
+                </section>
+                <hr class="border-slate-200 dark:border-neutral-dark" />
+                <!-- Specs Grid -->
+                <section>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-5">Thông số kỹ thuật</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-neutral-dark border border-slate-100 dark:border-neutral-dark shadow-sm">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">sports_soccer</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Loại sân</h4>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm">Bóng đá 5 người</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-neutral-dark border border-slate-100 dark:border-neutral-dark shadow-sm">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">straighten</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Kích thước</h4>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm">20m x 40m</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-neutral-dark border border-slate-100 dark:border-neutral-dark shadow-sm">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">grass</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Mặt sân</h4>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm">Cỏ nhân tạo (Châu Âu)</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-neutral-dark border border-slate-100 dark:border-neutral-dark shadow-sm">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">light_mode</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Chiếu sáng</h4>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm">Hệ thống LED 400W</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Amenities -->
+                <section>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-5">Tiện ích đi kèm</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">wifi</span> Free Wifi
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">local_drink</span> Nước uống miễn phí
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">lock</span> Tủ đồ cá nhân
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">local_parking</span> Bãi giữ xe
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">shower</span> Phòng tắm
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-neutral-dark px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-base">sports_bar</span> Canteen
+                        </span>
+                    </div>
+                </section>
+            </div>
+            <!-- Right Column: Pricing & Rules -->
+            <div class="lg:col-span-1">
+                <div
+                    class="sticky top-24 rounded-2xl bg-white dark:bg-neutral-dark p-6 shadow-xl border border-slate-100 dark:border-neutral-dark/50">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Giá thuê</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-extrabold text-primary">350.000đ</span>
+                                <span class="text-slate-500 dark:text-slate-400">/ giờ</span>
+                            </div>
+                        </div>
+                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4 mb-8">
+                        <div
+                            class="p-3 bg-background-light dark:bg-background-dark rounded-lg flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Giờ vàng (17h - 21h)</span>
+                            <span class="font-bold text-slate-900 dark:text-white">450.000đ/h</span>
+                        </div>
+                        <div
+                            class="p-3 bg-background-light dark:bg-background-dark rounded-lg flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Cuối tuần</span>
+                            <span class="font-bold text-slate-900 dark:text-white">+50.000đ/h</span>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3 uppercase tracking-wider">Quy
+                            định đặt sân</h4>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                                <span
+                                    class="material-symbols-outlined text-primary text-lg shrink-0">check_circle</span>
+                                <span>Đặt cọc tối thiểu 30% giá trị giờ thuê.</span>
+                            </li>
+                            <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                                <span
+                                    class="material-symbols-outlined text-primary text-lg shrink-0">check_circle</span>
+                                <span>Hủy sân trước 24h hoàn 100% cọc.</span>
+                            </li>
+                            <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                                <span
+                                    class="material-symbols-outlined text-primary text-lg shrink-0">check_circle</span>
+                                <span>Có mặt trước 15 phút để nhận sân.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <button
+                            class="w-full rounded-lg bg-primary py-3 px-4 text-center text-sm font-bold text-slate-900 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25">
+                            Quản lý lịch đặt
+                        </button>
+                        <button
+                            class="w-full rounded-lg border border-slate-200 dark:border-neutral-dark/50 bg-white dark:bg-neutral-dark py-3 px-4 text-center text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-neutral-dark/80 transition-colors">
+                            Cập nhật giá
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

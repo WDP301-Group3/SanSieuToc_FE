@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainLayout from './components/layout/MainLayout';
+import ManagerLayout from './components/layout/ManagerLayout';
+
+// Pages
+import HomePage from './pages/Home/HomePage';
+import AuthPage from './pages/Auth/AuthPage'; // Unified Auth Interface
+import AboutPage from './pages/AboutPage';
+import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
+
+// Field Pages
+import FieldListPage from './pages/Field/FieldListPage';
+import FieldDetailPage from './pages/Field/FieldDetailPage';
+
+// Customer Pages
+import UserProfilePage from './pages/Customer/UserProfilePage';
+import BookingDetailPage from './pages/Customer/BookingDetailPage';
+
+// Manager Pages
+import ManagerDashboardPage from './pages/Manager/ManagerDashboardPage';
+import ManagerSettingsPage from './pages/Manager/ManagerSettingsPage';
+import ManagerFieldsPage from './pages/Manager/Field/ManagerFieldsPage';
+import ManagerFieldDetailPage from './pages/Manager/Field/ManagerFieldDetailPage';
+import ManagerFieldCreatePage from './pages/Manager/Field/ManagerFieldCreatePage';
+import ManagerFieldEditPage from './pages/Manager/Field/ManagerFieldEditPage';
+import ManagerCustomersPage from './pages/Manager/Customer/ManagerCustomersPage';
+import ManagerCustomerDetailPage from './pages/Manager/Customer/ManagerCustomerDetailPage';
+import ManagerFeedbackPage from './pages/Manager/Feedback/ManagerFeedbackPage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        {/* Public Routes with MainLayout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          
+          {/* Auth Routes (inside MainLayout with Header/Footer) */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<AuthPage />} />
+          
+          {/* Field & Customer Routes */}
+          <Route path="/fields" element={<FieldListPage />} />
+          <Route path="/fields/:id" element={<FieldDetailPage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/booking-history" element={<UserProfilePage />} />
+          <Route path="/booking-history/:id" element={<BookingDetailPage />} />
+          <Route path="/settings" element={<UserProfilePage />} />
+        </Route>
+
+        {/* Manager Routes with ManagerLayout */}
+        <Route path="/admin" element={<ManagerLayout />}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<ManagerDashboardPage />} />
+          <Route path="fields" element={<ManagerFieldsPage />} />
+          <Route path="fields/create" element={<ManagerFieldCreatePage />} />
+          <Route path="fields/:id" element={<ManagerFieldDetailPage />} />
+          <Route path="fields/:id/edit" element={<ManagerFieldEditPage />} />
+          <Route path="customers" element={<ManagerCustomersPage />} />
+          <Route path="customers/:id" element={<ManagerCustomerDetailPage />} />
+          <Route path="feedback" element={<ManagerFeedbackPage />} />
+          <Route path="settings" element={<ManagerSettingsPage />} />
+        </Route>
+
+        {/* 404 Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
