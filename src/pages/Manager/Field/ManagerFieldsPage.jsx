@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { searchFields, getCategoriesAndTypes } from '../../../services/fieldService';
 import { deleteField } from '../../../services/managerService';
+import { useAuth } from '../../../context/AuthContext';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerFieldsPage.css';
 
@@ -63,6 +64,7 @@ const getCategoryIconClass = (categoryName) => {
 
 const ManagerFieldsPage = () => {
   const notification = useNotification();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -83,33 +85,56 @@ const ManagerFieldsPage = () => {
       setLoading(true);
       setError(null);
       const [fieldsRes, catRes] = await Promise.all([
-        searchFields({ status: 'all', page: 1, limit: 200 }),
+        searchFields({ status: 'all', page: 1, limit: 10000 }),
         getCategoriesAndTypes(),
       ]);
-      if (fieldsRes.success) setRawFields(fieldsRes.data?.fields || []);
-      else setError(fieldsRes.error);
+      if (fieldsRes.success) {
+        // Lọc chỉ sân thuộc manager đang đăng nhập
+        // Sau normaliseField: managerID populated → f.manager._id, nhưng f.managerID vẫn còn trong ...f spread
+        const all = fieldsRes.data?.fields || [];
+        const myFields = user?._id
+          ? all.filter(f => {
+              // Thử field.manager._id (sau normalise) rồi field.managerID._id (raw populate) rồi string
+              const mid =
+                f.manager?._id ||
+                f.managerID?._id ||
+                f.managerID;
+              return mid?.toString() === user._id?.toString();
+            })
+          : all;
+        setRawFields(myFields);
+      } else {
+        setError(fieldsRes.error);
+      }
       if (catRes.success) setCategories(catRes.data?.categories || []);
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   // Transform API fields for table display
   const allFields = useMemo(() => rawFields.map((field) => {
     const status = mapStatus(field.status);
+    // Sau normaliseField: fieldType.category._id, fieldType.category.categoryName
+    const ft = field.fieldType || field.fieldTypeID;
+    const cat = ft?.category || (typeof ft?.categoryID === 'object' ? ft.categoryID : null);
+    const categoryId = (cat?._id || ft?.categoryID || '').toString();
+    const categoryName = cat?.categoryName || '';
+    const typeName = ft?.typeName || '';
+    const imgArr = Array.isArray(field.images) ? field.images : Array.isArray(field.image) ? field.image : [];
     return {
       id: field._id,
-      name: field.fieldName,
-      address: field.address,
-      district: field.district,
-      categoryId: field.fieldType?.category?._id || field.fieldType?.categoryID || '',
-      categoryName: field.fieldType?.category?.categoryName || '',
-      typeName: field.fieldType?.typeName || '',
+      name: field.fieldName || '',
+      address: field.address || '',
+      district: field.district || '',
+      categoryId,
+      categoryName,
+      typeName,
       price: field.hourlyPrice,
       priceFormatted: formatPrice(field.hourlyPrice || 0),
       statusKey: status.key,
       statusLabel: status.label,
-      image: (field.images || field.image)?.[0] || null,
+      image: imgArr[0] || null,
     };
   }), [rawFields]);
 
@@ -124,7 +149,7 @@ const ManagerFieldsPage = () => {
   // Filter logic
   const filteredFields = useMemo(() => allFields.filter((field) => {
     const matchSearch = field.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategory = !categoryFilter || field.categoryId === categoryFilter;
+    const matchCategory = !categoryFilter || field.categoryId === categoryFilter.toString();
     const matchStatus = !statusFilter || field.statusKey === statusFilter;
     return matchSearch && matchCategory && matchStatus;
   }), [allFields, searchTerm, categoryFilter, statusFilter]);
