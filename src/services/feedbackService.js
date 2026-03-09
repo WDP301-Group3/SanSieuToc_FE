@@ -28,10 +28,13 @@ const feedbackService = {
       const response = await axiosInstance.get(ENDPOINTS.FEEDBACK.BY_FIELD(fieldId), {
         params: { page, limit },
       });
-      const raw = response.data?.data || response.data;
-      const feedbacks = raw?.feedbacks || raw || [];
-      const total = raw?.total || feedbacks.length;
-      return { success: true, data: feedbacks, total };
+      // BE response shape: { success, data: feedbacks[], averageRating, pagination }
+      // "data" is the array directly (not wrapped in an object)
+      const raw = response.data;
+      const feedbacks = raw?.data || [];
+      const averageRating = raw?.averageRating ?? 0;
+      const total = raw?.pagination?.totalItems ?? feedbacks.length;
+      return { success: true, data: feedbacks, averageRating, total };
     } catch (error) {
       console.error('getFeedbacksByField error:', error);
       return { success: false, data: [], error: error.response?.data?.message || error.message };

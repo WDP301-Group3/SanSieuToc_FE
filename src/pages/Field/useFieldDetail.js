@@ -75,14 +75,12 @@ const useFieldDetail = () => {
     const fetchFeedbacks = async () => {
       if (!id) return;
       try {
-        const [fbResult, statsResult] = await Promise.all([
-          feedbackService.getFeedbacksByField(id),
-          feedbackService.getFieldStats(id),
-        ]);
-        if (fbResult.success) setFeedbacks(fbResult.data);
-        if (statsResult.success && statsResult.data) {
-          setAverageRating(statsResult.data.averageRating);
-          setTotalReviews(statsResult.data.totalReviews);
+        // averageRating is returned directly from getFeedbacksByField (BE response root)
+        const fbResult = await feedbackService.getFeedbacksByField(id);
+        if (fbResult.success) {
+          setFeedbacks(fbResult.data);
+          setAverageRating(parseFloat((fbResult.averageRating || 0).toFixed(1)));
+          setTotalReviews(fbResult.total || fbResult.data.length);
         }
       } catch (err) {
         console.error('Error fetching feedbacks:', err);
@@ -160,7 +158,8 @@ const useFieldDetail = () => {
     if (feedbacks.length === 0) return { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     feedbacks.forEach((fb) => {
-      counts[fb.rating] = (counts[fb.rating] || 0) + 1;
+      const r = fb.rate ?? fb.rating;          // BE uses "rate", guard against old shape
+      if (r >= 1 && r <= 5) counts[r] = (counts[r] || 0) + 1;
     });
     const total = feedbacks.length;
     return {
