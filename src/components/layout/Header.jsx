@@ -151,7 +151,7 @@ const Header = () => {
                       /* Customer: chỉ hiện Hồ sơ */
                       <button
                         className="header-dropdown-item"
-                        onClick={() => { setShowDropdown(false); handleNavClick('/customer/dashboard'); }}
+                        onClick={() => { setShowDropdown(false); handleNavClick('/customer/profile'); }}
                       >
                         <span className="material-icons-outlined">person</span>
                         {t('nav.profile')}

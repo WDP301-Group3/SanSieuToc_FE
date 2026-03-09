@@ -18,6 +18,8 @@ const FieldFilterSidebar = ({
   handleFilterChange,
   handleCategoryChange,
   handleFieldTypeChange,
+  handleCityChange,
+  handleWardChange,
   handleReset,
   handlePriceInputChange,
   handlePriceInputBlur,
@@ -132,28 +134,56 @@ const FieldFilterSidebar = ({
           </div>
         )}
 
-        {/* Location Filter */}
-        <div className="filter-group">
-          <p className="filter-label">{t('fieldList.district')}</p>
-          <div className="select-wrapper">
-            <select
-              value={filters.district}
-              onChange={(e) => handleFilterChange('district', e.target.value)}
-              className="filter-select"
-            >
-              <option value="">{t('fieldList.allDistricts')}</option>
-              {globalData.districts.map(district => (
-                <option key={district} value={district}>
-                  {district}
-                  {facets.districts.find(d => d.name === district) &&
-                    ` (${facets.districts.find(d => d.name === district).count})`
-                  }
-                </option>
-              ))}
-            </select>
-            <span className="material-symbols-outlined select-icon">expand_more</span>
+        {/* Location Filter — 2 dropdown cascade */}
+        {facets.cities && facets.cities.length > 0 && (
+          <div className="filter-group">
+            <p className="filter-label">{t('fieldList.district')}</p>
+
+            {/* Dropdown 1: Tỉnh / Thành Phố */}
+            <div className="select-wrapper" style={{ marginBottom: '8px' }}>
+              <select
+                value={filters.city}
+                onChange={(e) => handleCityChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value="">Tỉnh / Thành Phố</option>
+                {[...facets.cities]
+                  .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+                  .map(({ name, count }) => (
+                    <option key={name} value={name}>
+                      {name} ({count})
+                    </option>
+                  ))}
+              </select>
+              <span className="material-symbols-outlined select-icon">expand_more</span>
+            </div>
+
+            {/* Dropdown 2: Phường / Xã / Quận — chỉ hiện khi đã chọn city */}
+            {filters.city && (() => {
+              const cityData = facets.cities.find(c => c.name === filters.city);
+              const wards = cityData?.wards || [];
+              return wards.length > 0 ? (
+                <div className="select-wrapper">
+                  <select
+                    value={filters.ward}
+                    onChange={(e) => handleWardChange(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="">Tất cả Xã / Phường / Thị Trấn</option>
+                    {[...wards]
+                      .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+                      .map(({ name, count }) => (
+                        <option key={name} value={name}>
+                          {name} ({count})
+                        </option>
+                      ))}
+                  </select>
+                  <span className="material-symbols-outlined select-icon">expand_more</span>
+                </div>
+              ) : null;
+            })()}
           </div>
-        </div>
+        )}
 
         {/* Date & Time Filter */}
         <div className="filter-group">

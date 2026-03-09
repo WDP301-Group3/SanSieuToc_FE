@@ -22,6 +22,8 @@ export const DEFAULT_FILTERS = {
   categoryName: '',
   fieldTypeName: '',
   district: '',
+  city: '',    // Tỉnh/Thành Phố  (e.g. "TP.HCM")
+  ward: '',    // Phường/Xã/Quận  (e.g. "Quận 7")
   priceMax: PRICE_CONFIG.DEFAULT_MAX,
   date: '',
   startTime: '',

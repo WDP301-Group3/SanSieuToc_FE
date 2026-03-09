@@ -42,7 +42,7 @@ const FieldInfoSection = ({ field, amenities }) => {
             </div>
             <div className="field-info-item">
               <span className="material-symbols-outlined">location_on</span>
-              <span><strong>Quận/Huyện:</strong> {field.district}</span>
+              <span><strong>Khu vực:</strong> {field.district || (field.address?.split(',').slice(1).join(',').trim())}</span>
             </div>
             <div className="field-info-item">
               <span className="material-symbols-outlined">person</span>

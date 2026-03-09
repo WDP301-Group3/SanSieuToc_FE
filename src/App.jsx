@@ -47,7 +47,10 @@ function App() {
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
-          <Route path="/profile" element={<UserProfilePage />} />
+          {/* Customer profile — /customer/profile (canonical) + legacy aliases */}
+          <Route path="/customer/profile" element={<UserProfilePage />} />
+          <Route path="/customer/dashboard" element={<Navigate to="/customer/profile" replace />} />
+          <Route path="/profile" element={<Navigate to="/customer/profile" replace />} />
           <Route path="/booking-history" element={<UserProfilePage />} />
           <Route path="/booking-history/:id" element={<BookingDetailPage />} />
           <Route path="/settings" element={<UserProfilePage />} />

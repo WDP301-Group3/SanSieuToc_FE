@@ -392,7 +392,7 @@ const BookingDetailPage = () => {
       <div className="booking-history-container">
         {/* Breadcrumbs */}
         <nav className="bh-breadcrumbs">
-          <Link to="/profile" className="bh-breadcrumb-link">Hồ sơ</Link>
+          <Link to="/customer/profile" className="bh-breadcrumb-link">Hồ sơ</Link>
           <span className="material-symbols-outlined bh-breadcrumb-sep">chevron_right</span>
           <Link to="/booking-history" className="bh-breadcrumb-link">Lịch sử đặt sân</Link>
           <span className="material-symbols-outlined bh-breadcrumb-sep">chevron_right</span>

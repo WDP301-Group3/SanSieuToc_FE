@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getFieldById } from '../../../services/fieldService';
+import { getManagerFieldById } from '../../../services/managerService';
 import '../../../styles/ManagerFieldDetailPage.css';
 
 // Utility key → { icon, label }
@@ -39,11 +39,9 @@ const ManagerFieldDetailPage = () => {
     const fetchField = async () => {
       setLoading(true);
       setError(null);
-      // Dùng public API để xem được bất kỳ sân nào (không bị giới hạn ownership)
-      const res = await getFieldById(id);
+      const res = await getManagerFieldById(id);
       if (res.success) {
-        // getFieldById trả về { field, availability }
-        setField(res.data?.field || res.data);
+        setField(res.data);
       } else {
         setError(res.error || 'Không thể tải thông tin sân');
       }
@@ -80,20 +78,14 @@ const ManagerFieldDetailPage = () => {
   }
 
   const status = getStatusInfo(field.status);
-  // Hỗ trợ cả public API (normaliseFieldDetail) và manager API (populate fieldTypeID)
-  const typeName =
-    field.fieldType?.typeName ||
-    field.fieldTypeID?.typeName || '';
+  // BE populates: field.fieldTypeID.typeName, field.fieldTypeID.categoryID.categoryName
+  const typeName = field.fieldTypeID?.typeName || field.fieldType?.typeName || '';
   const categoryName =
-    field.category?.categoryName ||
-    field.fieldType?.category?.categoryName ||
-    field.fieldTypeID?.categoryID?.categoryName || '';
-  const managerName = field.manager?.name || field.managerID?.name || '';
-  const managerPhone = field.manager?.phone || field.managerID?.phone || '';
-  const managerImage = field.manager?.image || field.managerID?.image || null;
-  const images = Array.isArray(field.images) ? field.images
-    : Array.isArray(field.image) ? field.image
-    : field.image ? [field.image] : [];
+    field.fieldTypeID?.categoryID?.categoryName ||
+    field.fieldType?.category?.categoryName || '';
+  const managerName = field.managerID?.name || field.manager?.name || '';
+  const managerPhone = field.managerID?.phone || field.manager?.phone || '';
+  const images = Array.isArray(field.image) ? field.image : field.image ? [field.image] : [];
   const amenities = (field.utilities || []).map(
     (u) => utilityMap[u] || { icon: 'check_circle', label: u }
   );
@@ -213,8 +205,11 @@ const ManagerFieldDetailPage = () => {
                 <h3 className="afd-section-title">Quản lý sân</h3>
                 <div className="afd-manager-card">
                   <div className="afd-manager-avatar">
-                    {managerImage ? (
-                      <img src={managerImage} alt={managerName} />
+                    {(field.managerID?.image || field.manager?.image) ? (
+                      <img
+                        src={field.managerID?.image || field.manager?.image}
+                        alt={managerName}
+                      />
                     ) : (
                       <span className="material-symbols-outlined">person</span>
                     )}

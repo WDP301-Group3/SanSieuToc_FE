@@ -41,6 +41,8 @@ const FieldListPage = () => {
     handleFilterChange,
     handleCategoryChange,
     handleFieldTypeChange,
+    handleCityChange,
+    handleWardChange,
     handleSortChange,
     handlePageChange,
     handleReset,
@@ -114,6 +116,8 @@ const FieldListPage = () => {
           handleFilterChange={handleFilterChange}
           handleCategoryChange={handleCategoryChange}
           handleFieldTypeChange={handleFieldTypeChange}
+          handleCityChange={handleCityChange}
+          handleWardChange={handleWardChange}
           handleReset={handleReset}
           handlePriceInputChange={handlePriceInputChange}
           handlePriceInputBlur={handlePriceInputBlur}

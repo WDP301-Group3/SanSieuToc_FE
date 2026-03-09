@@ -52,17 +52,11 @@ const ManagerFieldCreatePage = () => {
       setFormLoading(true);
       const res = await getFieldCreateForm();
       if (res.success && res.data) {
-        // BE trả về { categories: [{ _id, categoryName, fieldTypes: [...] }] }
         const cats = res.data.categories || [];
-        const types = cats.flatMap((cat) =>
-          (cat.fieldTypes || []).map((ft) => ({
-            ...ft,
-            categoryID: { _id: cat._id, categoryName: cat.categoryName },
-          }))
-        );
+        const types = res.data.fieldTypes || [];
         setCategories(cats);
         setAllFieldTypes(types);
-        if (cats.length > 0) setSelectedCategoryId(cats[0]._id.toString());
+        if (cats.length > 0) setSelectedCategoryId(cats[0]._id);
       }
       setFormLoading(false);
     };
@@ -72,10 +66,11 @@ const ManagerFieldCreatePage = () => {
   /* ---------- Derived ---------- */
   const availableFieldTypes = useMemo(() => {
     if (!selectedCategoryId) return allFieldTypes;
-    return allFieldTypes.filter((ft) => {
-      const catId = (ft.categoryID?._id || ft.categoryID || '').toString();
-      return catId === selectedCategoryId.toString();
-    });
+    return allFieldTypes.filter(
+      (ft) =>
+        ft.categoryID === selectedCategoryId ||
+        ft.categoryID?._id === selectedCategoryId
+    );
   }, [selectedCategoryId, allFieldTypes]);
 
   /* ---------- Handlers ---------- */
@@ -88,10 +83,9 @@ const ManagerFieldCreatePage = () => {
 
   const handleCategoryChange = (catId) => {
     setSelectedCategoryId(catId);
-    const typesForCat = allFieldTypes.filter((ft) => {
-      const ftCatId = (ft.categoryID?._id || ft.categoryID || '').toString();
-      return ftCatId === catId.toString();
-    });
+    const typesForCat = allFieldTypes.filter(
+      (ft) => ft.categoryID === catId || ft.categoryID?._id === catId
+    );
     setSelectedFieldTypeId(typesForCat.length > 0 ? typesForCat[0]._id : '');
   };
 
@@ -112,69 +106,33 @@ const ManagerFieldCreatePage = () => {
     setHourlyPrice(Number(raw) || 0);
   };
 
-  /** Handle form submission — POST to API (JSON, không dùng FormData) */
+  /** Handle form submission — POST to API */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedCategoryId) {
-      notification.error('Vui lòng chọn môn thể thao!');
-      return;
-    }
     if (!selectedFieldTypeId) {
       notification.error('Vui lòng chọn loại sân!');
-      return;
-    }
-    if (images.length === 0) {
-      notification.error('Vui lòng thêm ít nhất 1 ảnh sân!');
       return;
     }
 
     setSubmitting(true);
 
-    // Compress + convert File → base64 (giảm kích thước trước khi gửi JSON)
-    const compressToBase64 = (file, maxWidth = 1280, quality = 0.75) =>
-      new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          URL.revokeObjectURL(url);
-          const scale = Math.min(1, maxWidth / img.width);
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
+    // Build FormData to support file uploads
+    const formData = new FormData();
+    formData.append('fieldName', fieldName);
+    formData.append('address', address);
+    formData.append('description', description);
+    formData.append('hourlyPrice', hourlyPrice);
+    formData.append('slotDuration', slotDuration);
+    formData.append('openingTime', openingTime);
+    formData.append('closingTime', closingTime);
+    formData.append('fieldTypeID', selectedFieldTypeId);
+    utilities.forEach((u) => formData.append('utilities[]', u));
+    images.forEach((img) => {
+      if (img instanceof File) formData.append('image', img);
+    });
 
-    let imageArray;
-    try {
-      imageArray = await Promise.all(
-        images.map((img) => (img instanceof File ? compressToBase64(img) : Promise.resolve(img)))
-      );
-    } catch {
-      notification.error('Lỗi đọc file ảnh. Vui lòng thử lại.');
-      setSubmitting(false);
-      return;
-    }
-
-    const payload = {
-      categoryID: selectedCategoryId,
-      fieldTypeID: selectedFieldTypeId,
-      fieldName,
-      address,
-      description,
-      hourlyPrice: Number(hourlyPrice),
-      slotDuration: Number(slotDuration),
-      openingTime,
-      closingTime,
-      utilities,
-      image: imageArray,
-    };
-
-    const res = await createField(payload);
+    const res = await createField(formData);
     setSubmitting(false);
 
     if (res.success) {

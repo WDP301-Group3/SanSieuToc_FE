@@ -91,7 +91,7 @@ const UserProfilePage = () => {
     const path = location.pathname;
     if (path.includes('/booking-history')) return 'bookings';
     if (path.includes('/settings')) return 'settings';
-    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/profile') || path.includes('/customer')) return 'profile';
     return searchParams.get('tab') || 'profile';
   };
 
@@ -134,7 +134,7 @@ const UserProfilePage = () => {
     } else if (tabKey === 'settings') {
       navigate('/settings');
     } else {
-      navigate('/profile');
+      navigate('/customer/profile');
     }
   };
 

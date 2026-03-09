@@ -109,12 +109,31 @@ export const searchFields = async (filters = {}) => {
       );
     }
 
-    // District / address
-    if (filters.district) {
-      result = result.filter(f =>
-        f.address?.includes(filters.district) ||
-        f.district === filters.district
-      );
+    // City filter (Tỉnh/Thành Phố)
+    if (filters.city) {
+      const needle = filters.city.trim().toLowerCase();
+      result = result.filter(f => {
+        const { city } = splitDistrict(f.district || extractDistrict(f.address));
+        return city.toLowerCase() === needle;
+      });
+    }
+
+    // Ward filter (Phường/Xã/Quận) — only meaningful when city is also set
+    if (filters.ward) {
+      const needle = filters.ward.trim().toLowerCase();
+      result = result.filter(f => {
+        const { ward } = splitDistrict(f.district || extractDistrict(f.address));
+        return ward.toLowerCase() === needle;
+      });
+    }
+
+    // Legacy district filter (kept for backward compat, ignored when city/ward used)
+    if (filters.district && !filters.city && !filters.ward) {
+      const needle = filters.district.trim().toLowerCase();
+      result = result.filter(f => {
+        const d = (f.district || extractDistrict(f.address) || '').trim().toLowerCase();
+        return d === needle;
+      });
     }
 
     // Price range
@@ -140,9 +159,18 @@ export const searchFields = async (filters = {}) => {
     });
 
     const districtCount = {};
+    // cityMap: { [cityName]: { [wardName]: count } }
+    const cityMap = {};
     normalised.forEach(f => {
       const d = f.district || extractDistrict(f.address);
-      if (d) districtCount[d] = (districtCount[d] || 0) + 1;
+      if (d) {
+        districtCount[d] = (districtCount[d] || 0) + 1;
+        const { city, ward } = splitDistrict(d);
+        if (city) {
+          if (!cityMap[city]) cityMap[city] = {};
+          if (ward) cityMap[city][ward] = (cityMap[city][ward] || 0) + 1;
+        }
+      }
     });
 
     // ---- sort ----
@@ -166,6 +194,12 @@ export const searchFields = async (filters = {}) => {
         facets: {
           categories: Object.entries(categoryCount).map(([name, count]) => ({ name, count })),
           districts: Object.entries(districtCount).map(([name, count]) => ({ name, count })),
+          // Phân cấp Tỉnh/TP → Phường/Xã/Quận
+          cities: Object.entries(cityMap).map(([city, wards]) => ({
+            name: city,
+            count: Object.values(wards).reduce((s, c) => s + c, 0),
+            wards: Object.entries(wards).map(([ward, count]) => ({ name: ward, count }))
+          })),
           priceRange: {
             min: prices.length ? Math.min(...prices) : 0,
             max: prices.length ? Math.max(...prices) : 1000000
@@ -386,12 +420,43 @@ function normaliseFieldDetail(f) {
 }
 
 /**
- * Try to extract a district string from an address for filter facets.
+ * Extract the area label (everything after the street number) from an address.
+ *
+ * Standard address format used in this project:
+ *   "Số đường, Phường/Xã/Quận/Huyện, Tỉnh/Thành Phố"
+ *
+ * Strategy: split by comma, discard the first segment (street), join the rest.
+ *   "123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM"  →  "Quận 7, TP.HCM"
+ *   "789 Đường Phan Xích Long, Quận Phú Nhuận, TP.HCM"  →  "Quận Phú Nhuận, TP.HCM"
+ *   "456 Đường Võ Văn Kiệt, Quận 1, TP.HCM"  →  "Quận 1, TP.HCM"
+ *
+ * Falls back to null when the address has no comma (single-segment address).
  */
 function extractDistrict(address) {
   if (!address) return null;
-  const match = address.match(/(Quận\s+[\w\d]+|Q\.\s*[\w\d]+|Huyện\s+[\w\s]+|TP\.[\w\s]+)/i);
-  return match ? match[0].trim() : null;
+  const parts = address.split(',').map(s => s.trim()).filter(Boolean);
+  // Need at least 2 parts: [street, area...]
+  if (parts.length < 2) return null;
+  // Join everything after the first segment (street number / road name)
+  return parts.slice(1).join(', ');
+}
+
+/**
+ * Split a district string "Quận 7, TP.HCM" into { ward: "Quận 7", city: "TP.HCM" }.
+ * The last comma-separated segment is treated as the city/province,
+ * everything before it is the ward/district.
+ *
+ * "Quận 7, TP.HCM"          → { ward: "Quận 7",          city: "TP.HCM" }
+ * "Quận Phú Nhuận, TP.HCM"  → { ward: "Quận Phú Nhuận",  city: "TP.HCM" }
+ * "Hà Nội"                   → { ward: "",                city: "Hà Nội" }
+ */
+function splitDistrict(district) {
+  if (!district) return { ward: '', city: '' };
+  const parts = district.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 1) return { ward: '', city: parts[0] };
+  const city = parts[parts.length - 1];
+  const ward = parts.slice(0, parts.length - 1).join(', ');
+  return { ward, city };
 }
 
 /**

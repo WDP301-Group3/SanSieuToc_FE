@@ -115,7 +115,7 @@ const AdminLayout = () => {
                   </div>
                   <div className="admin-dropdown-divider" />
                   <Link
-                    to="/profile"
+                    to="/customer/profile"
                     className="admin-dropdown-item"
                     onClick={() => setShowDropdown(false)}
                   >

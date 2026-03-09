@@ -1,13 +1,24 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { getAllFeedbacks } from '../../../services/managerService';
+import { getAllFeedbacks, deleteFeedback } from '../../../services/managerService';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerFeedbackPage.css';
-import '../../../styles/ManagerFieldsPage.css';
 
+/**
+ * Format date string to dd/MM/yyyy
+ */
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
+/**
+ * Build a map of fieldID → fieldName for quick lookup
+ * (used as fallback when API returns fieldID only)
+ */
+
+/**
+ * Render star icons for a given rating
+ */
 const renderStars = (rating) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
@@ -25,96 +36,78 @@ const renderStars = (rating) => {
 };
 
 const ManagerFeedbackPage = () => {
+  const notification = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
-  const [ratingFilter, setRatingFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // API state
   const [rawFeedbacks, setRawFeedbacks] = useState([]);
-  const [apiAvgRating, setApiAvgRating] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const feedbacksPerPage = 10;
+  const feedbacksPerPage = 8;
 
-  // Tải tất cả feedback — BE đã populate bookingDetailID → fieldID, bookingID.customerID
+  // Fetch all feedbacks on mount
   useEffect(() => {
-    const fetchAll = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
-
-      const first = await getAllFeedbacks({ page: 1, limit: 50 });
-      if (!first.success) {
-        setError(first.error);
-        setLoading(false);
-        return;
-      }
-
-      const pagination = first.rawPagination;
-      const totalPages = pagination?.totalPages || 1;
-      let all = [...(first.data || [])];
-
-      if (totalPages > 1) {
-        const pages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
-        const results = await Promise.all(pages.map((p) => getAllFeedbacks({ page: p, limit: 50 })));
-        results.forEach((r) => { if (r.success) all = [...all, ...(r.data || [])]; });
-      }
-
-      setRawFeedbacks(all);
-      if (first.avgRating != null) setApiAvgRating(first.avgRating);
+      const res = await getAllFeedbacks({ page: 1, limit: 500 });
+      if (res.success) setRawFeedbacks(res.data || []);
+      else setError(res.error);
       setLoading(false);
     };
-    fetchAll();
+    fetchData();
   }, []);
 
-  // Normalise — BE populate: bookingDetailID.fieldID.fieldName, bookingDetailID.bookingID.customerID.{name,image}
-  const allFeedbacks = useMemo(() =>
-    rawFeedbacks.map((fb) => {
-      const detail = fb.bookingDetailID;
-      const customer = detail?.bookingID?.customerID;
-      return {
-        _id: fb._id,
-        rating: fb.rate || 0,
-        comment: fb.content || '',
+  // Normalise and enrich feedbacks from API
+  const allFeedbacks = useMemo(() => {
+    return rawFeedbacks
+      .map((fb) => ({
+        ...fb,
+        // Support various BE field shapes
+        userName: fb.userName || fb.customer?.name || fb.customerID?.name || 'Ẩn danh',
+        userImage: fb.userImage || fb.customer?.image || fb.customerID?.image || null,
+        fieldName: fb.fieldName || fb.field?.fieldName || fb.fieldID?.fieldName || 'N/A',
+        rating: fb.rating || fb.rate || 0,
+        comment: fb.comment || fb.content || '',
         createdAt: fb.createdAt,
-        customerName: customer?.name || '—',
-        customerImage: customer?.image || null,
-        fieldName: detail?.fieldID?.fieldName || '—',
-      };
-    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
-  [rawFeedbacks]);
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [rawFeedbacks]);
 
-  // Filter
-  const filteredFeedbacks = useMemo(() => allFeedbacks.filter((fb) => {
-    const term = searchTerm.toLowerCase();
-    const matchSearch = !term ||
-      fb.comment.toLowerCase().includes(term) ||
-      fb.customerName.toLowerCase().includes(term) ||
-      fb.fieldName.toLowerCase().includes(term);
-    const matchRating = !ratingFilter || fb.rating === Number(ratingFilter);
-    let matchDate = true;
-    if (dateFrom) matchDate = matchDate && new Date(fb.createdAt) >= new Date(dateFrom);
-    if (dateTo) {
-      const to = new Date(dateTo); to.setHours(23, 59, 59, 999);
-      matchDate = matchDate && new Date(fb.createdAt) <= to;
-    }
-    return matchSearch && matchRating && matchDate;
-  }), [allFeedbacks, searchTerm, ratingFilter, dateFrom, dateTo]);
+  // Filtered feedbacks
+  const filteredFeedbacks = useMemo(() => {
+    return allFeedbacks.filter((fb) => {
+      const term = searchTerm.toLowerCase();
+      const matchSearch =
+        fb.userName.toLowerCase().includes(term) ||
+        fb.fieldName.toLowerCase().includes(term) ||
+        fb.comment.toLowerCase().includes(term);
+
+      let matchDate = true;
+      if (dateFrom) matchDate = matchDate && new Date(fb.createdAt) >= new Date(dateFrom);
+      if (dateTo) {
+        const to = new Date(dateTo);
+        to.setHours(23, 59, 59, 999);
+        matchDate = matchDate && new Date(fb.createdAt) <= to;
+      }
+      return matchSearch && matchDate;
+    });
+  }, [allFeedbacks, searchTerm, dateFrom, dateTo]);
 
   // Stats
   const stats = useMemo(() => {
     const total = allFeedbacks.length;
-    const avgRating = apiAvgRating != null
-      ? apiAvgRating
-      : total > 0
-        ? Math.round((allFeedbacks.reduce((s, fb) => s + fb.rating, 0) / total) * 10) / 10
-        : 0;
+    const avgRating = total > 0
+      ? Math.round((allFeedbacks.reduce((sum, fb) => sum + fb.rating, 0) / total) * 10) / 10
+      : 0;
     const lowRating = allFeedbacks.filter((fb) => fb.rating <= 2).length;
-    const highRating = allFeedbacks.filter((fb) => fb.rating >= 4).length;
-    return { total, avgRating, lowRating, highRating };
-  }, [allFeedbacks, apiAvgRating]);
+    return { total, avgRating, lowRating };
+  }, [allFeedbacks]);
 
   // Pagination
   const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
@@ -123,9 +116,22 @@ const ManagerFeedbackPage = () => {
     currentPage * feedbacksPerPage
   );
 
-  const handleSearch = (v) => { setSearchTerm(v); setCurrentPage(1); };
-  const handleDateFromChange = (v) => { setDateFrom(v); setCurrentPage(1); };
-  const handleDateToChange = (v) => { setDateTo(v); setCurrentPage(1); };
+  const handleSearch = (value) => { setSearchTerm(value); setCurrentPage(1); };
+  const handleDateFromChange = (value) => { setDateFrom(value); setCurrentPage(1); };
+  const handleDateToChange = (value) => { setDateTo(value); setCurrentPage(1); };
+  const handleDelete = (feedback) => setConfirmDelete(feedback);
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
+    const res = await deleteFeedback(confirmDelete._id);
+    if (res.success) {
+      setRawFeedbacks((prev) => prev.filter((fb) => fb._id !== confirmDelete._id));
+      notification.success('Đã xóa feedback thành công.');
+    } else {
+      notification.error(res.error || 'Xóa feedback thất bại.');
+    }
+    setConfirmDelete(null);
+  };
 
   return (
     <div className="manager-feedback-page">
@@ -134,7 +140,7 @@ const ManagerFeedbackPage = () => {
         <div>
           <h2 className="feedback-page-title">Quản lý Feedback</h2>
           <p className="feedback-page-subtitle">
-            Xem các ý kiến phản hồi từ người dùng hệ thống
+            Xem và quản lý các ý kiến phản hồi từ người dùng hệ thống
           </p>
         </div>
       </div>
@@ -147,69 +153,50 @@ const ManagerFeedbackPage = () => {
 
       {/* Stats Summary */}
       <div className="feedback-stats">
-        <div className="field-stat-card">
-          <div className="field-stat-icon total">
+        <div className="stat-card">
+          <div className="stat-icon total">
             <span className="material-symbols-outlined">reviews</span>
           </div>
           <div>
-            <div className="field-stat-value">{stats.total.toLocaleString('vi-VN')}</div>
-            <div className="field-stat-label">Tổng feedback</div>
+            <div className="stat-value">{stats.total.toLocaleString('vi-VN')}</div>
+            <div className="stat-label">Tổng feedback</div>
           </div>
         </div>
-        <div className="field-stat-card">
-          <div className="field-stat-icon active">
+        <div className="stat-card">
+          <div className="stat-icon star">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
               star
             </span>
           </div>
           <div>
-            <div className="field-stat-value">{stats.avgRating} / 5.0</div>
-            <div className="field-stat-label">Đánh giá trung bình</div>
+            <div className="stat-value">{stats.avgRating} / 5.0</div>
+            <div className="stat-label">Đánh giá trung bình</div>
           </div>
         </div>
-        <div className="field-stat-card">
-          <div className="field-stat-icon maintenance">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_up</span>
-          </div>
-          <div>
-            <div className="field-stat-value">{stats.highRating}</div>
-            <div className="field-stat-label">Đánh giá tốt (≥4 sao)</div>
-          </div>
-        </div>
-        <div className="field-stat-card">
-          <div className="field-stat-icon closed">
+        <div className="stat-card">
+          <div className="stat-icon urgent">
             <span className="material-symbols-outlined">report</span>
           </div>
           <div>
-            <div className="field-stat-value">{stats.lowRating}</div>
-            <div className="field-stat-label">Cần chú ý (≤2 sao)</div>
+            <div className="stat-value">{stats.lowRating} tin</div>
+            <div className="stat-label">Cần xử lý gấp</div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters / Search */}
       <div className="feedback-toolbar">
         <div className="feedback-search">
           <span className="material-symbols-outlined feedback-search-icon">search</span>
           <input
             type="text"
             className="feedback-search-input"
-            placeholder="Tìm theo tên KH, tên sân, nội dung..."
+            placeholder="Tìm kiếm theo tên khách hàng hoặc sân..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
         <div className="feedback-date-filters">
-          <select
-            className="feedback-select"
-            value={ratingFilter}
-            onChange={(e) => { setRatingFilter(e.target.value); setCurrentPage(1); }}
-          >
-            <option value="">Tất cả đánh giá</option>
-            {[5, 4, 3, 2, 1].map((r) => (
-              <option key={r} value={r}>{r} sao</option>
-            ))}
-          </select>
           <div className="feedback-date-field">
             <span className="material-symbols-outlined feedback-date-icon">calendar_month</span>
             <input
@@ -240,63 +227,69 @@ const ManagerFeedbackPage = () => {
             <p>Đang tải danh sách feedback...</p>
           </div>
         ) : (
-          <div className="feedback-table-wrapper">
-            <table className="feedback-table">
-              <thead>
+        <div className="feedback-table-wrapper">
+          <table className="feedback-table">
+            <thead>
+              <tr>
+                <th>Tên khách hàng</th>
+                <th>Nội dung feedback</th>
+                <th>Sân liên quan</th>
+                <th>Đánh giá</th>
+                <th>Ngày gửi</th>
+                <th className="text-right">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedFeedbacks.length === 0 ? (
                 <tr>
-                  <th>Khách hàng</th>
-                  <th>Sân</th>
-                  <th>Nội dung</th>
-                  <th>Đánh giá</th>
-                  <th>Ngày gửi</th>
+                  <td colSpan={6} className="feedback-empty-row">
+                    <span className="material-symbols-outlined">search_off</span>
+                    Không tìm thấy phản hồi nào phù hợp.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedFeedbacks.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="feedback-empty-row">
-                      <span className="material-symbols-outlined">search_off</span>
-                      Không tìm thấy phản hồi nào phù hợp.
+              ) : (
+                paginatedFeedbacks.map((fb) => (
+                  <tr key={fb._id}>
+                    <td>
+                      <div className="feedback-user-cell">
+                        <img
+                          src={fb.userImage}
+                          alt={fb.userName}
+                          className="feedback-user-avatar"
+                        />
+                        <div className="feedback-user-info">
+                          <span className="feedback-user-name">{fb.userName}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p className="feedback-comment">{fb.comment}</p>
+                    </td>
+                    <td>
+                      <span className="feedback-field-badge">
+                        <span className="material-symbols-outlined">location_on</span>
+                        {fb.fieldName}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="feedback-stars">{renderStars(fb.rating)}</div>
+                    </td>
+                    <td className="feedback-date">{formatDate(fb.createdAt)}</td>
+                    <td className="text-right">
+                      <button
+                        className="btn-delete-feedback"
+                        title="Xóa feedback"
+                        onClick={() => handleDelete(fb)}
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  paginatedFeedbacks.map((fb) => (
-                    <tr key={fb._id}>
-                      <td>
-                        <div className="feedback-user-cell">
-                          {fb.customerImage ? (
-                            <img
-                              src={fb.customerImage}
-                              alt={fb.customerName}
-                              className="feedback-user-avatar"
-                            />
-                          ) : (
-                            <div className="feedback-user-avatar feedback-user-avatar--placeholder">
-                              <span className="material-symbols-outlined">person</span>
-                            </div>
-                          )}
-                          <span className="feedback-customer-name">{fb.customerName}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="feedback-field-badge">
-                          <span className="material-symbols-outlined">stadium</span>
-                          {fb.fieldName}
-                        </span>
-                      </td>
-                      <td>
-                        <p className="feedback-comment">{fb.comment}</p>
-                      </td>
-                      <td>
-                        <div className="feedback-stars">{renderStars(fb.rating)}</div>
-                      </td>
-                      <td className="feedback-date">{formatDate(fb.createdAt)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
         )}
 
         {/* Pagination */}
@@ -305,7 +298,10 @@ const ManagerFeedbackPage = () => {
             <div className="customers-pagination-info">
               Hiển thị{' '}
               <span className="customers-pagination-bold">
-                {(currentPage - 1) * feedbacksPerPage + 1}–{Math.min(currentPage * feedbacksPerPage, filteredFeedbacks.length)}
+                {filteredFeedbacks.length === 0
+                  ? 0
+                  : (currentPage - 1) * feedbacksPerPage + 1}
+                -{Math.min(currentPage * feedbacksPerPage, filteredFeedbacks.length)}
               </span>{' '}
               của{' '}
               <span className="customers-pagination-bold">{filteredFeedbacks.length}</span>{' '}
@@ -316,23 +312,53 @@ const ManagerFeedbackPage = () => {
                 className="customers-page-btn"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
-              >Trước</button>
+              >
+                Trước
+              </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
                   key={page}
                   className={`customers-page-btn ${currentPage === page ? 'active' : ''}`}
                   onClick={() => setCurrentPage(page)}
-                >{page}</button>
+                >
+                  {page}
+                </button>
               ))}
               <button
                 className="customers-page-btn"
                 disabled={currentPage === totalPages || totalPages === 0}
                 onClick={() => setCurrentPage((p) => p + 1)}
-              >Sau</button>
+              >
+                Sau
+              </button>
             </div>
           </div>
         )}
       </div>
+
+
+      {/* Confirm Delete Modal */}
+      {confirmDelete && (
+        <div className="confirm-modal-overlay" onClick={() => setConfirmDelete(null)}>
+          <div className="confirm-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-icon">
+              <span className="material-symbols-outlined">warning</span>
+            </div>
+            <h3 className="confirm-modal-title">Xóa feedback?</h3>
+            <p className="confirm-modal-desc">
+              Bạn có chắc muốn xóa feedback của &quot;{confirmDelete.userName}&quot;? Hành động này không thể hoàn tác.
+            </p>
+            <div className="confirm-modal-actions">
+              <button className="btn-modal-cancel" onClick={() => setConfirmDelete(null)}>
+                Hủy
+              </button>
+              <button className="btn-modal-confirm btn-danger" onClick={handleConfirmDelete}>
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

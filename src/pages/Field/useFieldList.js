@@ -53,6 +53,7 @@ const useFieldList = () => {
   const [facets, setFacets] = useState({
     categories: [],
     districts: [],
+    cities: [],
     priceRange: { min: 0, max: PRICE_CONFIG.MAX },
   });
 
@@ -157,6 +158,19 @@ const useFieldList = () => {
     }));
   }, []);
 
+  const handleCityChange = useCallback((city) => {
+    setFilters(prev => ({
+      ...prev,
+      city,
+      ward: '',  // reset ward khi đổi city
+      page: 1,
+    }));
+  }, []);
+
+  const handleWardChange = useCallback((ward) => {
+    setFilters(prev => ({ ...prev, ward, page: 1 }));
+  }, []);
+
   const handleSortChange = useCallback((sortValue) => {
     setFilters(prev => ({ ...prev, sortBy: sortValue, page: 1 }));
   }, []);
@@ -252,6 +266,8 @@ const useFieldList = () => {
     handleFilterChange,
     handleCategoryChange,
     handleFieldTypeChange,
+    handleCityChange,
+    handleWardChange,
     handleSortChange,
     handlePageChange,
     handleReset,
