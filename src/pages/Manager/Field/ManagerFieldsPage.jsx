@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { searchFields, getCategoriesAndTypes } from '../../../services/fieldService';
-import { deleteField } from '../../../services/managerService';
+import { searchFields } from '../../../services/fieldService';
+import { deleteField, getManagerCategories } from '../../../services/managerService';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerFieldsPage.css';
@@ -86,7 +86,7 @@ const ManagerFieldsPage = () => {
       setError(null);
       const [fieldsRes, catRes] = await Promise.all([
         searchFields({ status: 'all', page: 1, limit: 10000 }),
-        getCategoriesAndTypes(),
+        getManagerCategories(),
       ]);
       if (fieldsRes.success) {
         // Lọc chỉ sân thuộc manager đang đăng nhập
@@ -106,7 +106,7 @@ const ManagerFieldsPage = () => {
       } else {
         setError(fieldsRes.error);
       }
-      if (catRes.success) setCategories(catRes.data?.categories || []);
+      if (catRes.success) setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
       setLoading(false);
     };
     fetchData();
