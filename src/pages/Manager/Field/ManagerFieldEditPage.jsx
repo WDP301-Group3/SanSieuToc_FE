@@ -5,26 +5,6 @@ import { getFieldById } from '../../../services/fieldService';
 import { getFieldCreateForm, updateField } from '../../../services/managerService';
 import '../../../styles/ManagerFieldEditPage.css';
 
-/**
- * Map utility key → Vietnamese label + icon
- */
-const utilityLabelMap = {
-  Wifi: { label: 'Wifi miễn phí', icon: 'wifi' },
-  Parking: { label: 'Bãi giữ xe', icon: 'local_parking' },
-  Shower: { label: 'Phòng tắm', icon: 'shower' },
-  'Changing Room': { label: 'Phòng thay đồ', icon: 'checkroom' },
-  Water: { label: 'Nước uống miễn phí', icon: 'local_drink' },
-  'First Aid': { label: 'Y tế sơ cứu', icon: 'medical_services' },
-  'Equipment Rental': { label: 'Cho thuê dụng cụ', icon: 'sports' },
-  Coaching: { label: 'Huấn luyện viên', icon: 'school' },
-  Cafe: { label: 'Quán cà phê', icon: 'local_cafe' },
-  'Air Conditioning': { label: 'Điều hòa', icon: 'ac_unit' },
-  'Snack Bar': { label: 'Canteen', icon: 'restaurant' },
-  Scoreboard: { label: 'Bảng điểm', icon: 'scoreboard' },
-};
-
-const ALL_UTILITIES = Object.keys(utilityLabelMap);
-
 const ManagerFieldEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,7 +21,9 @@ const ManagerFieldEditPage = () => {
 
   /* ---------- Form fields ---------- */
   const [fieldName, setFieldName] = useState('');
-  const [address, setAddress] = useState('');
+  const [street, setStreet] = useState('');
+  const [ward, setWard] = useState('');
+  const [province, setProvince] = useState('');
   const [description, setDescription] = useState('');
   const [hourlyPrice, setHourlyPrice] = useState(0);
   const [slotDuration, setSlotDuration] = useState(60);
@@ -50,7 +32,7 @@ const ManagerFieldEditPage = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedFieldTypeId, setSelectedFieldTypeId] = useState('');
   const [status, setStatus] = useState(true); // true = Available
-  const [utilities, setUtilities] = useState([]);
+  const [utilities, setUtilities] = useState(['']);
   const [images, setImages] = useState([]); // string URLs (existing) or File objects (new)
   const [fieldIdReal, setFieldIdReal] = useState(null);
 
@@ -74,14 +56,18 @@ const ManagerFieldEditPage = () => {
       const f = fieldRes.data?.field || fieldRes.data;
       setFieldIdReal(f._id);
       setFieldName(f.fieldName || '');
-      setAddress(f.address || '');
+      // Parse address back into 3 parts (stored as "street, ward, province")
+      const addressParts = (f.address || '').split(',').map((s) => s.trim());
+      setStreet(addressParts[0] || '');
+      setWard(addressParts[1] || '');
+      setProvince(addressParts[2] || '');
       setDescription(f.description || '');
       setHourlyPrice(f.hourlyPrice || 0);
       setSlotDuration(f.slotDuration || 60);
       setOpeningTime(f.openingTime || '06:00');
       setClosingTime(f.closingTime || '23:00');
       setStatus((f.status || '').toLowerCase() !== 'maintenance');
-      setUtilities(f.utilities || []);
+      setUtilities(f.utilities && f.utilities.length > 0 ? f.utilities : ['']);
       // public API trả về f.images; manager API trả về f.image — đều là array URL
       setImages(
         Array.isArray(f.images) ? f.images
@@ -137,11 +123,13 @@ const ManagerFieldEditPage = () => {
 
   /* ---------- Handlers ---------- */
 
-  const toggleUtility = (util) => {
-    setUtilities((prev) =>
-      prev.includes(util) ? prev.filter((u) => u !== util) : [...prev, util]
-    );
-  };
+  const addUtility = () => setUtilities((prev) => [...prev, '']);
+
+  const updateUtility = (index, value) =>
+    setUtilities((prev) => prev.map((u, i) => (i === index ? value : u)));
+
+  const removeUtility = (index) =>
+    setUtilities((prev) => prev.filter((_, i) => i !== index));
 
   const handleCategoryChange = (catId) => {
     setSelectedCategoryId(catId);
@@ -188,52 +176,35 @@ const ManagerFieldEditPage = () => {
 
     setSubmitting(true);
 
-    // Compress + convert File → base64 (giảm kích thước trước khi gửi JSON)
-    const compressToBase64 = (file, maxWidth = 1280, quality = 0.75) =>
-      new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          URL.revokeObjectURL(url);
-          const scale = Math.min(1, maxWidth / img.width);
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
+    const address = [street, ward, province].filter(Boolean).join(', ');
+    const filteredUtilities = utilities.map((u) => u.trim()).filter(Boolean);
 
-    let imageArray;
-    try {
-      imageArray = await Promise.all(
-        images.map((img) => (img instanceof File ? compressToBase64(img) : Promise.resolve(img)))
-      );
-    } catch {
-      notification.error('Lỗi đọc file ảnh. Vui lòng thử lại.');
+    const uniqueUtilities = new Set(filteredUtilities.map((u) => u.toLowerCase()));
+    if (uniqueUtilities.size !== filteredUtilities.length) {
+      notification.error('Tiện ích bị trùng! Vui lòng kiểm tra lại.');
       setSubmitting(false);
       return;
     }
 
-    // Gửi JSON — BE updateField nhận req.body, không nhận FormData
-    // Tất cả trường khớp đúng với BE fieldService.updateField
-    const payload = {
-      fieldTypeID: selectedFieldTypeId,
-      fieldName,
-      address,
-      description,
-      hourlyPrice: Number(hourlyPrice),       // BE validate kiểu number
-      slotDuration: Number(slotDuration),     // BE validate integer >= 60
-      openingTime,
-      closingTime,
-      status: status ? 'Available' : 'Maintenance',
-      utilities,                              // array string
-      image: imageArray,                      // array URL hoặc base64 string
-    };
+    const fd = new FormData();
+    fd.append('fieldTypeID', selectedFieldTypeId);
+    fd.append('categoryID', selectedCategoryId);
+    fd.append('fieldName', fieldName);
+    fd.append('address', address);
+    fd.append('description', description);
+    fd.append('hourlyPrice', String(hourlyPrice));
+    fd.append('slotDuration', String(slotDuration));
+    fd.append('openingTime', openingTime);
+    fd.append('closingTime', closingTime);
+    fd.append('status', status ? 'Available' : 'Maintenance');
+    fd.append('utilities', JSON.stringify(filteredUtilities));
 
-    const res = await updateField(fieldIdReal || id, payload);
+    // Separate existing Cloudinary URLs from new File objects
+    const existingUrls = images.filter((img) => typeof img === 'string');
+    fd.append('existingImages', JSON.stringify(existingUrls));
+    images.filter((img) => img instanceof File).forEach((file) => fd.append('images', file));
+
+    const res = await updateField(fieldIdReal || id, fd);
     setSubmitting(false);
 
     if (res.success) {
@@ -325,16 +296,48 @@ const ManagerFieldEditPage = () => {
                 </div>
 
                 {/* Địa chỉ */}
-                <div className="edit-form-group">
-                  <label className="edit-label">Địa chỉ</label>
-                  <input
-                    type="text"
-                    className="edit-input"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Nhập địa chỉ..."
-                    required
-                  />
+                <div className="edit-form-group full-width">
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px 16px', background: '#f8fafc' }}>
+                    <p style={{ margin: '0 0 12px 0', fontWeight: 600, fontSize: '0.875rem', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', color: '#22c55e' }}>location_on</span>
+                      Địa chỉ
+                    </p>
+                    <div className="edit-form-grid" style={{ margin: 0 }}>
+                      <div className="edit-form-group full-width" style={{ marginBottom: '10px' }}>
+                        <label className="edit-label">Thôn / Xóm / Đường</label>
+                        <input
+                          type="text"
+                          className="edit-input"
+                          value={street}
+                          onChange={(e) => setStreet(e.target.value)}
+                          placeholder="Ví dụ: 123 Nguyễn Huệ"
+                          required
+                        />
+                      </div>
+                      <div className="edit-form-group" style={{ marginBottom: 0 }}>
+                        <label className="edit-label">Xã / Phường / Thị trấn</label>
+                        <input
+                          type="text"
+                          className="edit-input"
+                          value={ward}
+                          onChange={(e) => setWard(e.target.value)}
+                          placeholder="Ví dụ: Phường Bến Nghé"
+                          required
+                        />
+                      </div>
+                      <div className="edit-form-group" style={{ marginBottom: 0 }}>
+                        <label className="edit-label">Tỉnh / Thành phố</label>
+                        <input
+                          type="text"
+                          className="edit-input"
+                          value={province}
+                          onChange={(e) => setProvince(e.target.value)}
+                          placeholder="Ví dụ: TP. Hồ Chí Minh"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Môn thể thao */}
@@ -369,7 +372,7 @@ const ManagerFieldEditPage = () => {
 
                 {/* Giá thuê */}
                 <div className="edit-form-group">
-                  <label className="edit-label">Giá thuê (VND/giờ)</label>
+                  <label className="edit-label">Giá thuê (VND/slot)</label>
                   <div className="edit-input-suffix">
                     <input
                       type="text"
@@ -393,7 +396,7 @@ const ManagerFieldEditPage = () => {
                       onChange={(e) => setSlotDuration(Number(e.target.value))}
                       min={60}
                       max={480}
-                      step={60}
+                      step={30}
                     />
                     <span className="edit-suffix">phút</span>
                   </div>
@@ -519,21 +522,35 @@ const ManagerFieldEditPage = () => {
               <div className="edit-utilities-section">
                 <label className="edit-setting-label">Tiện ích đi kèm</label>
                 <div className="edit-utilities-list">
-                  {ALL_UTILITIES.map((util) => {
-                    const info = utilityLabelMap[util];
-                    return (
-                      <label key={util} className="edit-utility-item">
-                        <input
-                          type="checkbox"
-                          checked={utilities.includes(util)}
-                          onChange={() => toggleUtility(util)}
-                          className="edit-utility-checkbox"
-                        />
-                        <span className="edit-utility-label">{info.label}</span>
-                        <span className="material-symbols-outlined edit-utility-icon">{info.icon}</span>
-                      </label>
-                    );
-                  })}
+                  {utilities.map((util, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                      <input
+                        type="text"
+                        className="edit-input"
+                        value={util}
+                        onChange={(e) => updateUtility(index, e.target.value)}
+                        placeholder={`Tiện ích ${index + 1}...`}
+                        style={{ flex: 1 }}
+                      />
+                      {utilities.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeUtility(index)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px' }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>remove_circle</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addUtility}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: '1.5px dashed #22c55e', borderRadius: '8px', color: '#22c55e', cursor: 'pointer', padding: '6px 12px', fontSize: '0.875rem', width: '100%', justifyContent: 'center', marginTop: '4px' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>add</span>
+                    Thêm tiện ích
+                  </button>
                 </div>
               </div>
 
@@ -565,7 +582,7 @@ const ManagerFieldEditPage = () => {
                   </div>
                   <div className="edit-summary-item">
                     <span className="material-symbols-outlined">build</span>
-                    <span>{utilities.length} tiện ích</span>
+                    <span>{utilities.filter(u => u.trim()).length} tiện ích</span>
                   </div>
                 </div>
               </div>

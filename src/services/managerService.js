@@ -423,13 +423,9 @@ export const getManagerFieldById = async (fieldId) => {
  */
 export const createField = async (payload) => {
   try {
-    const isFormData = payload instanceof FormData;
     const response = await axiosInstance.post(
       ENDPOINTS.MANAGER_FIELDS.CREATE,
       payload,
-      {
-        headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
-      },
     );
     const data = response.data?.data || response.data;
     return { success: true, data };
@@ -451,13 +447,9 @@ export const createField = async (payload) => {
 export const updateField = async (fieldId, payload) => {
   try {
     if (!fieldId) return { success: false, error: "Field ID is required" };
-    const isFormData = payload instanceof FormData;
     const response = await axiosInstance.put(
       ENDPOINTS.MANAGER_FIELDS.UPDATE(fieldId),
       payload,
-      {
-        headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
-      },
     );
     const data = response.data?.data || response.data;
     return { success: true, data };

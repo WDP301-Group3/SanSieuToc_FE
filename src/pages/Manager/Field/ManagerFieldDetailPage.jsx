@@ -271,15 +271,11 @@ const ManagerFieldDetailPage = () => {
               <ul className="afd-rules-list">
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>
-                  <span>Đặt cọc tối thiểu 30% giá trị giờ thuê.</span>
+                  <span>Đặt cọc tối thiểu 20% giá trị giờ thuê.</span>
                 </li>
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>
-                  <span>Hủy sân trước 24h hoàn 100% cọc.</span>
-                </li>
-                <li>
-                  <span className="material-symbols-outlined">check_circle</span>
-                  <span>Có mặt trước 15 phút để nhận sân.</span>
+                  <span>Có mặt trước 10 phút để nhận sân.</span>
                 </li>
               </ul>
             </div>
