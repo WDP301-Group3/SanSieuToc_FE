@@ -3,41 +3,48 @@
  */
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import avatarSang from '../assets/avatar/sang.png';
+import avatarThanh from '../assets/avatar/thanh.png';
+import avatarLong from '../assets/avatar/long.png';
+import avatarQuocMinh from '../assets/avatar/phamminh.png';
+import avatarDucMinh from '../assets/avatar/dm.png';
 import '../styles/AboutPage.css';
 
 const AboutPage = () => {
   const { t } = useTranslation();
+  const { isAuthenticated, user } = useAuth();
 
   // Team members data
   const teamMembers = [
     {
       name: 'Nguyễn Viết Sang',
       role: 'Founder & CEO',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face',
+      image: avatarSang,
       description: 'Với hơn 10 năm kinh nghiệm trong lĩnh vực thể thao và công nghệ.',
     },
     {
       name: 'Phan Duy Thành',
       role: 'Co-Founder & CTO',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face',
+      image: avatarThanh,
       description: 'Chuyên gia công nghệ với đam mê xây dựng sản phẩm số.',
     },
     {
       name: 'Hoàng Tuấn Long',
       role: 'Head of Operations',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
+      image: avatarLong,
       description: 'Đảm bảo vận hành mượt mà cho hệ thống toàn quốc.',
     },
     {
       name: 'Phạm Quốc Minh',
       role: 'Customer Success Manager',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
+      image: avatarQuocMinh,
       description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
     },
     {
       name: 'Phạm Đức Minh',
       role: 'Customer Success Manager',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
+      image: avatarDucMinh,
       description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
     },
   ];
@@ -233,10 +240,20 @@ const AboutPage = () => {
                 <span className="material-symbols-outlined">search</span>
                 {t('home.searchButton', 'Tìm sân ngay')}
               </Link>
-              <Link to="/register" className="about-cta-btn secondary">
-                <span className="material-symbols-outlined">person_add</span>
-                {t('auth.register', 'Đăng ký')}
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to={user?.role === 'manager' || user?.role === 'admin' ? '/admin/dashboard' : '/customer/profile'}
+                  className="about-cta-btn secondary"
+                >
+                  <span className="material-symbols-outlined">manage_accounts</span>
+                  {t('nav.profile', 'Hồ sơ của tôi')}
+                </Link>
+              ) : (
+                <Link to="/register" className="about-cta-btn secondary">
+                  <span className="material-symbols-outlined">person_add</span>
+                  {t('auth.register', 'Đăng ký')}
+                </Link>
+              )}
             </div>
           </div>
         </div>
