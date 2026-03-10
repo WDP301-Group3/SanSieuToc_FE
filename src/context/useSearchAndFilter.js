@@ -132,6 +132,10 @@ const useSearchAndFilter = (setLoading, setError, clearError, globalData) => {
 
   /**
    * getFieldTypesByCategory - Lấy field types theo category
+   *
+   * Sau khi cập nhật DB, BE trả về fieldtypes.categoryID là raw ObjectId string
+   * (không populate). Cần normalize cả hai phía về string trước khi so sánh
+   * để tránh fail khi một trong hai là object { _id/toString } hoặc MongoId object.
    */
   const getFieldTypesByCategory = useCallback(
     (categoryName) => {
@@ -143,12 +147,20 @@ const useSearchAndFilter = (setLoading, setError, clearError, globalData) => {
 
       if (!category) return [];
 
+      // Normalize category._id: hỗ trợ plain string, ObjectId object, { $oid } (MongoDB shell format)
+      const categoryIdStr = String(
+        category._id?.$oid ?? category._id?._id ?? category._id ?? ''
+      );
+
       return globalData.fieldTypes.filter((type) => {
-        const catId =
-          typeof type.categoryID === 'object'
-            ? type.categoryID?._id
-            : type.categoryID;
-        return catId === category._id;
+        // Normalize type.categoryID: hỗ trợ plain string, ObjectId object, { $oid }, populated object
+        const catId = String(
+          type.categoryID?.$oid ??
+            type.categoryID?._id ??
+            type.categoryID ??
+            ''
+        );
+        return catId === categoryIdStr;
       });
     },
     [globalData.categories, globalData.fieldTypes]

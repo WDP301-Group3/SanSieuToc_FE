@@ -49,9 +49,16 @@ const FieldCard = ({ field, viewMode, notification }) => {
           <h3 className="field-name" title={field.fieldName}>{field.fieldName}</h3>
           <div className={`field-rating ${field.averageRating > 0 ? '' : 'no-rating'}`}>
             <span className="material-symbols-outlined rating-star">star</span>
-            <span className="rating-value">
-              {field.averageRating > 0 ? field.averageRating.toFixed(1) : t('field.new')}
-            </span>
+            {field.averageRating > 0 ? (
+              <>
+                <span className="rating-value">{field.averageRating.toFixed(1)}</span>
+                {field.totalReviews > 0 && (
+                  <span className="rating-count">({field.totalReviews})</span>
+                )}
+              </>
+            ) : (
+              <span className="rating-value">{t('field.new')}</span>
+            )}
           </div>
         </div>
 

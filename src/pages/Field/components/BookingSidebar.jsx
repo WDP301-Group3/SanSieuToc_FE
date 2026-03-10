@@ -49,10 +49,18 @@ const BookingSidebar = ({
             className="form-input"
           >
             <option value="once">Đặt 1 lần</option>
-            <option value="weekly">Lặp hàng tuần</option>
+            <option value="weekly">Đặt cả tuần (7 ngày liên tiếp)</option>
+            <option value="recurring">Đặt hàng tuần (lặp theo tháng)</option>
           </select>
           
           {recurringType === 'weekly' && selectedDate && (
+            <p className="form-hint highlight">
+              <span className="material-symbols-outlined">event_repeat</span>
+              Đặt slot này cho <strong>7 ngày liên tiếp</strong> kể từ {selectedDate}
+            </p>
+          )}
+          
+          {recurringType === 'recurring' && selectedDate && (
             <p className="form-hint highlight">
               <span className="material-symbols-outlined">event_repeat</span>
               Lặp lại vào <strong>{getDayOfWeekName(selectedDate)}</strong> hàng tuần
@@ -60,8 +68,8 @@ const BookingSidebar = ({
           )}
         </div>
 
-        {/* Chọn số tháng lặp */}
-        {recurringType === 'weekly' && (
+        {/* Chọn số tháng lặp — chỉ hiện khi recurring */}
+        {recurringType === 'recurring' && (
           <div className="form-group">
             <label className="form-label">Thời gian lặp</label>
             <select
@@ -158,9 +166,16 @@ const BookingSidebar = ({
             <span>{(field.hourlyPrice * (selectedSlots.length || 1)).toLocaleString('vi-VN')}đ</span>
           </div>
           
-          {recurringType === 'weekly' && calculateRecurringDates.length > 1 && (
+          {recurringType === 'recurring' && calculateRecurringDates.length > 1 && (
             <div className="price-row recurring">
               <span>× {calculateRecurringDates.length} lần (hàng tuần)</span>
+              <span>{calculateTotalPrice().toLocaleString('vi-VN')}đ</span>
+            </div>
+          )}
+          
+          {recurringType === 'weekly' && calculateRecurringDates.length > 1 && (
+            <div className="price-row recurring">
+              <span>× {calculateRecurringDates.length} ngày (cả tuần)</span>
               <span>{calculateTotalPrice().toLocaleString('vi-VN')}đ</span>
             </div>
           )}

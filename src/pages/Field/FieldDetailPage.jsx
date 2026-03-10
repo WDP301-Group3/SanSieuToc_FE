@@ -207,10 +207,10 @@ const FieldDetailPage = () => {
                   <span className="material-symbols-outlined">phone</span>
                   {managerPhone}
                 </a>
-                <button className="btn-contact">
+                {/* <button className="btn-contact">
                   <span className="material-symbols-outlined">chat</span>
                   Chat ngay
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

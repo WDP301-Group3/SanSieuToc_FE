@@ -114,15 +114,25 @@ const useFieldDetail = () => {
     if (!selectedDate) return [];
     if (recurringType === 'once') return [selectedDate];
 
+    if (recurringType === 'weekly') {
+      // Đặt 7 ngày liên tiếp (BE: repeatType = 'weekly')
+      const dates = [];
+      let current = new Date(selectedDate);
+      for (let i = 0; i < 7; i++) {
+        dates.push(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
+      }
+      return dates;
+    }
+
+    // recurring: lặp cùng ngày trong tuần theo N tháng (BE: repeatType = 'recurring')
     const totalWeeks = recurringMonths * WEEKS_PER_MONTH;
     const dates = [];
     let current = new Date(selectedDate);
-
     for (let i = 0; i < totalWeeks; i++) {
       dates.push(current.toISOString().split('T')[0]);
       current.setDate(current.getDate() + 7);
     }
-
     return dates;
   }, [selectedDate, recurringType, recurringMonths]);
 
@@ -272,10 +282,11 @@ const useFieldDetail = () => {
         startTime: s.startTime,
         endTime: s.endTime,
       })),
-      repeatType: recurringType === 'weekly' ? 'recurring' : 'once',
+      repeatType: recurringType, // 'once' | 'weekly' | 'recurring' — khớp đúng với BE
     };
 
-    if (recurringType === 'weekly') {
+    // duration chỉ dùng cho 'recurring' (1 | 2 | 3 tháng)
+    if (recurringType === 'recurring') {
       apiPayload.duration = recurringMonths;
     }
 

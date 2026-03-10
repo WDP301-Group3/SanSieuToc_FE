@@ -29,23 +29,24 @@ const BOOKING_STATUS = {
 };
 
 /**
- * Xác định trạng thái hiển thị dựa trên thời gian thực:
- * - Confirmed + endTime đã qua → hiển thị như Completed
- * - Pending + endTime đã qua → hiển thị như Expired (quá hạn thanh toán)
+ * Xác định trạng thái hiển thị:
+ * - BE tự động chuyển slot Active → Completed qua cron job mỗi 10 phút.
+ * - FE KHÔNG tự suy ra Completed từ Confirmed (sẽ lệch với BE).
+ * - Chỉ xử lý trường hợp đặc biệt: Pending + endTime đã qua → Expired (quá hạn thanh toán cọc).
  */
 const resolveDisplayStatus = (booking) => {
   const { status, bookingDetails } = booking;
-  if (status === BOOKING_STATUS.CANCELLED || status === BOOKING_STATUS.COMPLETED) return status;
+  // Trả về đúng status từ BE, không override Confirmed → Completed
+  if (status !== BOOKING_STATUS.PENDING) return status;
 
+  // Chỉ kiểm tra Expired cho Pending: nếu thời gian đặt đã qua mà chưa trả cọc
   const now = new Date();
   const details = bookingDetails || [];
-  // Lấy endTime của slot cuối cùng
   const lastDetail = details[details.length - 1];
   const endTime = lastDetail?.endTime ? new Date(lastDetail.endTime) : null;
 
   if (endTime && now > endTime) {
-    if (status === BOOKING_STATUS.CONFIRMED) return BOOKING_STATUS.COMPLETED;
-    if (status === BOOKING_STATUS.PENDING) return 'Expired'; // quá hạn mà chưa thanh toán
+    return 'Expired'; // Pending quá hạn → hết hạn thanh toán cọc
   }
   return status;
 };

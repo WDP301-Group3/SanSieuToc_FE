@@ -113,23 +113,32 @@ const FieldFilterSidebar = ({
         </div>
 
         {/* Field Type Filter */}
-        {filters.categoryName && selectedCategoryFieldTypes.length > 0 && (
+        {filters.categoryName && selectedCategoryFieldTypes.length >= 1 && (
           <div className="filter-group">
             <p className="filter-label">{t('fieldList.fieldType')}</p>
             <div className="sport-chips">
-              {selectedCategoryFieldTypes.map((fieldType) => (
-                <label key={fieldType._id || fieldType.typeName} className="chip-label">
-                  <input
-                    type="checkbox"
-                    checked={filters.fieldTypeName === fieldType.typeName}
-                    onChange={() => handleFieldTypeChange(fieldType.typeName)}
-                    className="chip-input"
-                  />
-                  <div className="chip">
-                    {fieldType.typeName}
-                  </div>
-                </label>
-              ))}
+              {selectedCategoryFieldTypes.length === 1 ? (
+                /* Chỉ 1 loại (Sân tiêu chuẩn) → hiển thị dạng auto-selected, không cho bỏ chọn */
+                <div className="chip chip--auto-selected">
+                  <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check_circle</span>
+                  {selectedCategoryFieldTypes[0].typeName}
+                </div>
+              ) : (
+                /* Nhiều loại (Bóng đá) → cho user chọn */
+                selectedCategoryFieldTypes.map((fieldType) => (
+                  <label key={fieldType._id || fieldType.typeName} className="chip-label">
+                    <input
+                      type="checkbox"
+                      checked={filters.fieldTypeName === fieldType.typeName}
+                      onChange={() => handleFieldTypeChange(fieldType.typeName)}
+                      className="chip-input"
+                    />
+                    <div className="chip">
+                      {fieldType.typeName}
+                    </div>
+                  </label>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -222,19 +231,18 @@ const FieldFilterSidebar = ({
               <span className="price-currency">₫</span>
               <input
                 type="text"
+                inputMode="numeric"
                 value={priceInputValue}
                 onChange={handlePriceInputChange}
                 onBlur={handlePriceInputBlur}
                 onKeyPress={handlePriceKeyPress}
                 className="price-input-field"
-                placeholder={t('fieldList.maxPrice')}
+                placeholder="1.000.000"
               />
             </div>
             <p className="price-hint">
-              {t('fieldList.priceHint', {
-                min: '0đ',
-                max: `${filters.priceMax.toLocaleString('vi-VN')}đ`
-              })}
+              Tối đa: <strong>{filters.priceMax.toLocaleString('vi-VN')}đ</strong>
+              &nbsp;·&nbsp;Nhấn Enter hoặc click ra ngoài để áp dụng
             </p>
           </div>
         </div>

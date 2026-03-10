@@ -285,6 +285,31 @@ export const confirmPayment = async (bookingId) => {
   }
 };
 
+/**
+ * Update status of a single booking detail (slot).
+ * PUT /api/manager/booking-details/:detailId/status
+ * @param {string} detailId - BookingDetail ID
+ * @param {string} status - 'Active' | 'Completed' | 'Cancelled'
+ */
+export const updateBookingDetailStatus = async (detailId, status) => {
+  try {
+    const response = await axiosInstance.put(
+      ENDPOINTS.MANAGER_BOOKINGS.UPDATE_DETAIL_STATUS(detailId),
+      { status },
+    );
+    return { success: true, data: response.data?.data };
+  } catch (error) {
+    console.error("updateBookingDetailStatus error:", error);
+    return {
+      success: false,
+      error:
+        error.response?.data?.message ||
+        error.message ||
+        "Lỗi cập nhật trạng thái slot",
+    };
+  }
+};
+
 // ============================================================================
 // FEEDBACK (MANAGER VIEW)
 // ============================================================================

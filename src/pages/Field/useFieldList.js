@@ -142,13 +142,33 @@ const useFieldList = () => {
   }, []);
 
   const handleCategoryChange = useCallback((category) => {
-    setFilters(prev => ({
-      ...prev,
-      categoryName: prev.categoryName === category ? '' : category,
-      fieldTypeName: '',
-      page: 1,
-    }));
-  }, []);
+    // Toggle off nếu đã chọn rồi
+    if (category === '') {
+      setFilters(prev => ({ ...prev, categoryName: '', fieldTypeName: '', page: 1 }));
+      return;
+    }
+
+    setFilters(prev => {
+      const isDeselecting = prev.categoryName === category;
+      if (isDeselecting) {
+        return { ...prev, categoryName: '', fieldTypeName: '', page: 1 };
+      }
+
+      // Lấy field types của category mới chọn
+      const types = getFieldTypesByCategory(category);
+
+      // Nếu chỉ có 1 loại (Sân tiêu chuẩn) → auto-select nó
+      // Nếu có nhiều loại (Bóng đá) → để trống, cho user tự chọn
+      const autoFieldType = types.length === 1 ? types[0].typeName : '';
+
+      return {
+        ...prev,
+        categoryName: category,
+        fieldTypeName: autoFieldType,
+        page: 1,
+      };
+    });
+  }, [getFieldTypesByCategory]);
 
   const handleFieldTypeChange = useCallback((typeName) => {
     setFilters(prev => ({
@@ -194,18 +214,20 @@ const useFieldList = () => {
   // ==========================================
 
   const handlePriceInputChange = useCallback((e) => {
-    const rawValue = e.target.value.replace(/[^\d]/g, '');
-    if (rawValue === '') {
-      setPriceInputValue('');
-      return;
-    }
-    const numericValue = parseInt(rawValue, 10);
-    setPriceInputValue(numericValue.toLocaleString('vi-VN'));
+    // Chỉ cho phép gõ chữ số — KHÔNG format trong lúc gõ
+    // vì toLocaleString('vi-VN') dùng dấu "." làm separator nghìn,
+    // khi user tiếp tục gõ sẽ bị strip dấu "." → sai số.
+    const digitsOnly = e.target.value.replace(/[^\d]/g, '');
+    setPriceInputValue(digitsOnly);
   }, []);
 
   const handlePriceInputBlur = useCallback(() => {
+    // Chỉ format + commit vào filter khi blur (rời khỏi ô)
     const rawValue = priceInputValue.replace(/[^\d]/g, '');
-    let numericValue = parseInt(rawValue, 10) || PRICE_CONFIG.DEFAULT_MAX;
+    let numericValue = parseInt(rawValue, 10);
+    if (isNaN(numericValue) || numericValue === 0) {
+      numericValue = PRICE_CONFIG.DEFAULT_MAX;
+    }
     numericValue = Math.max(0, Math.min(numericValue, PRICE_CONFIG.MAX));
     setPriceInputValue(numericValue.toLocaleString('vi-VN'));
     handleFilterChange('priceMax', numericValue);

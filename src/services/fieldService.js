@@ -150,6 +150,19 @@ export const searchFields = async (filters = {}) => {
       result = result.filter(f => f.status === statusFilter);
     }
 
+    // Time range filter — lọc sân có giờ mở cửa bao phủ khoảng giờ user chọn
+    // So sánh "HH:MM" string (lexicographic safe vì cùng format 24h 2 chữ số)
+    if (filters.startTime || filters.endTime) {
+      result = result.filter(f => {
+        const open = f.openingTime || '00:00';   // "06:00"
+        const close = f.closingTime || '23:59';  // "22:00"
+        // Sân hợp lệ khi: openingTime <= startTime  AND  endTime <= closingTime
+        if (filters.startTime && filters.startTime < open) return false;
+        if (filters.endTime && filters.endTime > close) return false;
+        return true;
+      });
+    }
+
     // ---- facets (computed from ALL normalised fields, NOT filtered result) ----
     // This ensures all categories always appear in the sidebar even when one is selected
     const categoryCount = {};
@@ -299,8 +312,17 @@ export const getCategoriesAndTypes = async () => {
       axiosInstance.get(ENDPOINTS.FIELDS.TYPES)
     ]);
 
-    const categories = catRes.data?.data?.categories || catRes.data?.categories || [];
-    const fieldTypes = typeRes.data?.data?.fieldTypes || typeRes.data?.fieldTypes || [];
+    // BE: { success: true, data: { categories: [...] } }  hoặc  { success: true, data: [...] }
+    const catRaw = catRes.data?.data;
+    const categories = Array.isArray(catRaw)
+      ? catRaw
+      : catRaw?.categories || catRes.data?.categories || [];
+
+    // BE: { success: true, data: { fieldTypes: [...] } }  hoặc  { success: true, data: [...] }
+    const typeRaw = typeRes.data?.data;
+    const fieldTypes = Array.isArray(typeRaw)
+      ? typeRaw
+      : typeRaw?.fieldTypes || typeRes.data?.fieldTypes || [];
 
     return { success: true, data: { categories, fieldTypes } };
   } catch (error) {
@@ -397,6 +419,9 @@ function normaliseField(f) {
     fieldType,
     manager,
     district,
+    // BE giờ trả về averageRating và totalReviews từ aggregate — giữ lại, fallback về 0
+    averageRating: f.averageRating ?? 0,
+    totalReviews: f.totalReviews ?? 0,
     images: f.images || f.image || [],
     image: f.images || f.image || []
   };
