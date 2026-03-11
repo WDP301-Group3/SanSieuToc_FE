@@ -26,7 +26,7 @@ const getStatusInfo = (status) => {
     case BOOKING_STATUS.CANCELLED:
       return { className: 'status-cancelled', label: 'Đã hủy', icon: 'cancel' };
     case BOOKING_STATUS.EXPIRED:
-      return { className: 'status-expired', label: 'Hết hạn thanh toán', icon: 'timer_off' };
+      return { className: 'status-expired', label: 'Quá hạn thời gian nhận sân', icon: 'timer_off' };
     default:
       return { className: '', label: status, icon: 'info' };
   }
@@ -243,11 +243,14 @@ const BookingsTab = ({ allBookings, stats, loading, onRefresh }) => {
                         <span>{(booking.totalPrice || 0).toLocaleString('vi-VN')}đ</span>
                       </div>
                     </div>
-                    {isExpired && (
-                      <p style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '4px', fontStyle: 'italic' }}>
-                        ⚠ Đơn này đã quá thời gian mà chưa được thanh toán cọc.
-                      </p>
-                    )}
+                    {isExpired && (() => {
+                      const hasCancelledSlot = (booking.bookingDetails || []).some((d) => d.status === 'Cancelled');
+                      return (
+                        <p style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '4px', fontStyle: 'italic' }}>
+                          ⚠ {hasCancelledSlot ? 'Khách hàng không đến sân.' : 'Đơn này đã quá thời gian mà chưa được thanh toán cọc.'}
+                        </p>
+                      );
+                    })()}
                     {!isExpired && booking.paymentInfo?.paymentMessage && (
                       <p style={{ fontSize: '0.8rem', color: booking.needPayment ? 'var(--warning-color, #e67e22)' : 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
                         {booking.paymentInfo.paymentMessage}
