@@ -10,6 +10,7 @@ const ManagerLoginForm = ({
   setShowPassword,
   handleLoginChange,
   handleManagerLoginSubmit,
+  onForgotPassword,
 }) => {
   return (
     <div className="auth-form-wrapper">
@@ -82,6 +83,15 @@ const ManagerLoginForm = ({
             </button>
           </div>
           {errors.password && <span className="error-text">{errors.password}</span>}
+          <div style={{ textAlign: 'right', marginTop: '0.25rem' }}>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="forgot-password-link"
+            >
+              Quên mật khẩu?
+            </button>
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -105,16 +115,6 @@ const ManagerLoginForm = ({
           )}
         </button>
       </form>
-
-      {/* Info note */}
-      <div className="manager-login-note">
-        <span className="material-symbols-outlined" style={{ fontSize: '0.95rem', color: '#6b7280' }}>
-          info
-        </span>
-        <p>
-          Tài khoản chủ sân được cấp bởi hệ thống. Liên hệ admin nếu gặp sự cố.
-        </p>
-      </div>
     </div>
   );
 };

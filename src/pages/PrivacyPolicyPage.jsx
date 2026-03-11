@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/PrivacyPolicyPage.css';
 
 const PrivacyPolicyPage = () => {
   const [activeSection, setActiveSection] = useState('overview');
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
@@ -39,12 +41,12 @@ const PrivacyPolicyPage = () => {
   };
 
   const sidebarLinks = [
-    { id: 'overview', icon: 'info', label: 'Tổng quan' },
-    { id: 'data-collection', icon: 'storage', label: 'Thu thập dữ liệu' },
-    { id: 'data-usage', icon: 'settings', label: 'Sử dụng dữ liệu' },
-    { id: 'data-security', icon: 'security', label: 'Bảo mật dữ liệu' },
-    { id: 'user-rights', icon: 'account_circle', label: 'Quyền của bạn' },
-    { id: 'cookies', icon: 'cookie', label: 'Cookies & Tracking' },
+    { id: 'overview', icon: 'info', label: t('privacy.section1Label') },
+    { id: 'data-collection', icon: 'storage', label: t('privacy.section2Label') },
+    { id: 'data-usage', icon: 'settings', label: t('privacy.section3Label') },
+    { id: 'data-security', icon: 'security', label: t('privacy.section4Label') },
+    { id: 'user-rights', icon: 'account_circle', label: t('privacy.section5Label') },
+    { id: 'cookies', icon: 'cookie', label: t('privacy.section6Label') },
   ];
 
   return (
@@ -52,10 +54,10 @@ const PrivacyPolicyPage = () => {
       {/* Page Header */}
       <div className="privacy-header">
         <h1 className="privacy-title">
-          Chính sách bảo mật
+          {t('privacy.pageTitle')}
         </h1>
         <p className="privacy-meta">
-          Có hiệu lực từ: 01 tháng 02, 2026 | Cập nhật: 04 tháng 02, 2026
+          {t('privacy.effectiveDate')}
         </p>
       </div>
 
@@ -63,7 +65,7 @@ const PrivacyPolicyPage = () => {
         {/* Sidebar Navigation */}
         <aside className="privacy-sidebar">
           <div className="privacy-sidebar-sticky">
-            <h3 className="privacy-sidebar-title">Nội dung</h3>
+            <h3 className="privacy-sidebar-title">{t('privacy.tableOfContents')}</h3>
             <nav>
               <ul className="privacy-nav-list">
                 {sidebarLinks.map((link) => (
@@ -103,7 +105,7 @@ const PrivacyPolicyPage = () => {
           <section id="overview" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">info</span>
-              Tổng quan
+              {t('privacy.section1Title')}
             </h2>
             <div className="privacy-section-content">
               <p>
@@ -133,7 +135,7 @@ const PrivacyPolicyPage = () => {
           <section id="data-collection" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">storage</span>
-              Thu thập dữ liệu
+              {t('privacy.section2Title')}
             </h2>
             <div className="privacy-section-content">
               <p>Chúng tôi thu thập các loại thông tin sau:</p>
@@ -207,7 +209,7 @@ const PrivacyPolicyPage = () => {
           <section id="data-usage" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">settings</span>
-              Sử dụng dữ liệu
+              {t('privacy.section3Title')}
             </h2>
             <div className="privacy-section-content">
               <p>Chúng tôi sử dụng thông tin của bạn cho các mục đích sau:</p>
@@ -255,7 +257,7 @@ const PrivacyPolicyPage = () => {
           <section id="data-security" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">security</span>
-              Bảo mật dữ liệu
+              {t('privacy.section4Title')}
             </h2>
             <div className="privacy-section-content">
               <p>
@@ -300,7 +302,7 @@ const PrivacyPolicyPage = () => {
           <section id="user-rights" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">account_circle</span>
-              Quyền của bạn
+              {t('privacy.section5Title')}
             </h2>
             <div className="privacy-section-content">
               <p>Bạn có các quyền sau đối với dữ liệu cá nhân của mình:</p>
@@ -380,7 +382,7 @@ const PrivacyPolicyPage = () => {
           <section id="cookies" className="privacy-section">
             <h2 className="privacy-section-title">
               <span className="material-icons-outlined privacy-section-icon">cookie</span>
-              Cookies & Tracking
+              {t('privacy.section6Title')}
             </h2>
             <div className="privacy-section-content">
               <p>
@@ -435,13 +437,13 @@ const PrivacyPolicyPage = () => {
             <div className="privacy-contact-icon">
               <span className="material-icons-outlined">support_agent</span>
             </div>
-            <h3 className="privacy-contact-title">Có câu hỏi về quyền riêng tư?</h3>
+            <h3 className="privacy-contact-title">{t('privacy.contactTitle')}</h3>
             <p className="privacy-contact-desc">
-              Đội ngũ bảo mật của chúng tôi luôn sẵn sàng hỗ trợ bạn.
+              {t('privacy.contactDesc')}
             </p>
             <a href="mailto:privacy@sansieutoc.vn" className="privacy-contact-btn">
               <span className="material-icons-outlined">email</span>
-              Liên hệ ngay
+              {t('privacy.contactBtn')}
             </a>
           </div>
 
@@ -457,7 +459,7 @@ const PrivacyPolicyPage = () => {
       </div>
 
       {/* Back to Top Button */}
-      <button className="privacy-back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+      <button className="privacy-back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label={t('privacy.backToTop')}>
         <span className="material-icons-outlined">arrow_upward</span>
       </button>
     </main>

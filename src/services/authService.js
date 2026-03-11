@@ -145,6 +145,23 @@ const authService = {
       throw authService.handleError(error);
     }
   },
+
+  /**
+   * Request password reset for manager (send email)
+   * @param {string} email - Manager email
+   * @returns {Promise<Object>} - { success, message }
+   */
+  resetManagerPassword: async (email) => {
+    try {
+      const response = await axiosInstance.post(
+        ENDPOINTS.MANAGER_AUTH.RESET_PASSWORD,
+        { email }
+      );
+      return response.data;
+    } catch (error) {
+      throw authService.handleError(error);
+    }
+  },
   
   /**
    * Get manager profile

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../styles/TermsPage.css';
 
 const TermsPage = () => {
   const [activeSection, setActiveSection] = useState('general-terms');
   const [navHidden, setNavHidden] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
@@ -56,11 +58,11 @@ const TermsPage = () => {
   };
 
   const sidebarLinks = [
-    { id: 'general-terms', icon: 'gavel', label: 'Điều khoản chung' },
-    { id: 'booking-policy', icon: 'event_available', label: 'Quy định đặt sân' },
-    { id: 'refund-policy', icon: 'payments', label: 'Thanh toán & Hoàn phí' },
-    { id: 'privacy-policy', icon: 'verified_user', label: 'An toàn & Bảo mật' },
-    { id: 'community-rules', icon: 'groups', label: 'Quy tắc cộng đồng' },
+    { id: 'general-terms', icon: 'gavel', label: t('terms.section1Label') },
+    { id: 'booking-policy', icon: 'event_available', label: t('terms.section2Label') },
+    { id: 'refund-policy', icon: 'payments', label: t('terms.section3Label') },
+    { id: 'privacy-policy', icon: 'verified_user', label: t('terms.section4Label') },
+    { id: 'community-rules', icon: 'groups', label: t('terms.section5Label') },
   ];
 
   return (
@@ -69,10 +71,10 @@ const TermsPage = () => {
 
       {/* Page Header */}
       <div className="terms-header">
-        <h1 className="terms-title" style={{ color: '#1e8d38ff' }}>Điều khoản sử dụng</h1>
+        <h1 className="terms-title" style={{ color: '#1e8d38ff' }}>{t('terms.pageTitle')}</h1>
         <p className="terms-meta">
           <span className="material-symbols-outlined terms-meta-icon">calendar_today</span>
-          Cập nhật lần cuối: 30 tháng 01, 2026
+          {t('terms.lastUpdated')}
         </p>
       </div>
 
@@ -80,7 +82,7 @@ const TermsPage = () => {
         {/* Sidebar Navigation */}
         <aside className={`terms-sidebar ${navHidden ? 'nav-hidden' : ''}`}>
           <div className="terms-sidebar-sticky">
-            <p className="terms-sidebar-label">MỤC LỤC</p>
+            <p className="terms-sidebar-label">{t('terms.tableOfContents')}</p>
             <nav className="terms-nav-list">
               {sidebarLinks.map((link) => (
                 <button
@@ -102,7 +104,7 @@ const TermsPage = () => {
           <section id="general-terms" className="terms-section">
             <h2 className="terms-section-title">
               <span className="material-icons-outlined terms-section-icon">info</span>
-              1. Điều khoản chung
+              {t('terms.section1Title')}
             </h2>
             <div className="terms-section-content">
               <p>
@@ -128,7 +130,7 @@ const TermsPage = () => {
               <span className="terms-section-icon-wrapper green">
                 <span className="material-symbols-outlined">event_available</span>
               </span>
-              2. Quy định đặt sân
+              {t('terms.section2Title')}
             </h2>
             <div className="terms-section-body">
               <p>
@@ -167,7 +169,7 @@ const TermsPage = () => {
               <span className="terms-section-icon-wrapper orange">
                 <span className="material-symbols-outlined">payments</span>
               </span>
-              3. Thanh toán & Hoàn phí
+              {t('terms.section3Title')}
             </h2>
             <div className="terms-section-body">
               <p>
@@ -201,7 +203,7 @@ const TermsPage = () => {
               <span className="terms-section-icon-wrapper purple">
                 <span className="material-symbols-outlined">verified_user</span>
               </span>
-              4. An toàn & Bảo mật
+              {t('terms.section4Title')}
             </h2>
             <div className="terms-section-body">
               <p>
@@ -236,7 +238,7 @@ const TermsPage = () => {
               <span className="terms-section-icon-wrapper teal">
                 <span className="material-symbols-outlined">groups</span>
               </span>
-              5. Quy tắc cộng đồng
+              {t('terms.section5Title')}
             </h2>
             <div className="terms-section-body">
               <p>
@@ -255,9 +257,8 @@ const TermsPage = () => {
           <div className="terms-highlight">
             <p className="terms-highlight-content">
               <span className="material-icons-outlined" style={{ fontSize: '1.25rem', verticalAlign: 'middle', marginRight: '0.5rem' }}>info</span>
-              Nếu bạn có bất kỳ câu hỏi nào về các chính sách này, vui lòng liên hệ với chúng tôi
-              qua hotline{' '}
-              <span className="terms-contact-link">1900 1234</span> hoặc email{' '}
+              {t('terms.contactNote')}{' '}
+              <span className="terms-contact-link">1900 1234</span> {t('terms.contactOr')}{' '}
               <span className="terms-contact-link">legal@sansieutoc.vn</span>.
             </p>
           </div>

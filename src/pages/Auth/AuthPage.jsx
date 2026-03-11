@@ -27,13 +27,18 @@ const AuthPage = () => {
     setForgotPasswordEmail,
     forgotPasswordSuccess,
     setForgotPasswordSuccess,
+    managerForgotActive,
+    setManagerForgotActive,
     handleLoginChange,
     handleRegisterChange,
     switchAuthMode,
+    switchToManagerForgot,
+    switchBackFromManagerForgot,
     handleLoginSubmit,
     handleManagerLoginSubmit,
     handleRegisterSubmit,
     handleForgotPasswordSubmit,
+    handleManagerForgotPasswordSubmit,
   } = useAuthPage();
 
   return (
@@ -83,7 +88,7 @@ const AuthPage = () => {
                 switchAuthMode={switchAuthMode}
               />
             )}
-            {authMode === 'login' && loginRole === 'manager' && (
+            {authMode === 'login' && loginRole === 'manager' && !managerForgotActive && (
               <ManagerLoginForm
                 loginData={loginData}
                 errors={errors}
@@ -92,6 +97,26 @@ const AuthPage = () => {
                 setShowPassword={setShowPassword}
                 handleLoginChange={handleLoginChange}
                 handleManagerLoginSubmit={handleManagerLoginSubmit}
+                onForgotPassword={switchToManagerForgot}
+              />
+            )}
+            {authMode === 'login' && loginRole === 'manager' && managerForgotActive && (
+              <ForgotPasswordForm
+                forgotPasswordEmail={forgotPasswordEmail}
+                setForgotPasswordEmail={setForgotPasswordEmail}
+                forgotPasswordSuccess={forgotPasswordSuccess}
+                setForgotPasswordSuccess={setForgotPasswordSuccess}
+                errors={errors}
+                setErrors={setErrors}
+                loading={loading}
+                handleForgotPasswordSubmit={handleManagerForgotPasswordSubmit}
+                switchAuthMode={(mode) => {
+                  if (mode === 'login') {
+                    switchBackFromManagerForgot();
+                  } else {
+                    switchAuthMode(mode);
+                  }
+                }}
               />
             )}
             {authMode === 'register' && (

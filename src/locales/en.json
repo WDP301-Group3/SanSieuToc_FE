@@ -280,5 +280,50 @@
     "pricing": "Service Pricing",
     "contact": "Contact",
     "poweredBy": "Powered by"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page Not Found",
+    "sub": "The URL you accessed is invalid or has been removed.",
+    "goBack": "Go Back",
+    "goHome": "Go to Home"
+  },
+  "terms": {
+    "pageTitle": "Terms of Service",
+    "lastUpdated": "Last updated: January 30, 2026",
+    "tableOfContents": "TABLE OF CONTENTS",
+    "section1Label": "General Terms",
+    "section2Label": "Booking Policy",
+    "section3Label": "Payment & Refund",
+    "section4Label": "Safety & Security",
+    "section5Label": "Community Rules",
+    "section1Title": "1. General Terms",
+    "section2Title": "2. Booking Policy",
+    "section3Title": "3. Payment & Refund",
+    "section4Title": "4. Safety & Security",
+    "section5Title": "5. Community Rules",
+    "contactNote": "If you have any questions about these policies, please contact us via hotline",
+    "contactOr": "or email"
+  },
+  "privacy": {
+    "pageTitle": "Privacy Policy",
+    "effectiveDate": "Effective: February 01, 2026 | Updated: February 04, 2026",
+    "tableOfContents": "Contents",
+    "section1Label": "Overview",
+    "section2Label": "Data Collection",
+    "section3Label": "Data Usage",
+    "section4Label": "Data Security",
+    "section5Label": "Your Rights",
+    "section6Label": "Cookies & Tracking",
+    "section1Title": "Overview",
+    "section2Title": "Data Collection",
+    "section3Title": "Data Usage",
+    "section4Title": "Data Security",
+    "section5Title": "Your Rights",
+    "section6Title": "Cookies & Tracking",
+    "contactTitle": "Questions about privacy?",
+    "contactDesc": "Our security team is always ready to assist you.",
+    "contactBtn": "Contact Us",
+    "backToTop": "Back to top"
   }
 }

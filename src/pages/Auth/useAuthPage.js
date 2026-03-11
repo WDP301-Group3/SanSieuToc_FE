@@ -51,6 +51,7 @@ const useAuthPage = () => {
   });
 
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [managerForgotActive, setManagerForgotActive] = useState(false);
 
   // ============================================================================
   // EFFECTS
@@ -93,6 +94,7 @@ const useAuthPage = () => {
     setAuthMode(mode);
     setErrors({});
     setForgotPasswordSuccess(false);
+    setManagerForgotActive(false);
 
     if (mode === 'register') {
       navigate('/register', { replace: true });
@@ -101,6 +103,20 @@ const useAuthPage = () => {
     } else {
       navigate('/login', { replace: true });
     }
+  };
+
+  const switchToManagerForgot = () => {
+    setManagerForgotActive(true);
+    setForgotPasswordEmail('');
+    setForgotPasswordSuccess(false);
+    setErrors({});
+  };
+
+  const switchBackFromManagerForgot = () => {
+    setManagerForgotActive(false);
+    setForgotPasswordSuccess(false);
+    setForgotPasswordEmail('');
+    setErrors({});
   };
 
   // ============================================================================
@@ -312,14 +328,37 @@ const useAuthPage = () => {
     try {
       const response = await authService.resetPassword(forgotPasswordEmail.trim());
       if (!response.success) {
-        setErrors({ submit: response.message || 'Có lỗi xảy ra.' });
+        setErrors({ email: response.message || 'Có lỗi xảy ra.' });
         setLoading(false);
         return;
       }
       setForgotPasswordSuccess(true);
     } catch (error) {
-      setErrors({ submit: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+      setErrors({ email: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
       console.error('Password reset error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManagerForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateEmail(forgotPasswordEmail)) return;
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const response = await authService.resetManagerPassword(forgotPasswordEmail.trim());
+      if (!response.success) {
+        setErrors({ email: response.message || 'Có lỗi xảy ra.' });
+        setLoading(false);
+        return;
+      }
+      setForgotPasswordSuccess(true);
+    } catch (error) {
+      setErrors({ email: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+      console.error('Manager password reset error:', error);
     } finally {
       setLoading(false);
     }
@@ -342,13 +381,18 @@ const useAuthPage = () => {
     setForgotPasswordEmail,
     forgotPasswordSuccess,
     setForgotPasswordSuccess,
+    managerForgotActive,
+    setManagerForgotActive,
     handleLoginChange,
     handleRegisterChange,
     switchAuthMode,
+    switchToManagerForgot,
+    switchBackFromManagerForgot,
     handleLoginSubmit,
     handleManagerLoginSubmit,
     handleRegisterSubmit,
     handleForgotPasswordSubmit,
+    handleManagerForgotPasswordSubmit,
   };
 };
 

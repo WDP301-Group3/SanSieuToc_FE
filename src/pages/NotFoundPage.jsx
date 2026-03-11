@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../styles/NotFoundPage.css';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="notfound-page">
@@ -10,9 +12,9 @@ const NotFoundPage = () => {
         <div className="notfound-icon">
           <span className="material-symbols-outlined">search_off</span>
         </div>
-        <h1 className="notfound-title">404</h1>
-        <p className="notfound-message">Trang không tồn tại</p>
-        <p className="notfound-sub">Đường dẫn bạn truy cập không hợp lệ hoặc đã bị xóa.</p>
+        <h1 className="notfound-title">{t('notFound.title')}</h1>
+        <p className="notfound-message">{t('notFound.message')}</p>
+        <p className="notfound-sub">{t('notFound.sub')}</p>
         <div className="notfound-actions">
           <button
             type="button"
@@ -20,11 +22,11 @@ const NotFoundPage = () => {
             onClick={() => navigate(-1)}
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            Quay lại
+            {t('notFound.goBack')}
           </button>
           <Link to="/" className="notfound-button">
             <span className="material-symbols-outlined">home</span>
-            Về trang chủ
+            {t('notFound.goHome')}
           </Link>
         </div>
       </div>

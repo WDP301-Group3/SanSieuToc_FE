@@ -2,14 +2,14 @@
 
 /* Footer Container */
 .footer {
-  background-color: white;
-  border-top: 1px solid rgb(243 244 246);
+  background-color: #1e293b;
+  border-top: 1px solid #334155;
   padding-top: 4rem;
   padding-bottom: 2rem;
 }
 
 .dark .footer {
-  background-color: black;
+  background-color: #000;
   border-top-color: rgb(20 83 45);
 }
 
@@ -81,7 +81,7 @@
 .footer-brand-name {
   font-weight: 700;
   font-size: 1.25rem;
-  color: rgb(17 24 39);
+  color: #f1f5f9;
 }
 
 .dark .footer-brand-name {
@@ -89,7 +89,7 @@
 }
 
 .footer-brand-desc {
-  color: rgb(107 114 128);
+  color: #94a3b8;
   font-size: 0.875rem;
   margin-bottom: 1.5rem;
   line-height: 1.6;
@@ -112,8 +112,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgb(243 244 246);
-  color: rgb(107 114 128);
+  background: #334155;
+  color: #94a3b8;
   transition: all 0.2s;
 }
 
@@ -141,7 +141,7 @@
 
 .footer-section-title {
   font-weight: 700;
-  color: rgb(17 24 39);
+  color: #f1f5f9;
   margin-bottom: 1rem;
 }
 
@@ -159,7 +159,7 @@
 }
 
 .footer-link {
-  color: rgb(107 114 128);
+  color: #94a3b8;
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s;
@@ -178,7 +178,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: rgb(107 114 128);
+  color: #94a3b8;
   font-size: 0.875rem;
 }
 
@@ -188,7 +188,7 @@
 
 /* Bottom Section */
 .footer-bottom {
-  border-top: 1px solid rgb(243 244 246);
+  border-top: 1px solid #334155;
   padding-top: 2rem;
   display: flex;
   flex-direction: column;
@@ -208,7 +208,7 @@
 }
 
 .footer-copyright {
-  color: rgb(107 114 128);
+  color: #94a3b8;
   font-size: 0.875rem;
 }
 
@@ -229,7 +229,7 @@
 
 .footer-powered-brand {
   font-weight: 700;
-  color: rgb(209 213 219);
+  color: #64748b;
   font-size: 0.875rem;
 }
 
