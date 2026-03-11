@@ -27,6 +27,7 @@ import ManagerFieldEditPage from './pages/Manager/Field/ManagerFieldEditPage';
 import ManagerCustomersPage from './pages/Manager/Customer/ManagerCustomersPage';
 import ManagerCustomerDetailPage from './pages/Manager/Customer/ManagerCustomerDetailPage';
 import ManagerFeedbackPage from './pages/Manager/Feedback/ManagerFeedbackPage';
+import ManagerBookingsPage from './pages/Manager/Booking/ManagerBookingsPage';
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
           <Route path="customers" element={<ManagerCustomersPage />} />
           <Route path="customers/:id" element={<ManagerCustomerDetailPage />} />
           <Route path="feedback" element={<ManagerFeedbackPage />} />
+          <Route path="bookings" element={<ManagerBookingsPage />} />
           <Route path="settings" element={<ManagerSettingsPage />} />
         </Route>
 

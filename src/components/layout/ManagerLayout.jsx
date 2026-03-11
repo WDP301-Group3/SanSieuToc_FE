@@ -40,11 +40,12 @@ const ManagerLayout = () => {
   }
 
   const menuItems = [
-    { path: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
-    { path: '/admin/fields', icon: 'stadium', label: 'Quản lý Sân' },
-    { path: '/admin/customers', icon: 'group', label: 'Quản lý Khách hàng' },
-    { path: '/admin/feedback', icon: 'chat_bubble', label: 'Quản lý Đánh giá' },
-    { path: '/admin/settings', icon: 'settings', label: 'Cài đặt' },
+    { path: '/admin/dashboard',  icon: 'dashboard',     label: 'Dashboard' },
+    { path: '/admin/fields',     icon: 'stadium',       label: 'Quản lý Sân' },
+    { path: '/admin/bookings',   icon: 'calendar_month',label: 'Quản lý Đặt sân' },
+    { path: '/admin/customers',  icon: 'group',         label: 'Quản lý Khách hàng' },
+    { path: '/admin/feedback',   icon: 'chat_bubble',   label: 'Quản lý Đánh giá' },
+    { path: '/admin/settings',   icon: 'settings',      label: 'Cài đặt' },
   ];
 
   const isActive = (path) => location.pathname.startsWith(path);

@@ -101,6 +101,7 @@ export const API_CONFIG = {
       LIST:            '/api/manager/bookings',                                                    // GET  (auth) ?customerId=
       CONFIRM_DEPOSIT: (bookingId) => `/api/manager/bookings/${bookingId}/confirm-deposit`,        // PUT  (auth)
       CONFIRM_PAYMENT: (bookingId) => `/api/manager/bookings/${bookingId}/confirm-payment`,        // PUT  (auth)
+      CANCEL:          (bookingId) => `/api/manager/bookings/${bookingId}/cancel`,                 // PUT  (auth)
       UPDATE_DETAIL_STATUS: (detailId) => `/api/manager/booking-details/${detailId}/status`,       // PUT  (auth)
     },
 
