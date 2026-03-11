@@ -280,5 +280,50 @@
     "pricing": "Bảng giá dịch vụ",
     "contact": "Liên hệ",
     "poweredBy": "Được hỗ trợ bởi"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Trang không tồn tại",
+    "sub": "Đường dẫn bạn truy cập không hợp lệ hoặc đã bị xóa.",
+    "goBack": "Quay lại",
+    "goHome": "Về trang chủ"
+  },
+  "terms": {
+    "pageTitle": "Điều khoản sử dụng",
+    "lastUpdated": "Cập nhật lần cuối: 30 tháng 01, 2026",
+    "tableOfContents": "MỤC LỤC",
+    "section1Label": "Điều khoản chung",
+    "section2Label": "Quy định đặt sân",
+    "section3Label": "Thanh toán & Hoàn phí",
+    "section4Label": "An toàn & Bảo mật",
+    "section5Label": "Quy tắc cộng đồng",
+    "section1Title": "1. Điều khoản chung",
+    "section2Title": "2. Quy định đặt sân",
+    "section3Title": "3. Thanh toán & Hoàn phí",
+    "section4Title": "4. An toàn & Bảo mật",
+    "section5Title": "5. Quy tắc cộng đồng",
+    "contactNote": "Nếu bạn có bất kỳ câu hỏi nào về các chính sách này, vui lòng liên hệ với chúng tôi qua hotline",
+    "contactOr": "hoặc email"
+  },
+  "privacy": {
+    "pageTitle": "Chính sách bảo mật",
+    "effectiveDate": "Có hiệu lực từ: 01 tháng 02, 2026 | Cập nhật: 04 tháng 02, 2026",
+    "tableOfContents": "Nội dung",
+    "section1Label": "Tổng quan",
+    "section2Label": "Thu thập dữ liệu",
+    "section3Label": "Sử dụng dữ liệu",
+    "section4Label": "Bảo mật dữ liệu",
+    "section5Label": "Quyền của bạn",
+    "section6Label": "Cookies & Tracking",
+    "section1Title": "Tổng quan",
+    "section2Title": "Thu thập dữ liệu",
+    "section3Title": "Sử dụng dữ liệu",
+    "section4Title": "Bảo mật dữ liệu",
+    "section5Title": "Quyền của bạn",
+    "section6Title": "Cookies & Tracking",
+    "contactTitle": "Có câu hỏi về quyền riêng tư?",
+    "contactDesc": "Đội ngũ bảo mật của chúng tôi luôn sẵn sàng hỗ trợ bạn.",
+    "contactBtn": "Liên hệ ngay",
+    "backToTop": "Về đầu trang"
   }
 }

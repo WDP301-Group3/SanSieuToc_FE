@@ -64,7 +64,9 @@ const bookingService = {
   async cancelBooking(bookingId) {
     try {
       const response = await axiosInstance.put(
-        API_CONFIG.ENDPOINTS.BOOKINGS.CANCEL(bookingId)
+        API_CONFIG.ENDPOINTS.BOOKINGS.CANCEL(bookingId),
+        {},
+        { timeout: 30000 }
       );
       return response.data;
     } catch (error) {
