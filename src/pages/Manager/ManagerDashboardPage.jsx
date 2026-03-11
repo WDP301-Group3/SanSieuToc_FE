@@ -361,7 +361,7 @@ const ManagerDashboardPage = () => {
       </div>
 
       {/* Recent Bookings Table */}
-      <div className="dashboard-table-card">
+      {/* <div className="dashboard-table-card">
         <div className="table-header">
           <h3 className="table-title">Đặt sân gần đây</h3>
         </div>
@@ -433,10 +433,10 @@ const ManagerDashboardPage = () => {
                       );
                     })}
                   </tbody>
-                </table>
+                </table> */}
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {/* {totalPages > 1 && (
                   <div className="fields-pagination">
                     <div className="fields-pagination-info">
                       Hiển thị{' '}
@@ -471,7 +471,7 @@ const ManagerDashboardPage = () => {
             );
           })()}
         </div>
-      </div>
+      </div> */}
 
       {/* ===== Booking Detail Modal ===== */}
       {selectedBooking && (() => {

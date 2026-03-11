@@ -27,6 +27,13 @@ axiosInstance.interceptors.request.use(
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
+    // Tăng timeout cho các request upload ảnh (base64 payload lớn + Cloudinary upload)
+    if (config.data && typeof config.data === 'object') {
+      const body = config.data;
+      if (body.image || body.imageQR) {
+        config.timeout = 60000; // 60s cho Cloudinary upload
+      }
+    }
     return config;
   },
   (error) => {
@@ -46,16 +53,20 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Clear auth and redirect to login
-      // Note: Refresh token chưa được implement ở BE
-      tokenManager.clearAuth();
-      
-      // Only redirect if not already on auth pages
-      if (!window.location.pathname.includes('/login') && 
-          !window.location.pathname.includes('/register')) {
-        window.location.href = '/login';
+      const currentToken = tokenManager.getToken();
+      // Chỉ clear auth và redirect nếu thực sự có token nhưng server từ chối
+      // (không redirect khi request chưa có token hoặc đang trên trang auth)
+      if (currentToken) {
+        tokenManager.clearAuth();
+        localStorage.removeItem('user');
+
+        if (!window.location.pathname.includes('/login') &&
+            !window.location.pathname.includes('/register') &&
+            !window.location.pathname.includes('/auth')) {
+          window.location.href = '/login';
+        }
       }
-      
+
       return Promise.reject(error);
     }
 

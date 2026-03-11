@@ -243,7 +243,8 @@ const useAuthPage = () => {
         email: manager.email,
         phone: manager.phone || '',
         image: manager.image || '',
-        role: 'manager',
+        imageQR: manager.imageQR || null,
+        role: 'manager',          // luôn đặt cứng — BE không trả về role
       };
 
       login(userData, token || accessToken);

@@ -214,6 +214,16 @@ const ManagerBookingsPage = () => {
 
   return (
     <div className="manager-page">
+      {/* Page title */}
+      <div className="bookings-page-header">
+        <h1 className="bookings-page-title">
+          <span className="material-symbols-outlined">calendar_month</span>
+          Quản lý đặt sân
+        </h1>
+        <p className="bookings-page-subtitle">
+          Xác nhận tiền cọc, thanh toán và theo dõi trạng thái các slot
+        </p>
+      </div>
       {/* Stats bar */}
       <div className="manager-stats-grid">
         <div className="manager-stat-card">
@@ -309,36 +319,37 @@ const ManagerBookingsPage = () => {
                     className="booking-card-header"
                     onClick={() => setExpandedId(isExpanded ? null : booking.id)}
                   >
-                    {/* Customer info */}
+                    {/* Customer info + badges */}
                     <div className="booking-customer">
                       <div className="customer-avatar">
                         {booking.customer?.image
                           ? <img src={booking.customer.image} alt={booking.customer.name} />
                           : <span className="material-symbols-outlined">person</span>}
                       </div>
-                      <div>
+                      <div className="customer-info">
                         <p className="customer-name">{booking.customer?.name || 'N/A'}</p>
                         <p className="customer-contact">{booking.customer?.email}</p>
                         <p className="customer-contact">{booking.customer?.phone}</p>
+                        <div className="booking-badges">
+                          <span className={`status-badge ${bookingStatus.className}`}>{bookingStatus.label}</span>
+                          <span className={`payment-badge ${paymentStatus.className}`}>{paymentStatus.label}</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Booking meta */}
-                    <div className="booking-meta">
-                      <span className={`status-badge ${bookingStatus.className}`}>{bookingStatus.label}</span>
-                      <span className={`payment-badge ${paymentStatus.className}`}>{paymentStatus.label}</span>
-                    </div>
-
-                    {/* Price */}
+                    {/* Price + date */}
                     <div className="booking-price">
                       <p className="price-total">{formatCurrency(booking.totalPrice)}</p>
                       <p className="price-deposit">Cọc: {formatCurrency(booking.depositAmount)}</p>
+                      <p className="booking-date">{new Date(booking.createdAt).toLocaleDateString('vi-VN')}</p>
                     </div>
 
-                    {/* Slot count + date */}
+                    {/* Slot count */}
                     <div className="booking-slots-info">
-                      <p>{booking.bookingDetails?.length || 0} slot</p>
-                      <p className="booking-date">{new Date(booking.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <span className="slots-pill">
+                        <span className="material-symbols-outlined">event_available</span>
+                        {booking.bookingDetails?.length || 0} slot
+                      </span>
                     </div>
 
                     {/* Expand icon */}
@@ -347,45 +358,49 @@ const ManagerBookingsPage = () => {
                     </span>
                   </div>
 
-                  {/* Booking actions (always visible for quick access) */}
-                  <div className="booking-actions">
-                    {booking.status === 'Pending' && (
-                      <>
+                  {/* Booking actions — chỉ hiện khi có action cần thực hiện */}
+                  {(booking.status === 'Pending' ||
+                    (booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid') ||
+                    isActing) && (
+                    <div className="booking-actions">
+                      {booking.status === 'Pending' && (
+                        <>
+                          <button
+                            className="btn-action btn-success"
+                            disabled={isActing}
+                            onClick={(e) => { e.stopPropagation(); handleConfirmDeposit(booking.id); }}
+                            title="Đã nhận tiền cọc → Xác nhận booking"
+                          >
+                            <span className="material-symbols-outlined">check_circle</span>
+                            Xác nhận cọc
+                          </button>
+                          <button
+                            className="btn-action btn-danger"
+                            disabled={isActing}
+                            onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking.id); }}
+                            title="Không nhận được cọc → Hủy booking"
+                          >
+                            <span className="material-symbols-outlined">cancel</span>
+                            Hủy booking
+                          </button>
+                        </>
+                      )}
+                      {booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid' && (
                         <button
                           className="btn-action btn-success"
                           disabled={isActing}
-                          onClick={(e) => { e.stopPropagation(); handleConfirmDeposit(booking.id); }}
-                          title="Đã nhận tiền cọc → Xác nhận booking"
+                          onClick={(e) => { e.stopPropagation(); handleConfirmPayment(booking.id); }}
+                          title="Khách đã thanh toán đủ tiền sân"
                         >
-                          <span className="material-symbols-outlined">check_circle</span>
-                          Xác nhận cọc
+                          <span className="material-symbols-outlined">paid</span>
+                          Xác nhận thanh toán
                         </button>
-                        <button
-                          className="btn-action btn-danger"
-                          disabled={isActing}
-                          onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking.id); }}
-                          title="Không nhận được cọc → Hủy booking"
-                        >
-                          <span className="material-symbols-outlined">cancel</span>
-                          Hủy booking
-                        </button>
-                      </>
-                    )}
-                    {booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid' && (
-                      <button
-                        className="btn-action btn-success"
-                        disabled={isActing}
-                        onClick={(e) => { e.stopPropagation(); handleConfirmPayment(booking.id); }}
-                        title="Khách đã thanh toán đủ tiền sân"
-                      >
-                        <span className="material-symbols-outlined">paid</span>
-                        Xác nhận thanh toán
-                      </button>
-                    )}
-                    {isActing && (
-                      <span className="material-symbols-outlined spin action-spinner">progress_activity</span>
-                    )}
-                  </div>
+                      )}
+                      {isActing && (
+                        <span className="material-symbols-outlined spin action-spinner">progress_activity</span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Expanded: booking detail slots */}
                   {isExpanded && (

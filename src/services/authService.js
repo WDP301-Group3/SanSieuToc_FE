@@ -162,6 +162,25 @@ const authService = {
   },
 
   /**
+   * Update manager profile
+   * @param {Object} profileData - { name, phone, image?, imageQR? }
+   *   image   — base64 string (data:image/...) → BE uploads to Cloudinary
+   *   imageQR — base64 string (data:image/...) → BE saves directly to DB
+   * @returns {Promise<Object>} - { success, message, data: { manager } }
+   */
+  updateManagerProfile: async (profileData) => {
+    try {
+      const response = await axiosInstance.put(
+        ENDPOINTS.MANAGER_PROFILE.UPDATE,
+        profileData
+      );
+      return response.data;
+    } catch (error) {
+      throw authService.handleError(error);
+    }
+  },
+
+  /**
    * Change manager password (requires authentication)
    * @param {Object} passwordData - { currentPassword, newPassword, confirmNewPassword }
    * @returns {Promise<Object>} - { success, message }
