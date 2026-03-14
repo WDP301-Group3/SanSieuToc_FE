@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import { useNotification } from '../../../context/NotificationContext';
+import authService from '../../../services/authService';
 
 const PasswordChangeModal = ({ onClose }) => {
   const notification = useNotification();
@@ -14,6 +15,7 @@ const PasswordChangeModal = ({ onClose }) => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -24,7 +26,7 @@ const PasswordChangeModal = ({ onClose }) => {
     setPasswordSuccess(false);
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -36,8 +38,13 @@ const PasswordChangeModal = ({ onClose }) => {
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự');
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('Mật khẩu mới phải có ít nhất 8 ký tự');
+      return;
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/.test(passwordForm.newPassword)) {
+      setPasswordError('Mật khẩu mới phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#)');
       return;
     }
 
@@ -46,10 +53,33 @@ const PasswordChangeModal = ({ onClose }) => {
       return;
     }
 
-    notification.success('Đổi mật khẩu thành công!');
+    setIsSubmitting(true);
     setPasswordError('');
-    setPasswordSuccess(true);
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+    try {
+      const response = await authService.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+        confirmNewPassword: passwordForm.confirmPassword,
+      });
+
+      if (!response.success) {
+        const message = response.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.';
+        setPasswordError(message);
+        notification.error(message);
+        return;
+      }
+
+      notification.success(response.message || 'Đổi mật khẩu thành công!');
+      setPasswordSuccess(true);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      const message = error.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.';
+      setPasswordError(message);
+      notification.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSuccessContinue = () => {
@@ -167,8 +197,8 @@ const PasswordChangeModal = ({ onClose }) => {
                 <button type="button" className="modal-btn-cancel" onClick={onClose}>
                   Hủy
                 </button>
-                <button type="submit" className="modal-btn-submit">
-                  Xác nhận
+                <button type="submit" className="modal-btn-submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Đang xử lý...' : 'Xác nhận'}
                 </button>
               </div>
             </form>
