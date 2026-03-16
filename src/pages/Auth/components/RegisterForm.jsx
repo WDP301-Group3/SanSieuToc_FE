@@ -3,6 +3,7 @@
  */
 
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const RegisterForm = ({
   registerData,
@@ -16,13 +17,15 @@ const RegisterForm = ({
   handleRegisterSubmit,
   switchAuthMode,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="auth-form-wrapper">
       {/* Header */}
       <div className="auth-header">
-        <h1 className="auth-title">Tạo tài khoản mới</h1>
+        <h1 className="auth-title">{t('auth.registerTitle')}</h1>
         <p className="auth-subtitle">
-          Chào mừng bạn! Hãy điền các thông tin dưới đây để bắt đầu.
+          {t('auth.registerSubtitle')}
         </p>
       </div>
 
@@ -40,14 +43,14 @@ const RegisterForm = ({
           <div className="form-field">
             <label className="form-label">
               <span className="material-icons-outlined">person</span>
-              Tên đăng nhập
+              {t('auth.username')}
             </label>
             <input
               name="username"
               value={registerData.username}
               onChange={handleRegisterChange}
               className="form-input"
-              placeholder="johndoe"
+              placeholder={t('auth.placeholders.username')}
               type="text"
               required
             />
@@ -57,14 +60,14 @@ const RegisterForm = ({
           <div className="form-field">
             <label className="form-label">
               <span className="material-icons-outlined">email</span>
-              Email
+              {t('auth.email')}
             </label>
             <input
               name="email"
               value={registerData.email}
               onChange={handleRegisterChange}
               className="form-input"
-              placeholder="john@example.com"
+              placeholder={t('auth.placeholders.email')}
               type="email"
               required
             />
@@ -76,14 +79,14 @@ const RegisterForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined">call</span>
-            Số điện thoại
+            {t('auth.phone')}
           </label>
           <input
             name="phone"
             value={registerData.phone}
             onChange={handleRegisterChange}
             className="form-input"
-            placeholder="0901234567"
+            placeholder={t('auth.placeholders.phone')}
             type="tel"
           />
           {errors.phone && <span className="error-text">{errors.phone}</span>}
@@ -94,7 +97,7 @@ const RegisterForm = ({
           <div className="form-field">
             <label className="form-label">
               <span className="material-icons-outlined">lock</span>
-              Mật khẩu
+              {t('auth.password')}
             </label>
             <div className="password-field">
               <input
@@ -123,7 +126,7 @@ const RegisterForm = ({
           <div className="form-field">
             <label className="form-label">
               <span className="material-icons-outlined">check_circle</span>
-              Xác nhận mật khẩu
+              {t('auth.confirmPassword')}
             </label>
             <div className="password-field">
               <input
@@ -161,13 +164,13 @@ const RegisterForm = ({
             type="checkbox"
           />
           <label className="terms-label" htmlFor="terms">
-            Tôi đồng ý với{' '}
+            {t('auth.agreeTo')}{' '}
             <Link to="/terms" className="terms-link">
-              Điều khoản sử dụng
+              {t('footer.terms')}
             </Link>{' '}
-            và{' '}
+            {t('common.and')}{' '}
             <Link to="/privacy" className="terms-link">
-              Chính sách bảo mật
+              {t('footer.privacy')}
             </Link>
           </label>
         </div>
@@ -179,20 +182,20 @@ const RegisterForm = ({
           disabled={loading}
           className="auth-submit-btn"
         >
-          {loading ? 'Đang xử lý...' : 'Tạo tài khoản'}
+          {loading ? t('auth.processing') : t('auth.createAccount')}
         </button>
       </form>
 
       {/* Switch to Login */}
       <div className="auth-switch">
         <p className="auth-switch-text">
-          Đã có tài khoản?{' '}
+          {t('auth.hasAccountPrompt')}{' '}
           <button
             type="button"
             onClick={() => switchAuthMode('login')}
             className="auth-switch-link"
           >
-            Đăng nhập ngay
+            {t('auth.loginNow')}
           </button>
         </p>
       </div>

@@ -2,6 +2,8 @@
  * @fileoverview ForgotPasswordForm - Form quên mật khẩu
  */
 
+import { useTranslation } from 'react-i18next';
+
 const ForgotPasswordForm = ({
   forgotPasswordEmail,
   setForgotPasswordEmail,
@@ -13,6 +15,8 @@ const ForgotPasswordForm = ({
   handleForgotPasswordSubmit,
   switchAuthMode,
 }) => {
+  const { t } = useTranslation();
+
   // Success state
   if (forgotPasswordSuccess) {
     return (
@@ -25,19 +29,18 @@ const ForgotPasswordForm = ({
         </div>
 
         {/* Success Message */}
-        <h2 className="success-title">Email đã được gửi!</h2>
+        <h2 className="success-title">{t('auth.forgot.successTitle')}</h2>
         <p className="success-text">
-          Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến email{' '}
-          <strong className="email-highlight">{forgotPasswordEmail}</strong>.
-          Vui lòng kiểm tra hộp thư đến và làm theo hướng dẫn.
+          {t('auth.forgot.successTextPrefix')}{' '}
+          <strong className="email-highlight">{forgotPasswordEmail}</strong>.{' '}
+          {t('auth.forgot.successTextSuffix')}
         </p>
 
         {/* Info Box */}
         <div className="info-box">
           <span className="material-icons-outlined">info</span>
           <span>
-            Không thấy email? Kiểm tra thư mục spam hoặc thư rác. 
-            Email có thể mất vài phút để đến.
+            {t('auth.forgot.infoBox')}
           </span>
         </div>
 
@@ -49,7 +52,7 @@ const ForgotPasswordForm = ({
             className="success-btn-primary"
           >
             <span className="material-icons-outlined">arrow_back</span>
-            Quay lại đăng nhập
+            {t('auth.forgot.backToLogin')}
           </button>
           <button
             type="button"
@@ -59,7 +62,7 @@ const ForgotPasswordForm = ({
             }}
             className="success-btn-secondary"
           >
-            Gửi lại email
+            {t('auth.forgot.resendEmail')}
           </button>
         </div>
       </div>
@@ -76,10 +79,9 @@ const ForgotPasswordForm = ({
             lock_reset
           </span>
         </div>
-        <h1 className="auth-title">Quên mật khẩu?</h1>
+        <h1 className="auth-title">{t('auth.forgot.title')}</h1>
         <p className="auth-subtitle">
-          Đừng lo lắng! Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn 
-          để đặt lại mật khẩu cho tài khoản của bạn.
+          {t('auth.forgot.subtitle')}
         </p>
       </div>
 
@@ -97,7 +99,7 @@ const ForgotPasswordForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined form-input-icon">mail</span>
-            Địa chỉ Email
+            {t('auth.email')}
           </label>
           <input
             type="email"
@@ -106,7 +108,7 @@ const ForgotPasswordForm = ({
               setForgotPasswordEmail(e.target.value);
               setErrors({});
             }}
-            placeholder="vidu@email.com"
+            placeholder={t('auth.placeholders.email')}
             className="form-input"
             required
           />
@@ -121,10 +123,10 @@ const ForgotPasswordForm = ({
           {loading ? (
             <>
               <span className="material-icons-outlined animate-spin">refresh</span>
-              Đang xử lý...
+              {t('auth.processing')}
             </>
           ) : (
-            'Gửi yêu cầu đặt lại'
+            t('auth.forgot.submit')
           )}
         </button>
       </form>
@@ -137,12 +139,12 @@ const ForgotPasswordForm = ({
           className="auth-back-link"
         >
           <span className="material-icons-outlined">arrow_back</span>
-          Quay lại trang Đăng nhập
+          {t('auth.forgot.backToLoginPage')}
         </button>
         <p className="auth-support-text">
-          Bạn gặp khó khăn?{' '}
+          {t('auth.support.prompt')}{' '}
           <a href="#" className="auth-support-link">
-            Liên hệ bộ phận hỗ trợ
+            {t('auth.support.contact')}
           </a>
         </p>
       </div>

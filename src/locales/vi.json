@@ -3,6 +3,7 @@
     "save": "Lưu",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
+    "and": "và",
     "delete": "Xóa",
     "edit": "Chỉnh sửa",
     "search": "Tìm kiếm",
@@ -23,15 +24,87 @@
     "logout": "Đăng xuất",
     "logoutConfirmTitle": "Đăng xuất?",
     "logoutConfirmDesc": "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?",
+    "tabs": {
+      "user": "Khách hàng",
+      "register": "Đăng ký",
+      "manager": "Quản trị"
+    },
+    "placeholders": {
+      "username": "Nhập tên đăng nhập",
+      "email": "Nhập email",
+      "phone": "Nhập số điện thoại",
+      "managerEmail": "Nhập email quản lý"
+    },
+    "customerLoginTitle": "Đăng nhập",
+    "customerLoginSubtitle": "Chào mừng bạn quay lại!",
+    "loginWithEmail": "Đăng nhập bằng email",
     "email": "Email",
     "password": "Mật khẩu",
     "confirmPassword": "Xác nhận mật khẩu",
     "forgotPassword": "Quên mật khẩu?",
     "rememberMe": "Ghi nhớ đăng nhập",
+    "loggingIn": "Đang đăng nhập...",
+    "loginNow": "Đăng nhập",
     "noAccount": "Chưa có tài khoản?",
+    "noAccountPrompt": "Chưa có tài khoản?",
+    "registerNow": "Đăng ký ngay",
     "hasAccount": "Đã có tài khoản?",
+    "hasAccountPrompt": "Đã có tài khoản?",
+    "registerTitle": "Tạo tài khoản",
+    "registerSubtitle": "Bắt đầu cùng Sân Siêu Tốc",
+    "username": "Tên đăng nhập",
+    "phone": "Số điện thoại",
+    "agreeTo": "Tôi đồng ý với",
+    "processing": "Đang xử lý...",
+    "createAccount": "Tạo tài khoản",
     "loginSuccess": "Đăng nhập thành công",
-    "registerSuccess": "Đăng ký thành công"
+    "registerSuccess": "Đăng ký thành công",
+    "forgot": {
+      "title": "Quên mật khẩu",
+      "subtitle": "Nhập email để nhận liên kết đặt lại mật khẩu.",
+      "submit": "Gửi liên kết",
+      "backToLoginPage": "Quay lại đăng nhập",
+      "successTitle": "Đã gửi email",
+      "successTextPrefix": "Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến",
+      "successTextSuffix": ". Vui lòng kiểm tra hộp thư (và thư rác).",
+      "infoBox": "Nếu bạn không nhận được email trong vài phút, hãy thử gửi lại.",
+      "backToLogin": "Quay lại đăng nhập",
+      "resendEmail": "Gửi lại email"
+    },
+    "support": {
+      "prompt": "Cần hỗ trợ?",
+      "contact": "Liên hệ chúng tôi"
+    },
+    "managerPortalBadge": "Cổng quản trị",
+    "managerLoginTitle": "Đăng nhập quản trị",
+    "managerLoginSubtitle": "Dành cho quản lý sân",
+    "managerEmailLabel": "Email quản lý",
+    "errors": {
+      "usernameRequired": "Tên đăng nhập không được để trống",
+      "usernameMinLength": "Tên đăng nhập phải có ít nhất 3 ký tự",
+      "emailRequired": "Email không được để trống",
+      "emailEnter": "Vui lòng nhập email",
+      "emailInvalid": "Email không hợp lệ",
+      "passwordRequired": "Mật khẩu không được để trống",
+      "passwordEnter": "Vui lòng nhập mật khẩu",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+      "passwordComplexity": "Mật khẩu phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#)",
+      "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp",
+      "phoneRequired": "Số điện thoại không được để trống",
+      "phoneInvalid": "Số điện thoại không hợp lệ (VD: 0901234567)",
+      "mustAgreeTerms": "Bạn phải đồng ý với điều khoản sử dụng",
+      "loginFailed": "Đăng nhập thất bại.",
+      "loginFailedTryAgain": "Đăng nhập thất bại. Vui lòng thử lại.",
+      "registerFailed": "Đăng ký thất bại.",
+      "registerFailedTryAgain": "Đăng ký thất bại. Vui lòng thử lại.",
+      "genericError": "Có lỗi xảy ra.",
+      "genericErrorTryAgain": "Có lỗi xảy ra. Vui lòng thử lại sau."
+    },
+    "notifications": {
+      "loginSuccess": "Đăng nhập thành công!",
+      "managerLoginSuccess": "Đăng nhập thành công! Chào mừng trở lại.",
+      "registerSuccess": "Đăng ký thành công! Chào mừng bạn đến với Sân Siêu Tốc."
+    }
   },
   "nav": {
     "home": "Trang chủ",
@@ -65,7 +138,47 @@
     "ourTeam": "Đội ngũ của chúng tôi",
     "meetTheTeam": "Gặp gỡ những người đứng sau Sân Siêu Tốc",
     "ctaTitle": "Sẵn sàng trải nghiệm?",
-    "ctaText": "Tham gia cùng hàng trăm nghìn người dùng đã tin tưởng Sân Siêu Tốc."
+    "ctaText": "Tham gia cùng hàng trăm nghìn người dùng đã tin tưởng Sân Siêu Tốc.",
+    "teamMembers": [
+      {
+        "id": "sang",
+        "name": "Nguyễn Viết Sang",
+        "role": "Founder & CEO",
+        "description": "Với hơn 10 năm kinh nghiệm trong lĩnh vực thể thao và công nghệ."
+      },
+      {
+        "id": "thanh",
+        "name": "Phan Duy Thành",
+        "role": "Co-Founder & CTO",
+        "description": "Chuyên gia công nghệ với đam mê xây dựng sản phẩm số."
+      },
+      {
+        "id": "long",
+        "name": "Hoàng Tuấn Long",
+        "role": "Head of Operations",
+        "description": "Đảm bảo vận hành mượt mà cho hệ thống toàn quốc."
+      },
+      {
+        "id": "quocMinh",
+        "name": "Phạm Quốc Minh",
+        "role": "Customer Success Manager",
+        "description": "Luôn đặt trải nghiệm khách hàng lên hàng đầu."
+      },
+      {
+        "id": "ducMinh",
+        "name": "Phạm Đức Minh",
+        "role": "Customer Success Manager",
+        "description": "Luôn đặt trải nghiệm khách hàng lên hàng đầu."
+      }
+    ],
+    "milestoneItems": [
+      { "year": "2020", "event": "Sân Siêu Tốc ra đời với 50 sân đối tác đầu tiên" },
+      { "year": "2021", "event": "Mở rộng ra 10 tỉnh thành, đạt 10.000 người dùng" },
+      { "year": "2022", "event": "Ra mắt ứng dụng mobile, 500+ sân đối tác" },
+      { "year": "2023", "event": "Đạt 50.000 người dùng, mở rộng ra 30 tỉnh thành" },
+      { "year": "2024", "event": "Tích hợp thanh toán online, 100.000+ người dùng" },
+      { "year": "2025", "event": "Trở thành nền tảng đặt sân #1 Việt Nam" }
+    ]
   },
   "home": {
     "heroTitle": "Tìm sân chơi",
@@ -303,7 +416,55 @@
     "section4Title": "4. An toàn & Bảo mật",
     "section5Title": "5. Quy tắc cộng đồng",
     "contactNote": "Nếu bạn có bất kỳ câu hỏi nào về các chính sách này, vui lòng liên hệ với chúng tôi qua hotline",
-    "contactOr": "hoặc email"
+    "contactOr": "hoặc email",
+    "content": {
+      "general": {
+        "intro": "Chào mừng bạn đến với Sân Siêu Tốc. Bằng việc truy cập và sử dụng dịch vụ của chúng tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu tại đây.",
+        "bullets": [
+          "Dịch vụ của chúng tôi chỉ dành cho cá nhân từ 15 tuổi trở lên.",
+          "Người dùng có trách nhiệm bảo mật thông tin tài khoản cá nhân.",
+          "Sân Siêu Tốc có quyền thay đổi nội dung chính sách này bất kỳ lúc nào mà không cần thông báo trước."
+        ]
+      },
+      "bookingPolicy": {
+        "intro": "Để đảm bảo công bằng cho tất cả các vận động viên và chủ sân, quy trình đặt sân được quy định nghiêm ngặt như sau:",
+        "processTitle": "Quy trình đặt sân",
+        "processBullets": [
+          "Người dùng chọn sân, khung giờ và thực hiện thanh toán đặt cọc (nếu có).",
+          "Lịch đặt chỉ được xác nhận khi bạn nhận được thông báo \"Thành công\" qua ứng dụng/email.",
+          "Mỗi tài khoản không được đặt quá 3 sân trong cùng một khung giờ."
+        ],
+        "responsibilityTitle": "Trách nhiệm của người chơi",
+        "responsibilityText": "Người chơi cần có mặt tại sân ít nhất 10 phút trước giờ bắt đầu. Trong trường hợp đến muộn quá 15 phút mà không thông báo, chủ sân có quyền cho thuê lại sân đó cho đối tượng khác."
+      },
+      "refund": {
+        "intro": "Sân Siêu Tốc hỗ trợ đa dạng phương thức thanh toán từ ví điện tử đến chuyển khoản ngân hàng nhằm tối ưu hóa sự tiện lợi.",
+        "card1Time": "Hủy trước 24h",
+        "card1Percent": "Hoàn 100% tiền cọc",
+        "card2Time": "Hủy từ 12h - 24h",
+        "card2Percent": "Hoàn 50% tiền cọc",
+        "note": "Lưu ý: Các trường hợp bất khả kháng như thiên tai hoặc sự cố kỹ thuật từ phía chủ sân sẽ được hệ thống xem xét hoàn trả toàn bộ chi phí trong vòng 24-48 giờ làm việc."
+      },
+      "security": {
+        "intro": "Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo tiêu chuẩn an toàn cao nhất.",
+        "collectTitle": "Thông tin thu thập",
+        "collectText": "Chúng tôi thu thập các thông tin bao gồm: Họ tên, số điện thoại, email và vị trí GPS (khi được phép) để gợi ý các sân gần nhất.",
+        "useTitle": "Sử dụng thông tin",
+        "useBullets": [
+          "Xác nhận lịch đặt sân và thông báo các thay đổi.",
+          "Cải thiện chất lượng dịch vụ và cá nhân hóa trải nghiệm.",
+          "Không cung cấp thông tin cho bên thứ ba ngoại trừ các đối tác vận hành sân bãi liên quan."
+        ]
+      },
+      "community": {
+        "intro": "Chúng tôi mong muốn xây dựng một cộng đồng thể thao văn minh, nơi tinh thần fair-play được đặt lên hàng đầu:",
+        "bullets": [
+          "Tôn trọng các vận động viên khác và nhân viên quản lý tại sân.",
+          "Giữ gìn vệ sinh chung, không mang chất cấm hoặc vật dụng nguy hiểm vào khu vực thi đấu.",
+          "Tuyệt đối không sử dụng phần mềm can thiệp (bots) để tranh giành lịch đặt sân."
+        ]
+      }
+    }
   },
   "privacy": {
     "pageTitle": "Chính sách bảo mật",
@@ -321,6 +482,215 @@
     "section4Title": "Bảo mật dữ liệu",
     "section5Title": "Quyền của bạn",
     "section6Title": "Cookies & Tracking",
+    "footerText": "Chính sách này có hiệu lực từ ngày 01/02/2026 và được cập nhật lần cuối vào 04/02/2026. Chúng tôi có quyền thay đổi chính sách này bất kỳ lúc nào. Thay đổi quan trọng sẽ được thông báo qua email.",
+    "content": {
+      "overview": {
+        "p1": "Tại Sân Siêu Tốc, chúng tôi cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của bạn. Chính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin của bạn khi sử dụng dịch vụ đặt sân thể thao của chúng tôi.",
+        "p2": "Bằng việc sử dụng nền tảng Sân Siêu Tốc, bạn đồng ý với các điều khoản trong chính sách này. Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ của chúng tôi.",
+        "commitment": {
+          "title": "Cam kết của chúng tôi",
+          "text": "Chúng tôi tuân thủ nghiêm ngặt các quy định về bảo vệ dữ liệu cá nhân tại Việt Nam và các tiêu chuẩn quốc tế như GDPR. Dữ liệu của bạn sẽ KHÔNG BAO GIỜ được bán cho bên thứ ba."
+        }
+      },
+      "dataCollection": {
+        "intro": "Chúng tôi thu thập các loại thông tin sau:",
+        "personal": {
+          "title": "1. Thông tin cá nhân",
+          "intro": "Khi bạn đăng ký tài khoản hoặc đặt sân, chúng tôi thu thập:",
+          "items": [
+            "Họ và tên",
+            "Địa chỉ email",
+            "Số điện thoại",
+            "Địa chỉ (nếu cần giao hàng)",
+            "Thông tin thanh toán (được mã hóa)"
+          ]
+        },
+        "automatic": {
+          "title": "2. Thông tin tự động",
+          "intro": "Khi bạn sử dụng website/ứng dụng, chúng tôi tự động thu thập:",
+          "items": [
+            "Địa chỉ IP",
+            "Loại trình duyệt và thiết bị",
+            "Hệ điều hành",
+            "Vị trí địa lý (với sự cho phép của bạn)",
+            "Lịch sử tìm kiếm và đặt sân",
+            "Cookies và dữ liệu phiên"
+          ]
+        },
+        "thirdParty": {
+          "title": "3. Thông tin từ bên thứ ba",
+          "intro": "Nếu bạn đăng nhập bằng tài khoản mạng xã hội (Google, Facebook), chúng tôi nhận được:",
+          "items": [
+            "Tên công khai",
+            "Email",
+            "Ảnh đại diện"
+          ]
+        },
+        "table": {
+          "headers": ["Loại dữ liệu", "Mục đích", "Thời gian lưu trữ"],
+          "rows": [
+            {
+              "type": "Thông tin tài khoản",
+              "purpose": "Quản lý tài khoản, xác thực",
+              "retention": "Đến khi xóa tài khoản"
+            },
+            {
+              "type": "Lịch sử đặt sân",
+              "purpose": "Quản lý booking, hỗ trợ khách hàng",
+              "retention": "3 năm"
+            },
+            {
+              "type": "Dữ liệu thanh toán",
+              "purpose": "Xử lý giao dịch, hoàn tiền",
+              "retention": "7 năm (theo luật)"
+            },
+            {
+              "type": "Analytics & Cookies",
+              "purpose": "Cải thiện trải nghiệm người dùng",
+              "retention": "13 tháng"
+            }
+          ]
+        }
+      },
+      "dataUsage": {
+        "intro": "Chúng tôi sử dụng thông tin của bạn cho các mục đích sau:",
+        "provideService": {
+          "title": "Cung cấp dịch vụ",
+          "items": [
+            "Xử lý đặt sân và thanh toán",
+            "Gửi xác nhận booking qua email/SMS",
+            "Thông báo thay đổi lịch hoặc hủy sân",
+            "Hỗ trợ khách hàng qua chat/email/phone"
+          ]
+        },
+        "improveExperience": {
+          "title": "Cải thiện trải nghiệm",
+          "items": [
+            "Gợi ý sân phù hợp dựa trên vị trí và lịch sử",
+            "Cá nhân hóa nội dung và quảng cáo",
+            "Phân tích hành vi người dùng để tối ưu hóa giao diện",
+            "Phát triển tính năng mới"
+          ]
+        },
+        "securityCompliance": {
+          "title": "Bảo mật và tuân thủ",
+          "items": [
+            "Phát hiện và ngăn chặn gian lận",
+            "Bảo vệ tài khoản khỏi truy cập trái phép",
+            "Tuân thủ các yêu cầu pháp lý",
+            "Giải quyết tranh chấp"
+          ]
+        },
+        "thirdPartySharing": {
+          "title": "Chia sẻ với bên thứ ba",
+          "text": "Chúng tôi CHỈ chia sẻ dữ liệu với: (1) Chủ sân để xác nhận booking, (2) Đối tác thanh toán (VNPay, Momo) để xử lý giao dịch, (3) Nhà cung cấp dịch vụ cloud (AWS) để lưu trữ, (4) Cơ quan chức năng khi có yêu cầu hợp pháp."
+        }
+      },
+      "dataSecurity": {
+        "intro": "Chúng tôi áp dụng các biện pháp bảo mật hàng đầu để bảo vệ dữ liệu của bạn:",
+        "technical": {
+          "title": "Biện pháp kỹ thuật",
+          "items": [
+            "Mã hóa SSL/TLS 256-bit cho tất cả truyền tải dữ liệu",
+            "Mã hóa AES-256 cho dữ liệu lưu trữ",
+            "Xác thực hai yếu tố (2FA) cho tài khoản",
+            "Firewall và hệ thống phát hiện xâm nhập (IDS)",
+            "Sao lưu dữ liệu hàng ngày"
+          ]
+        },
+        "accessControl": {
+          "title": "Kiểm soát truy cập",
+          "items": [
+            "Chỉ nhân viên được ủy quyền mới có quyền truy cập dữ liệu",
+            "Tất cả truy cập đều được ghi log và giám sát",
+            "Đào tạo nhân viên về bảo mật thường xuyên"
+          ]
+        },
+        "incidentResponse": {
+          "title": "Phản ứng sự cố",
+          "intro": "Trong trường hợp xảy ra vi phạm dữ liệu, chúng tôi sẽ:",
+          "items": [
+            "Thông báo cho bạn trong vòng 72 giờ",
+            "Giải thích phạm vi vi phạm và dữ liệu bị ảnh hưởng",
+            "Cung cấp hướng dẫn bảo vệ tài khoản",
+            "Báo cáo cho cơ quan có thẩm quyền nếu cần"
+          ]
+        }
+      },
+      "userRights": {
+        "intro": "Bạn có các quyền sau đối với dữ liệu cá nhân của mình:",
+        "cards": [
+          {
+            "icon": "visibility",
+            "title": "Quyền truy cập",
+            "desc": "Yêu cầu xem dữ liệu cá nhân mà chúng tôi đang lưu trữ về bạn."
+          },
+          {
+            "icon": "edit",
+            "title": "Quyền sửa đổi",
+            "desc": "Cập nhật hoặc sửa thông tin cá nhân không chính xác."
+          },
+          {
+            "icon": "delete",
+            "title": "Quyền xóa",
+            "desc": "Yêu cầu xóa dữ liệu cá nhân (trừ dữ liệu bắt buộc theo luật)."
+          },
+          {
+            "icon": "download",
+            "title": "Quyền xuất dữ liệu",
+            "desc": "Tải xuống dữ liệu của bạn dưới định dạng JSON/CSV."
+          },
+          {
+            "icon": "block",
+            "title": "Quyền phản đối",
+            "desc": "Từ chối xử lý dữ liệu cho mục đích marketing hoặc profiling."
+          },
+          {
+            "icon": "gavel",
+            "title": "Quyền khiếu nại",
+            "desc": "Gửi khiếu nại đến cơ quan bảo vệ dữ liệu nếu cần."
+          }
+        ],
+        "contactText": "Để thực hiện các quyền trên, vui lòng liên hệ:"
+      },
+      "cookies": {
+        "intro": "Chúng tôi sử dụng cookies và các công nghệ tracking tương tự để cải thiện trải nghiệm của bạn.",
+        "types": {
+          "title": "Các loại cookies",
+          "items": [
+            {
+              "title": "Cookies cần thiết",
+              "desc": "Giúp website hoạt động (đăng nhập, giỏ hàng). Không thể tắt."
+            },
+            {
+              "title": "Cookies chức năng",
+              "desc": "Ghi nhớ preferences (ngôn ngữ, theme). Có thể tắt."
+            },
+            {
+              "title": "Cookies phân tích",
+              "desc": "Google Analytics để hiểu cách bạn sử dụng site. Có thể tắt."
+            },
+            {
+              "title": "Cookies marketing",
+              "desc": "Hiển thị quảng cáo phù hợp. Có thể tắt."
+            }
+          ]
+        },
+        "manage": {
+          "title": "Quản lý cookies",
+          "intro": "Bạn có thể quản lý cookies qua:",
+          "items": [
+            "Cài đặt trình duyệt (Chrome, Firefox, Safari)",
+            "Banner \"Cookie Settings\" trên website",
+            "Trang cài đặt tài khoản"
+          ]
+        },
+        "note": {
+          "title": "Lưu ý",
+          "text": "Tắt cookies có thể ảnh hưởng đến trải nghiệm sử dụng website (ví dụ: phải đăng nhập lại mỗi lần truy cập)."
+        }
+      }
+    },
     "contactTitle": "Có câu hỏi về quyền riêng tư?",
     "contactDesc": "Đội ngũ bảo mật của chúng tôi luôn sẵn sàng hỗ trợ bạn.",
     "contactBtn": "Liên hệ ngay",
