@@ -29,25 +29,37 @@ const BOOKING_STATUS = {
 };
 
 /**
- * Xác định trạng thái hiển thị:
- * - BE tự động chuyển slot Active → Completed qua cron job mỗi 10 phút.
- * - FE KHÔNG tự suy ra Completed từ Confirmed (sẽ lệch với BE).
- * - Chỉ xử lý trường hợp đặc biệt: Pending + endTime đã qua → Expired (quá hạn thanh toán cọc).
+ * Xác định trạng thái hiển thị dựa trên slot-level statuses:
+ * - Nếu booking bị Cancelled → Cancelled
+ * - Nếu Pending + endTime đã qua → Expired
+ * - Nếu có bất kỳ slot nào Completed → Completed
+ * - Nếu có bất kỳ slot nào Cancelled → Expired (slot bị hủy bởi manager)
+ * - Còn lại trả status gốc từ BE
  */
 const resolveDisplayStatus = (booking) => {
   const { status, bookingDetails } = booking;
-  // Trả về đúng status từ BE, không override Confirmed → Completed
-  if (status !== BOOKING_STATUS.PENDING) return status;
 
-  // Chỉ kiểm tra Expired cho Pending: nếu thời gian đặt đã qua mà chưa trả cọc
-  const now = new Date();
-  const details = bookingDetails || [];
-  const lastDetail = details[details.length - 1];
-  const endTime = lastDetail?.endTime ? new Date(lastDetail.endTime) : null;
+  // Booking cấp độ bị hủy
+  if (status === BOOKING_STATUS.CANCELLED) return BOOKING_STATUS.CANCELLED;
 
-  if (endTime && now > endTime) {
-    return 'Expired'; // Pending quá hạn → hết hạn thanh toán cọc
+  // Pending quá hạn → Expired
+  if (status === BOOKING_STATUS.PENDING) {
+    const now = new Date();
+    const details = bookingDetails || [];
+    const lastDetail = details[details.length - 1];
+    const endTime = lastDetail?.endTime ? new Date(lastDetail.endTime) : null;
+    if (endTime && now > endTime) return 'Expired';
+    return status;
   }
+
+  // Với trạng thái Confirmed / Completed: kiểm tra slot-level statuses
+  const details = bookingDetails || [];
+  const hasCompletedSlot = details.some((d) => d.status === 'Completed');
+  const hasCancelledSlot = details.some((d) => d.status === 'Cancelled');
+
+  if (hasCompletedSlot) return BOOKING_STATUS.COMPLETED;
+  if (hasCancelledSlot) return 'Expired';
+
   return status;
 };
 
