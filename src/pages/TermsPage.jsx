@@ -8,6 +8,11 @@ const TermsPage = () => {
   const [navHidden, setNavHidden] = useState(false);
   const { t } = useTranslation();
 
+  const tArray = (key) => {
+    const value = t(key, { returnObjects: true });
+    return Array.isArray(value) ? value : [];
+  };
+
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
 
@@ -108,16 +113,12 @@ const TermsPage = () => {
             </h2>
             <div className="terms-section-content">
               <p>
-                Chào mừng bạn đến với Sân Siêu Tốc. Bằng việc truy cập và sử dụng dịch vụ của chúng
-                tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu tại đây.
+                {t('terms.content.general.intro')}
               </p>
               <ul>
-                <li>Dịch vụ của chúng tôi chỉ dành cho cá nhân từ 15 tuổi trở lên.</li>
-                <li>Người dùng có trách nhiệm bảo mật thông tin tài khoản cá nhân.</li>
-                <li>
-                  Sân Siêu Tốc có quyền thay đổi nội dung chính sách này bất kỳ lúc nào mà không cần
-                  thông báo trước.
-                </li>
+                {tArray('terms.content.general.bullets').map((text, idx) => (
+                  <li key={idx}>{text}</li>
+                ))}
               </ul>
             </div>
           </section>
@@ -134,31 +135,23 @@ const TermsPage = () => {
             </h2>
             <div className="terms-section-body">
               <p>
-                Để đảm bảo công bằng cho tất cả các vận động viên và chủ sân, quy trình đặt sân được
-                quy định nghiêm ngặt như sau:
+                {t('terms.content.bookingPolicy.intro')}
               </p>
 
               <h3 className="terms-subsection-title">
-                Quy trình đặt sân
+                {t('terms.content.bookingPolicy.processTitle')}
               </h3>
               <ul>
-                <li>
-                  Người dùng chọn sân, khung giờ và thực hiện thanh toán đặt cọc (nếu có).
-                </li>
-                <li>
-                  Lịch đặt chỉ được xác nhận khi bạn nhận được thông báo "Thành công" qua ứng
-                  dụng/email.
-                </li>
-                <li>Mỗi tài khoản không được đặt quá 3 sân trong cùng một khung giờ.</li>
+                {tArray('terms.content.bookingPolicy.processBullets').map((text, idx) => (
+                  <li key={idx}>{text}</li>
+                ))}
               </ul>
 
               <h3 className="terms-subsection-title">
-                Trách nhiệm của người chơi
+                {t('terms.content.bookingPolicy.responsibilityTitle')}
               </h3>
               <p>
-                Người chơi cần có mặt tại sân ít nhất 10 phút trước giờ bắt đầu. Trong trường hợp đến
-                muộn quá 15 phút mà không thông báo, chủ sân có quyền cho thuê lại sân đó cho đối
-                tượng khác.
+                {t('terms.content.bookingPolicy.responsibilityText')}
               </p>
             </div>
           </section>
@@ -173,25 +166,23 @@ const TermsPage = () => {
             </h2>
             <div className="terms-section-body">
               <p>
-                Sân Siêu Tốc hỗ trợ đa dạng phương thức thanh toán từ ví điện tử đến chuyển khoản
-                ngân hàng nhằm tối ưu hóa sự tiện lợi.
+                {t('terms.content.refund.intro')}
               </p>
 
               <div className="terms-refund-cards">
                 <div className="terms-refund-card">
-                  <p className="terms-refund-time">Hủy trước 24h</p>
-                  <p className="terms-refund-percent green">Hoàn 100% tiền cọc</p>
+                  <p className="terms-refund-time">{t('terms.content.refund.card1Time')}</p>
+                  <p className="terms-refund-percent green">{t('terms.content.refund.card1Percent')}</p>
                 </div>
                 <div className="terms-refund-card">
-                  <p className="terms-refund-time">Hủy từ 12h - 24h</p>
-                  <p className="terms-refund-percent orange">Hoàn 50% tiền cọc</p>
+                  <p className="terms-refund-time">{t('terms.content.refund.card2Time')}</p>
+                  <p className="terms-refund-percent orange">{t('terms.content.refund.card2Percent')}</p>
                 </div>
               </div>
 
               <p className="terms-note">
                 <em>
-                  Lưu ý: Các trường hợp bất khả kháng như thiên tai hoặc sự cố kỹ thuật từ phía chủ sân
-                  sẽ được hệ thống xem xét hoàn trả toàn bộ chi phí trong vòng 24-48 giờ làm việc.
+                  {t('terms.content.refund.note')}
                 </em>
               </p>
             </div>
@@ -207,27 +198,23 @@ const TermsPage = () => {
             </h2>
             <div className="terms-section-body">
               <p>
-                Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo tiêu chuẩn an toàn cao nhất.
+                {t('terms.content.security.intro')}
               </p>
 
               <h3 className="terms-subsection-title">
-                Thông tin thu thập
+                {t('terms.content.security.collectTitle')}
               </h3>
               <p>
-                Chúng tôi thu thập các thông tin bao gồm: Họ tên, số điện thoại, email và vị trí GPS
-                (khi được phép) để gợi ý các sân gần nhất.
+                {t('terms.content.security.collectText')}
               </p>
 
               <h3 className="terms-subsection-title">
-                Sử dụng thông tin
+                {t('terms.content.security.useTitle')}
               </h3>
               <ul>
-                <li>Xác nhận lịch đặt sân và thông báo các thay đổi.</li>
-                <li>Cải thiện chất lượng dịch vụ và cá nhân hóa trải nghiệm.</li>
-                <li>
-                  Không cung cấp thông tin cho bên thứ ba ngoại trừ các đối tác vận hành sân bãi liên
-                  quan.
-                </li>
+                {tArray('terms.content.security.useBullets').map((text, idx) => (
+                  <li key={idx}>{text}</li>
+                ))}
               </ul>
             </div>
           </section>
@@ -242,13 +229,12 @@ const TermsPage = () => {
             </h2>
             <div className="terms-section-body">
               <p>
-                Chúng tôi mong muốn xây dựng một cộng đồng thể thao văn minh, nơi tinh thần fair-play
-                được đặt lên hàng đầu:
+                {t('terms.content.community.intro')}
               </p>
               <ul className="terms-bullet-list">
-                <li>Tôn trọng các vận động viên khác và nhân viên quản lý tại sân.</li>
-                <li>Giữ gìn vệ sinh chung, không mang chất cấm hoặc vật dụng nguy hiểm vào khu vực thi đấu.</li>
-                <li>Tuyệt đối không sử dụng phần mềm can thiệp (bots) để tranh giành lịch đặt sân.</li>
+                {tArray('terms.content.community.bullets').map((text, idx) => (
+                  <li key={idx}>{text}</li>
+                ))}
               </ul>
             </div>
           </section>

@@ -2,6 +2,8 @@
  * @fileoverview ManagerLoginForm - Form đăng nhập dành cho Chủ sân (Manager)
  */
 
+import { useTranslation } from 'react-i18next';
+
 const ManagerLoginForm = ({
   loginData,
   errors,
@@ -12,17 +14,19 @@ const ManagerLoginForm = ({
   handleManagerLoginSubmit,
   onForgotPassword,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="auth-form-wrapper">
       {/* Header */}
       <div className="auth-header">
         <div className="manager-login-badge">
           <span className="material-symbols-outlined">manage_accounts</span>
-          Cổng quản lý
+          {t('auth.managerPortalBadge')}
         </div>
-        <h1 className="auth-title">Đăng nhập quản lý</h1>
+        <h1 className="auth-title">{t('auth.managerLoginTitle')}</h1>
         <p className="auth-subtitle">
-          Quản lý sân, theo dõi lịch đặt và doanh thu dễ dàng.
+          {t('auth.managerLoginSubtitle')}
         </p>
       </div>
 
@@ -39,7 +43,7 @@ const ManagerLoginForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined form-input-icon">business_center</span>
-            Email đăng nhập
+            {t('auth.managerEmailLabel')}
           </label>
           <div className="form-input-wrapper">
             <input
@@ -47,7 +51,7 @@ const ManagerLoginForm = ({
               value={loginData.email}
               onChange={handleLoginChange}
               className="form-input"
-              placeholder="manager@sansieutoc.com"
+              placeholder={t('auth.placeholders.managerEmail')}
               type="text"
               required
             />
@@ -59,7 +63,7 @@ const ManagerLoginForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined form-input-icon">lock</span>
-            Mật khẩu
+            {t('auth.password')}
           </label>
           <div className="password-input-container">
             <input
@@ -89,7 +93,7 @@ const ManagerLoginForm = ({
               onClick={onForgotPassword}
               className="forgot-password-link"
             >
-              Quên mật khẩu?
+              {t('auth.forgotPassword')}
             </button>
           </div>
         </div>
@@ -103,14 +107,14 @@ const ManagerLoginForm = ({
           {loading ? (
             <>
               <span className="auth-btn-spinner" />
-              Đang đăng nhập...
+              {t('auth.loggingIn')}
             </>
           ) : (
             <>
               <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
                 login
               </span>
-              Đăng nhập
+              {t('auth.login')}
             </>
           )}
         </button>

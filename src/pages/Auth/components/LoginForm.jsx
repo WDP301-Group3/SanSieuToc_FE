@@ -2,6 +2,8 @@
  * @fileoverview LoginForm - Form đăng nhập
  */
 
+import { useTranslation } from 'react-i18next';
+
 const LoginForm = ({
   loginData,
   errors,
@@ -12,13 +14,15 @@ const LoginForm = ({
   handleLoginSubmit,
   switchAuthMode,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="auth-form-wrapper">
       {/* Header */}
       <div className="auth-header">
-        <h1 className="auth-title">Chào mừng trở lại!</h1>
+        <h1 className="auth-title">{t('auth.customerLoginTitle')}</h1>
         <p className="auth-subtitle">
-          Đặt sân nhanh chóng, thi đấu hết mình cùng Sân Siêu Tốc.
+          {t('auth.customerLoginSubtitle')}
         </p>
       </div>
 
@@ -35,7 +39,7 @@ const LoginForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined form-input-icon">person</span>
-            Đăng nhập bằng Email
+            {t('auth.loginWithEmail')}
           </label>
           <div className="form-input-wrapper">
             <input
@@ -43,7 +47,7 @@ const LoginForm = ({
               value={loginData.email}
               onChange={handleLoginChange}
               className="form-input"
-              placeholder="example@gmail.com"
+              placeholder={t('auth.placeholders.email')}
               type="text"
               required
             />
@@ -55,7 +59,7 @@ const LoginForm = ({
         <div className="form-field">
           <label className="form-label">
             <span className="material-icons-outlined form-input-icon">lock</span>
-            Mật khẩu
+            {t('auth.password')}
           </label>
           <div className="password-input-container">
             <input
@@ -88,7 +92,7 @@ const LoginForm = ({
             onClick={() => switchAuthMode('forgot-password')}
             className="forgot-password-link"
           >
-            Quên mật khẩu?
+            {t('auth.forgotPassword')}
           </button>
         </div>
 
@@ -98,20 +102,20 @@ const LoginForm = ({
           disabled={loading}
           className="auth-submit-btn"
         >
-          {loading ? 'Đang đăng nhập...' : 'Đăng nhập ngay'}
+          {loading ? t('auth.loggingIn') : t('auth.loginNow')}
         </button>
       </form>
 
       {/* Switch to Register */}
       <div className="auth-switch">
         <p className="auth-switch-text">
-          Bạn chưa có tài khoản?{' '}
+          {t('auth.noAccountPrompt')}{' '}
           <button
             type="button"
             onClick={() => switchAuthMode('register')}
             className="auth-switch-link"
           >
-            Đăng ký ngay
+            {t('auth.registerNow')}
           </button>
         </p>
       </div>

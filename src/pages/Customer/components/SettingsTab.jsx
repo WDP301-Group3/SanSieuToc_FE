@@ -7,16 +7,10 @@ import { useTranslation } from 'react-i18next';
 import PasswordChangeModal from './PasswordChangeModal';
 
 const SettingsTab = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   // Password modal state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-
-  // Handle language change
-  const handleLanguageChange = (e) => {
-    const newLang = e.target.value;
-    i18n.changeLanguage(newLang);
-  };
 
   return (
     <>
@@ -47,28 +41,6 @@ const SettingsTab = () => {
             >
               {t('settings.changePassword')}
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Language Section */}
-      <section className="user-dashboard-settings-section">
-        <div className="user-dashboard-settings-section-header">
-          <h3 className="user-dashboard-settings-section-title">
-            <span className="material-symbols-outlined">language</span>
-            {t('settings.language')}
-          </h3>
-        </div>
-        <div className="user-dashboard-settings-section-body">
-          <div className="user-dashboard-settings-language-select">
-            <select
-              value={i18n.language}
-              onChange={handleLanguageChange}
-              className="user-dashboard-settings-select"
-            >
-              <option value="vi">🇻🇳 Tiếng Việt</option>
-              <option value="en">🇬🇧 English</option>
-            </select>
           </div>
         </div>
       </section>

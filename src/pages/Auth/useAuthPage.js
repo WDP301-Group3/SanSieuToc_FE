@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import authService from '../../services/authService';
@@ -13,6 +14,7 @@ import authService from '../../services/authService';
 const useAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { login } = useAuth();
   const notification = useNotification();
 
@@ -127,37 +129,37 @@ const useAuthPage = () => {
     const newErrors = {};
 
     if (!registerData.username.trim()) {
-      newErrors.username = 'Tên đăng nhập không được để trống';
+      newErrors.username = t('auth.errors.usernameRequired');
     } else if (registerData.username.length < 3) {
-      newErrors.username = 'Tên đăng nhập phải có ít nhất 3 ký tự';
+      newErrors.username = t('auth.errors.usernameMinLength');
     }
 
     if (!registerData.email.trim()) {
-      newErrors.email = 'Email không được để trống';
+      newErrors.email = t('auth.errors.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('auth.errors.emailInvalid');
     }
 
     if (!registerData.password) {
-      newErrors.password = 'Mật khẩu không được để trống';
+      newErrors.password = t('auth.errors.passwordRequired');
     } else if (registerData.password.length < 8) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
+      newErrors.password = t('auth.errors.passwordMinLength');
     } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/.test(registerData.password)) {
-      newErrors.password = 'Mật khẩu phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#)';
+      newErrors.password = t('auth.errors.passwordComplexity');
     }
 
     if (registerData.password !== registerData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      newErrors.confirmPassword = t('auth.errors.confirmPasswordMismatch');
     }
 
     if (!registerData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại không được để trống';
+      newErrors.phone = t('auth.errors.phoneRequired');
     } else if (!/^(0|\+84)[0-9]{9,10}$/.test(registerData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ (VD: 0901234567)';
+      newErrors.phone = t('auth.errors.phoneInvalid');
     }
 
     if (!registerData.agreeToTerms) {
-      newErrors.agreeToTerms = 'Bạn phải đồng ý với điều khoản sử dụng';
+      newErrors.agreeToTerms = t('auth.errors.mustAgreeTerms');
     }
 
     setErrors(newErrors);
@@ -166,12 +168,12 @@ const useAuthPage = () => {
 
   const validateEmail = (email) => {
     if (!email) {
-      setErrors({ email: 'Vui lòng nhập địa chỉ email' });
+      setErrors({ email: t('auth.errors.emailEnter') });
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setErrors({ email: 'Email không hợp lệ' });
+      setErrors({ email: t('auth.errors.emailInvalid') });
       return false;
     }
     return true;
@@ -186,8 +188,8 @@ const useAuthPage = () => {
     setErrors({});
 
     const newErrors = {};
-    if (!loginData.email.trim()) newErrors.email = 'Vui lòng nhập email';
-    if (!loginData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    if (!loginData.email.trim()) newErrors.email = t('auth.errors.emailEnter');
+    if (!loginData.password) newErrors.password = t('auth.errors.passwordEnter');
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -201,7 +203,7 @@ const useAuthPage = () => {
       });
 
       if (!response.success) {
-        setErrors({ submit: response.message || 'Đăng nhập thất bại.' });
+        setErrors({ submit: response.message || t('auth.errors.loginFailed') });
         setLoading(false);
         return;
       }
@@ -217,10 +219,10 @@ const useAuthPage = () => {
       };
 
       login(userData, token || accessToken);
-      notification.success('Đăng nhập thành công!');
+      notification.success(t('auth.notifications.loginSuccess'));
       navigate('/');
     } catch (error) {
-      setErrors({ submit: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -232,8 +234,8 @@ const useAuthPage = () => {
     setErrors({});
 
     const newErrors = {};
-    if (!loginData.email.trim()) newErrors.email = 'Vui lòng nhập email';
-    if (!loginData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    if (!loginData.email.trim()) newErrors.email = t('auth.errors.emailEnter');
+    if (!loginData.password) newErrors.password = t('auth.errors.passwordEnter');
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -247,7 +249,7 @@ const useAuthPage = () => {
       });
 
       if (!response.success) {
-        setErrors({ submit: response.message || 'Đăng nhập thất bại.' });
+        setErrors({ submit: response.message || t('auth.errors.loginFailed') });
         setLoading(false);
         return;
       }
@@ -264,10 +266,10 @@ const useAuthPage = () => {
       };
 
       login(userData, token || accessToken);
-      notification.success('Đăng nhập thành công! Chào mừng trở lại.');
+      notification.success(t('auth.notifications.managerLoginSuccess'));
       navigate('/admin/dashboard');
     } catch (error) {
-      setErrors({ submit: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Manager login error:', error);
     } finally {
       setLoading(false);
@@ -289,7 +291,7 @@ const useAuthPage = () => {
       });
 
       if (!response.success) {
-        setErrors({ submit: response.message || 'Đăng ký thất bại.' });
+        setErrors({ submit: response.message || t('auth.errors.registerFailed') });
         setLoading(false);
         return;
       }
@@ -305,13 +307,13 @@ const useAuthPage = () => {
       };
 
       login(userData, token);
-      notification.success('Đăng ký thành công! Chào mừng bạn đến với Sân Siêu Tốc.');
+      notification.success(t('auth.notifications.registerSuccess'));
       navigate('/');
     } catch (error) {
       if (error.errors) {
         setErrors(error.errors);
       } else {
-        setErrors({ submit: error.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
+        setErrors({ submit: error.message || t('auth.errors.registerFailedTryAgain') });
       }
       console.error('Registration error:', error);
     } finally {
@@ -329,13 +331,13 @@ const useAuthPage = () => {
     try {
       const response = await authService.resetPassword(forgotPasswordEmail.trim());
       if (!response.success) {
-        setErrors({ email: response.message || 'Có lỗi xảy ra.' });
+        setErrors({ email: response.message || t('auth.errors.genericError') });
         setLoading(false);
         return;
       }
       setForgotPasswordSuccess(true);
     } catch (error) {
-      setErrors({ email: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+      setErrors({ email: error.message || t('auth.errors.genericErrorTryAgain') });
       console.error('Password reset error:', error);
     } finally {
       setLoading(false);
@@ -352,13 +354,13 @@ const useAuthPage = () => {
     try {
       const response = await authService.resetManagerPassword(forgotPasswordEmail.trim());
       if (!response.success) {
-        setErrors({ email: response.message || 'Có lỗi xảy ra.' });
+        setErrors({ email: response.message || t('auth.errors.genericError') });
         setLoading(false);
         return;
       }
       setForgotPasswordSuccess(true);
     } catch (error) {
-      setErrors({ email: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+      setErrors({ email: error.message || t('auth.errors.genericErrorTryAgain') });
       console.error('Manager password reset error:', error);
     } finally {
       setLoading(false);

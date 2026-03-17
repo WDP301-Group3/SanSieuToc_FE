@@ -120,6 +120,43 @@
   gap: 1rem;
 }
 
+/* Language Switch */
+.header-lang-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(229 231 235);
+  background: transparent;
+}
+
+.dark .header-lang-wrapper {
+  border-color: rgb(55 65 81);
+}
+
+.header-lang-icon {
+  font-size: 1.1rem;
+  color: rgb(107 114 128);
+}
+
+.dark .header-lang-icon {
+  color: rgb(156 163 175);
+}
+
+.header-lang-select {
+  border: none;
+  background: transparent;
+  color: rgb(55 65 81);
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.dark .header-lang-select {
+  color: rgb(229 231 235);
+}
+
 /* Icon Buttons */
 .header-icon-btn {
   padding: 0.5rem;

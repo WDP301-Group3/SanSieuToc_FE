@@ -4,12 +4,14 @@ import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ManagerLoginForm from './components/ManagerLoginForm';
+import { useTranslation } from 'react-i18next';
 
 /**
  * AuthPage Component - Unified Authentication Interface
  * Handles Login, Register, and Forgot Password flows in a single component with tab switching
  */
 const AuthPage = () => {
+  const { t } = useTranslation();
   const {
     authMode,
     loginRole,
@@ -54,7 +56,7 @@ const AuthPage = () => {
               className={`auth-mode-tab ${authMode === 'login' && loginRole === 'customer' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>person</span>
-              Người dùng
+              {t('auth.tabs.user')}
             </button>
             <button
               type="button"
@@ -62,7 +64,7 @@ const AuthPage = () => {
               className={`auth-mode-tab ${authMode === 'register' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>person_add</span>
-              Đăng ký
+              {t('auth.tabs.register')}
             </button>
             <button
               type="button"
@@ -70,7 +72,7 @@ const AuthPage = () => {
               className={`auth-mode-tab manager-tab ${authMode === 'login' && loginRole === 'manager' ? 'active manager-tab-active' : ''}`}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>manage_accounts</span>
-              Quản lý sân
+              {t('auth.tabs.manager')}
             </button>
           </div>
 

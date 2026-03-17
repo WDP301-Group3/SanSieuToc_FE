@@ -6,6 +6,23 @@ const PrivacyPolicyPage = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const { t } = useTranslation();
 
+  const tArray = (key) => {
+    const value = t(key, { returnObjects: true });
+    return Array.isArray(value) ? value : [];
+  };
+
+  const tObj = (key) => {
+    const value = t(key, { returnObjects: true });
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  };
+
+  const overview = tObj('privacy.content.overview');
+  const dataCollection = tObj('privacy.content.dataCollection');
+  const dataUsage = tObj('privacy.content.dataUsage');
+  const dataSecurity = tObj('privacy.content.dataSecurity');
+  const userRights = tObj('privacy.content.userRights');
+  const cookies = tObj('privacy.content.cookies');
+
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
 
@@ -108,24 +125,16 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section1Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>
-                Tại <strong>Sân Siêu Tốc</strong>, chúng tôi cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của bạn. 
-                Chính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin của bạn 
-                khi sử dụng dịch vụ đặt sân thể thao của chúng tôi.
-              </p>
-              <p>
-                Bằng việc sử dụng nền tảng Sân Siêu Tốc, bạn đồng ý với các điều khoản trong chính sách này. 
-                Nếu bạn không đồng ý, vui lòng ngừng sử dụng dịch vụ của chúng tôi.
-              </p>
+              <p>{overview.p1}</p>
+              <p>{overview.p2}</p>
 
               <div className="privacy-info-box">
                 <p className="privacy-info-title">
                   <span className="material-icons-outlined">verified_user</span>
-                  Cam kết của chúng tôi
+                  {overview?.commitment?.title}
                 </p>
                 <p className="privacy-info-content">
-                  Chúng tôi tuân thủ nghiêm ngặt các quy định về bảo vệ dữ liệu cá nhân tại Việt Nam 
-                  và các tiêu chuẩn quốc tế như GDPR. Dữ liệu của bạn sẽ KHÔNG BAO GIỜ được bán cho bên thứ ba.
+                  {overview?.commitment?.text}
                 </p>
               </div>
             </div>
@@ -138,67 +147,49 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section2Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>Chúng tôi thu thập các loại thông tin sau:</p>
+              <p>{dataCollection.intro}</p>
 
-              <h3>1. Thông tin cá nhân</h3>
-              <p>Khi bạn đăng ký tài khoản hoặc đặt sân, chúng tôi thu thập:</p>
+              <h3>{dataCollection?.personal?.title}</h3>
+              <p>{dataCollection?.personal?.intro}</p>
               <ul>
-                <li>Họ và tên</li>
-                <li>Địa chỉ email</li>
-                <li>Số điện thoại</li>
-                <li>Địa chỉ (nếu cần giao hàng)</li>
-                <li>Thông tin thanh toán (được mã hóa)</li>
+                {tArray('privacy.content.dataCollection.personal.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
-              <h3>2. Thông tin tự động</h3>
-              <p>Khi bạn sử dụng website/ứng dụng, chúng tôi tự động thu thập:</p>
+              <h3>{dataCollection?.automatic?.title}</h3>
+              <p>{dataCollection?.automatic?.intro}</p>
               <ul>
-                <li>Địa chỉ IP</li>
-                <li>Loại trình duyệt và thiết bị</li>
-                <li>Hệ điều hành</li>
-                <li>Vị trí địa lý (với sự cho phép của bạn)</li>
-                <li>Lịch sử tìm kiếm và đặt sân</li>
-                <li>Cookies và dữ liệu phiên</li>
+                {tArray('privacy.content.dataCollection.automatic.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
-              <h3>3. Thông tin từ bên thứ ba</h3>
-              <p>Nếu bạn đăng nhập bằng tài khoản mạng xã hội (Google, Facebook), chúng tôi nhận được:</p>
+              <h3>{dataCollection?.thirdParty?.title}</h3>
+              <p>{dataCollection?.thirdParty?.intro}</p>
               <ul>
-                <li>Tên công khai</li>
-                <li>Email</li>
-                <li>Ảnh đại diện</li>
+                {tArray('privacy.content.dataCollection.thirdParty.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
               <div className="privacy-data-table">
                 <table>
                   <thead>
                     <tr>
-                      <th>Loại dữ liệu</th>
-                      <th>Mục đích</th>
-                      <th>Thời gian lưu trữ</th>
+                      {tArray('privacy.content.dataCollection.table.headers').map((h, idx) => (
+                        <th key={idx}>{h}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Thông tin tài khoản</td>
-                      <td>Quản lý tài khoản, xác thực</td>
-                      <td>Đến khi xóa tài khoản</td>
-                    </tr>
-                    <tr>
-                      <td>Lịch sử đặt sân</td>
-                      <td>Quản lý booking, hỗ trợ khách hàng</td>
-                      <td>3 năm</td>
-                    </tr>
-                    <tr>
-                      <td>Dữ liệu thanh toán</td>
-                      <td>Xử lý giao dịch, hoàn tiền</td>
-                      <td>7 năm (theo luật)</td>
-                    </tr>
-                    <tr>
-                      <td>Analytics & Cookies</td>
-                      <td>Cải thiện trải nghiệm người dùng</td>
-                      <td>13 tháng</td>
-                    </tr>
+                    {tArray('privacy.content.dataCollection.table.rows').map((row, idx) => (
+                      <tr key={idx}>
+                        <td>{row.type}</td>
+                        <td>{row.purpose}</td>
+                        <td>{row.retention}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -212,42 +203,36 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section3Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>Chúng tôi sử dụng thông tin của bạn cho các mục đích sau:</p>
+              <p>{dataUsage.intro}</p>
 
-              <h3>Cung cấp dịch vụ</h3>
+              <h3>{dataUsage?.provideService?.title}</h3>
               <ul>
-                <li>Xử lý đặt sân và thanh toán</li>
-                <li>Gửi xác nhận booking qua email/SMS</li>
-                <li>Thông báo thay đổi lịch hoặc hủy sân</li>
-                <li>Hỗ trợ khách hàng qua chat/email/phone</li>
+                {tArray('privacy.content.dataUsage.provideService.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
-              <h3>Cải thiện trải nghiệm</h3>
+              <h3>{dataUsage?.improveExperience?.title}</h3>
               <ul>
-                <li>Gợi ý sân phù hợp dựa trên vị trí và lịch sử</li>
-                <li>Cá nhân hóa nội dung và quảng cáo</li>
-                <li>Phân tích hành vi người dùng để tối ưu hóa giao diện</li>
-                <li>Phát triển tính năng mới</li>
+                {tArray('privacy.content.dataUsage.improveExperience.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
-              <h3>Bảo mật và tuân thủ</h3>
+              <h3>{dataUsage?.securityCompliance?.title}</h3>
               <ul>
-                <li>Phát hiện và ngăn chặn gian lận</li>
-                <li>Bảo vệ tài khoản khỏi truy cập trái phép</li>
-                <li>Tuân thủ các yêu cầu pháp lý</li>
-                <li>Giải quyết tranh chấp</li>
+                {tArray('privacy.content.dataUsage.securityCompliance.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
               <div className="privacy-warning-box">
                 <p className="privacy-warning-title">
                   <span className="material-icons-outlined">warning</span>
-                  Chia sẻ với bên thứ ba
+                  {dataUsage?.thirdPartySharing?.title}
                 </p>
                 <p className="privacy-warning-content">
-                  Chúng tôi CHỈ chia sẻ dữ liệu với: (1) Chủ sân để xác nhận booking, 
-                  (2) Đối tác thanh toán (VNPay, Momo) để xử lý giao dịch, 
-                  (3) Nhà cung cấp dịch vụ cloud (AWS) để lưu trữ, 
-                  (4) Cơ quan chức năng khi có yêu cầu hợp pháp.
+                  {dataUsage?.thirdPartySharing?.text}
                 </p>
               </div>
             </div>
@@ -260,40 +245,33 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section4Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>
-                Chúng tôi áp dụng các biện pháp bảo mật hàng đầu để bảo vệ dữ liệu của bạn:
-              </p>
+              <p>{dataSecurity.intro}</p>
 
               <div className="privacy-security-box">
                 <p className="privacy-security-title">
                   <span className="material-icons-outlined">lock</span>
-                  Biện pháp kỹ thuật
+                  {dataSecurity?.technical?.title}
                 </p>
-                <p className="privacy-security-content">
-                  ✅ Mã hóa SSL/TLS 256-bit cho tất cả truyền tải dữ liệu<br />
-                  ✅ Mã hóa AES-256 cho dữ liệu lưu trữ<br />
-                  ✅ Xác thực hai yếu tố (2FA) cho tài khoản<br />
-                  ✅ Firewall và hệ thống phát hiện xâm nhập (IDS)<br />
-                  ✅ Sao lưu dữ liệu hàng ngày
-                </p>
+                <ul className="privacy-security-content">
+                  {tArray('privacy.content.dataSecurity.technical.items').map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
               </div>
 
-              <h3>Kiểm soát truy cập</h3>
+              <h3>{dataSecurity?.accessControl?.title}</h3>
               <ul>
-                <li>Chỉ nhân viên được ủy quyền mới có quyền truy cập dữ liệu</li>
-                <li>Tất cả truy cập đều được ghi log và giám sát</li>
-                <li>Đào tạo nhân viên về bảo mật thường xuyên</li>
+                {tArray('privacy.content.dataSecurity.accessControl.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
-              <h3>Phản ứng sự cố</h3>
-              <p>
-                Trong trường hợp xảy ra vi phạm dữ liệu, chúng tôi sẽ:
-              </p>
+              <h3>{dataSecurity?.incidentResponse?.title}</h3>
+              <p>{dataSecurity?.incidentResponse?.intro}</p>
               <ul>
-                <li>Thông báo cho bạn trong vòng 72 giờ</li>
-                <li>Giải thích phạm vi vi phạm và dữ liệu bị ảnh hưởng</li>
-                <li>Cung cấp hướng dẫn bảo vệ tài khoản</li>
-                <li>Báo cáo cho cơ quan có thẩm quyền nếu cần</li>
+                {tArray('privacy.content.dataSecurity.incidentResponse.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
             </div>
           </section>
@@ -305,72 +283,22 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section5Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>Bạn có các quyền sau đối với dữ liệu cá nhân của mình:</p>
+              <p>{userRights.intro}</p>
 
               <div className="privacy-rights-grid">
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">visibility</span>
+                {tArray('privacy.content.userRights.cards').map((card, idx) => (
+                  <div className="privacy-rights-card" key={idx}>
+                    <div className="privacy-rights-card-icon">
+                      <span className="material-icons-outlined">{card.icon}</span>
+                    </div>
+                    <h4 className="privacy-rights-card-title">{card.title}</h4>
+                    <p className="privacy-rights-card-desc">{card.desc}</p>
                   </div>
-                  <h4 className="privacy-rights-card-title">Quyền truy cập</h4>
-                  <p className="privacy-rights-card-desc">
-                    Yêu cầu xem dữ liệu cá nhân mà chúng tôi đang lưu trữ về bạn.
-                  </p>
-                </div>
-
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">edit</span>
-                  </div>
-                  <h4 className="privacy-rights-card-title">Quyền sửa đổi</h4>
-                  <p className="privacy-rights-card-desc">
-                    Cập nhật hoặc sửa thông tin cá nhân không chính xác.
-                  </p>
-                </div>
-
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">delete</span>
-                  </div>
-                  <h4 className="privacy-rights-card-title">Quyền xóa</h4>
-                  <p className="privacy-rights-card-desc">
-                    Yêu cầu xóa dữ liệu cá nhân (trừ dữ liệu bắt buộc theo luật).
-                  </p>
-                </div>
-
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">download</span>
-                  </div>
-                  <h4 className="privacy-rights-card-title">Quyền xuất dữ liệu</h4>
-                  <p className="privacy-rights-card-desc">
-                    Tải xuống dữ liệu của bạn dưới định dạng JSON/CSV.
-                  </p>
-                </div>
-
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">block</span>
-                  </div>
-                  <h4 className="privacy-rights-card-title">Quyền phản đối</h4>
-                  <p className="privacy-rights-card-desc">
-                    Từ chối xử lý dữ liệu cho mục đích marketing hoặc profiling.
-                  </p>
-                </div>
-
-                <div className="privacy-rights-card">
-                  <div className="privacy-rights-card-icon">
-                    <span className="material-icons-outlined">gavel</span>
-                  </div>
-                  <h4 className="privacy-rights-card-title">Quyền khiếu nại</h4>
-                  <p className="privacy-rights-card-desc">
-                    Gửi khiếu nại đến cơ quan bảo vệ dữ liệu nếu cần.
-                  </p>
-                </div>
+                ))}
               </div>
 
               <p>
-                Để thực hiện các quyền trên, vui lòng liên hệ:{' '}
+                {userRights.contactText}{' '}
                 <a href="mailto:privacy@sansieutoc.vn" className="privacy-contact-link">
                   privacy@sansieutoc.vn
                 </a>
@@ -385,48 +313,32 @@ const PrivacyPolicyPage = () => {
               {t('privacy.section6Title')}
             </h2>
             <div className="privacy-section-content">
-              <p>
-                Chúng tôi sử dụng cookies và các công nghệ tracking tương tự để cải thiện trải nghiệm của bạn.
-              </p>
+              <p>{cookies.intro}</p>
 
-              <h3>Các loại cookies</h3>
+              <h3>{cookies?.types?.title}</h3>
               <ul>
-                <li>
-                  <strong>Cookies cần thiết:</strong> Giúp website hoạt động (đăng nhập, giỏ hàng). 
-                  Không thể tắt.
-                </li>
-                <li>
-                  <strong>Cookies chức năng:</strong> Ghi nhớ preferences (ngôn ngữ, theme). 
-                  Có thể tắt.
-                </li>
-                <li>
-                  <strong>Cookies phân tích:</strong> Google Analytics để hiểu cách bạn sử dụng site. 
-                  Có thể tắt.
-                </li>
-                <li>
-                  <strong>Cookies marketing:</strong> Hiển thị quảng cáo phù hợp. 
-                  Có thể tắt.
-                </li>
+                {tArray('privacy.content.cookies.types.items').map((item, idx) => (
+                  <li key={idx}>
+                    <strong>{item.title}:</strong> {item.desc}
+                  </li>
+                ))}
               </ul>
 
-              <h3>Quản lý cookies</h3>
-              <p>
-                Bạn có thể quản lý cookies qua:
-              </p>
+              <h3>{cookies?.manage?.title}</h3>
+              <p>{cookies?.manage?.intro}</p>
               <ul>
-                <li>Cài đặt trình duyệt (Chrome, Firefox, Safari)</li>
-                <li>Banner "Cookie Settings" trên website</li>
-                <li>Trang cài đặt tài khoản</li>
+                {tArray('privacy.content.cookies.manage.items').map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
               </ul>
 
               <div className="privacy-info-box">
                 <p className="privacy-info-title">
                   <span className="material-icons-outlined">info</span>
-                  Lưu ý
+                  {cookies?.note?.title}
                 </p>
                 <p className="privacy-info-content">
-                  Tắt cookies có thể ảnh hưởng đến trải nghiệm sử dụng website 
-                  (ví dụ: phải đăng nhập lại mỗi lần truy cập).
+                  {cookies?.note?.text}
                 </p>
               </div>
             </div>
@@ -450,9 +362,7 @@ const PrivacyPolicyPage = () => {
           {/* Footer */}
           <div className="privacy-footer">
             <p className="privacy-footer-text">
-              Chính sách này có hiệu lực từ ngày 01/02/2026 và được cập nhật lần cuối vào 04/02/2026. 
-              Chúng tôi có quyền thay đổi chính sách này bất kỳ lúc nào. 
-              Thay đổi quan trọng sẽ được thông báo qua email.
+              {t('privacy.footerText')}
             </p>
           </div>
         </article>

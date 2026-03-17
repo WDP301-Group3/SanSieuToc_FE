@@ -15,49 +15,24 @@ const AboutPage = () => {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAuth();
 
-  // Team members data
-  const teamMembers = [
-    {
-      name: 'Nguyễn Viết Sang',
-      role: 'Founder & CEO',
-      image: avatarSang,
-      description: 'Với hơn 10 năm kinh nghiệm trong lĩnh vực thể thao và công nghệ.',
-    },
-    {
-      name: 'Phan Duy Thành',
-      role: 'Co-Founder & CTO',
-      image: avatarThanh,
-      description: 'Chuyên gia công nghệ với đam mê xây dựng sản phẩm số.',
-    },
-    {
-      name: 'Hoàng Tuấn Long',
-      role: 'Head of Operations',
-      image: avatarLong,
-      description: 'Đảm bảo vận hành mượt mà cho hệ thống toàn quốc.',
-    },
-    {
-      name: 'Phạm Quốc Minh',
-      role: 'Customer Success Manager',
-      image: avatarQuocMinh,
-      description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
-    },
-    {
-      name: 'Phạm Đức Minh',
-      role: 'Customer Success Manager',
-      image: avatarDucMinh,
-      description: 'Luôn đặt trải nghiệm khách hàng lên hàng đầu.',
-    },
-  ];
+  const teamMemberImages = {
+    sang: avatarSang,
+    thanh: avatarThanh,
+    long: avatarLong,
+    quocMinh: avatarQuocMinh,
+    ducMinh: avatarDucMinh,
+  };
 
-  // Milestones
-  const milestones = [
-    { year: '2020', event: 'Sân Siêu Tốc ra đời với 50 sân đối tác đầu tiên' },
-    { year: '2021', event: 'Mở rộng ra 10 tỉnh thành, đạt 10.000 người dùng' },
-    { year: '2022', event: 'Ra mắt ứng dụng mobile, 500+ sân đối tác' },
-    { year: '2023', event: 'Đạt 50.000 người dùng, mở rộng ra 30 tỉnh thành' },
-    { year: '2024', event: 'Tích hợp thanh toán online, 100.000+ người dùng' },
-    { year: '2025', event: 'Trở thành nền tảng đặt sân #1 Việt Nam' },
-  ];
+  const rawTeamMembers = t('about.teamMembers', { returnObjects: true });
+  const teamMembers = Array.isArray(rawTeamMembers)
+    ? rawTeamMembers.map((m) => ({
+      ...m,
+      image: teamMemberImages[m.id] || avatarSang,
+    }))
+    : [];
+
+  const rawMilestones = t('about.milestoneItems', { returnObjects: true });
+  const milestones = Array.isArray(rawMilestones) ? rawMilestones : [];
 
   return (
     <div className="about-page">

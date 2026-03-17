@@ -8,7 +8,7 @@ import logo from '../../assets/images/logo.png';
 import '../../styles/Header.css';
 
 const Header = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [hidden, setHidden] = useState(false);
@@ -30,6 +30,11 @@ const Header = () => {
     setShowLogoutModal(false);
     setShowDropdown(false);
     handleNavClick('/login');
+  };
+
+  const handleLanguageChange = (e) => {
+    const newLang = e.target.value;
+    i18n.changeLanguage(newLang);
   };
 
   useEffect(() => {
@@ -102,6 +107,21 @@ const Header = () => {
                 {isDark ? 'light_mode' : 'dark_mode'}
               </span>
             </button>
+
+            {/* Language Switch (guest/customer only) */}
+            {!(user?.role === 'manager' || user?.role === 'admin') && (
+              <div className="header-lang-wrapper" aria-label={t('settings.language')}>
+                <span className="material-icons-outlined header-lang-icon">language</span>
+                <select
+                  value={i18n.resolvedLanguage || i18n.language}
+                  onChange={handleLanguageChange}
+                  className="header-lang-select"
+                >
+                  <option value="vi">VI</option>
+                  <option value="en">EN</option>
+                </select>
+              </div>
+            )}
 
             <div className="header-divider" />
 
