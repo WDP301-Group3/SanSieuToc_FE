@@ -438,11 +438,8 @@
         "responsibilityText": "Người chơi cần có mặt tại sân ít nhất 10 phút trước giờ bắt đầu. Trong trường hợp đến muộn quá 15 phút mà không thông báo, chủ sân có quyền cho thuê lại sân đó cho đối tượng khác."
       },
       "refund": {
-        "intro": "Sân Siêu Tốc hỗ trợ đa dạng phương thức thanh toán từ ví điện tử đến chuyển khoản ngân hàng nhằm tối ưu hóa sự tiện lợi.",
-        "card1Time": "Hủy trước 24h",
-        "card1Percent": "Hoàn 100% tiền cọc",
-        "card2Time": "Hủy từ 12h - 24h",
-        "card2Percent": "Hoàn 50% tiền cọc",
+        "intro": "Sân Siêu Tốc hỗ trợ phương thức thanh toán bằng chuyển khoản ngân hàng nhằm tối ưu hóa sự tiện lợi.",
+        "card1Time": "Hãy thanh toán tiền cọc để được đặt sân tốt nhất.",
         "note": "Lưu ý: Các trường hợp bất khả kháng như thiên tai hoặc sự cố kỹ thuật từ phía chủ sân sẽ được hệ thống xem xét hoàn trả toàn bộ chi phí trong vòng 24-48 giờ làm việc."
       },
       "security": {

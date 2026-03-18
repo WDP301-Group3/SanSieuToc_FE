@@ -172,14 +172,8 @@ const TermsPage = () => {
               <div className="terms-refund-cards">
                 <div className="terms-refund-card">
                   <p className="terms-refund-time">{t('terms.content.refund.card1Time')}</p>
-                  <p className="terms-refund-percent green">{t('terms.content.refund.card1Percent')}</p>
-                </div>
-                <div className="terms-refund-card">
-                  <p className="terms-refund-time">{t('terms.content.refund.card2Time')}</p>
-                  <p className="terms-refund-percent orange">{t('terms.content.refund.card2Percent')}</p>
                 </div>
               </div>
-
               <p className="terms-note">
                 <em>
                   {t('terms.content.refund.note')}

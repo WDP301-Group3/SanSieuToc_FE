@@ -77,6 +77,8 @@ const ManagerCustomersPage = () => {
       image: user.image || user.avatar,
       status,
       createdAt: user.createdAt,
+      completedCount: Number.isFinite(user.completedCount) ? user.completedCount : 0,
+      cancelledCount: Number.isFinite(user.cancelledCount) ? user.cancelledCount : 0,
     };
   }), [rawCustomers]);
 
@@ -244,6 +246,8 @@ const ManagerCustomersPage = () => {
                 <th>Email</th>
                 <th>SĐT</th>
                 <th>Ngày tạo</th>
+                <th className="customers-th-center">Hoàn thành</th>
+                <th className="customers-th-center">Đã hủy</th>
                 <th>Trạng thái</th>
                 <th className="customers-th-actions">Thao tác</th>
               </tr>
@@ -275,6 +279,8 @@ const ManagerCustomersPage = () => {
                     <td className="customer-email">{customer.email}</td>
                     <td className="customer-phone">{customer.phone}</td>
                     <td className="customer-date">{formatDate(customer.createdAt)}</td>
+                    <td className="customer-count">{customer.completedCount}</td>
+                    <td className="customer-count">{customer.cancelledCount}</td>
                     <td>
                       <span className={`customer-status-badge ${statusCfg.className}`}>
                         <span className="status-dot" />
@@ -316,7 +322,7 @@ const ManagerCustomersPage = () => {
               })}
               {paginatedCustomers.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="customers-empty">
+                  <td colSpan="8" className="customers-empty">
                     Không tìm thấy khách hàng nào phù hợp.
                   </td>
                 </tr>
