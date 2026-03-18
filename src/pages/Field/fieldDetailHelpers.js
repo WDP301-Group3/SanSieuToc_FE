@@ -77,15 +77,13 @@ export const mergeConsecutiveSlots = (slots) => {
  * @param {string} startTime - Giờ bắt đầu (HH:mm)
  * @param {string} endTime - Giờ kết thúc (HH:mm)
  * @param {Array}  bookedSlots - Array of booked slot objects from API availability
- * @returns {boolean} - true nếu available
+ * @returns {{ available: boolean, isBooked: boolean, isPast: boolean }}
  */
-export const checkSlotAvailability = (fieldId, dateStr, startTime, endTime, bookedSlots = []) => {
-  // Check if slot is booked using API data
+export const getSlotAvailabilityInfo = (dateStr, startTime, endTime, bookedSlots = []) => {
   const isBooked = bookedSlots.some((b) => {
-    // API availability returns slots with isAvailable flag or startTime/endTime
     const bStartTime = b.startTime ? new Date(b.startTime) : null;
     const bEndTime = b.endTime ? new Date(b.endTime) : null;
-    
+
     if (bStartTime && bEndTime) {
       const bStartStr = `${String(bStartTime.getHours()).padStart(2, '0')}:${String(bStartTime.getMinutes()).padStart(2, '0')}`;
       const bEndStr = `${String(bEndTime.getHours()).padStart(2, '0')}:${String(bEndTime.getMinutes()).padStart(2, '0')}`;
@@ -93,16 +91,23 @@ export const checkSlotAvailability = (fieldId, dateStr, startTime, endTime, book
     }
     return false;
   });
-  
-  // Check nếu là quá khứ
+
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
-  if (dateStr === today) {
-    const slotStart = new Date(`${dateStr}T${startTime}:00`);
-    if (slotStart <= now) return false;
-  }
-  
-  return !isBooked;
+  const slotStart = new Date(`${dateStr}T${startTime}:00`);
+  const isPast = slotStart <= now;
+
+  return {
+    available: !isBooked && !isPast,
+    isBooked,
+    isPast,
+  };
+};
+
+/**
+ * Backward-compatible boolean availability check
+ */
+export const checkSlotAvailability = (fieldId, dateStr, startTime, endTime, bookedSlots = []) => {
+  return getSlotAvailabilityInfo(dateStr, startTime, endTime, bookedSlots).available;
 };
 
 /**
@@ -135,13 +140,15 @@ export const generateTimeSlots = (field, selectedDate, bookedSlots = []) => {
     const endTime = `${String(endSlotH).padStart(2, '0')}:${String(endSlotM).padStart(2, '0')}`;
     const time = `${startTime} - ${endTime}`;
 
-    const available = checkSlotAvailability(field._id, selectedDate, startTime, endTime, bookedSlots);
+    const { available, isBooked, isPast } = getSlotAvailabilityInfo(selectedDate, startTime, endTime, bookedSlots);
 
     slots.push({
       time,
       startTime,
       endTime,
       available,
+      isBooked,
+      isPast,
     });
 
     // Thêm breakTime (10 phút) giữa các slot — khớp với BE
