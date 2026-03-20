@@ -43,7 +43,9 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
+          {/* Forgot password routes tách rõ customer/manager */}
           <Route path="/forgot-password" element={<AuthPage />} />
+          <Route path="/manager/forgot-password" element={<AuthPage />} />
           
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />

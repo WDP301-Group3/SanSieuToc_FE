@@ -504,9 +504,10 @@
 /* Refund Cards (side by side) */
 .terms-refund-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
-  margin: 1.25rem 0;
+  margin: 1rem 0 0.75rem;
+  align-items: stretch;
 }
 
 @media (max-width: 500px) {
@@ -519,8 +520,12 @@
   background-color: #f8fafc;
   border: 1px solid rgb(226 232 240);
   border-radius: 0.75rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.1rem 1.25rem;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.25rem;
 }
 
 .dark .terms-refund-card {
@@ -529,14 +534,15 @@
 }
 
 .terms-refund-time {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: rgb(100 116 139);
-  margin-bottom: 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgb(51 65 85);
+  margin-bottom: 0;
+  line-height: 1.5;
 }
 
 .dark .terms-refund-time {
-  color: rgb(148 163 184);
+  color: rgb(226 232 240);
 }
 
 .terms-refund-percent {
@@ -564,7 +570,9 @@
 .terms-note {
   color: rgb(107 114 128);
   font-size: 0.875rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  line-height: 1.6;
+  text-align: left;
 }
 
 .dark .terms-note {

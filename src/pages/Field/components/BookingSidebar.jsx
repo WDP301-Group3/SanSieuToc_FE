@@ -127,7 +127,7 @@ const BookingSidebar = ({
                 onClick={() => handleSlotSelection(slot)}
               >
                 {slot.time}
-                {!slot.available && <span className="slot-badge">Đã đặt</span>}
+                {slot.isBooked && <span className="slot-badge">Đã đặt</span>}
               </button>
             ))}
           </div>

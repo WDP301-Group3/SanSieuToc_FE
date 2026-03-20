@@ -205,6 +205,10 @@
   text-align: right !important;
 }
 
+.customers-th-center {
+  text-align: center;
+}
+
 .customers-table tbody tr {
   border-bottom: 1px solid #f1f5f9;
   transition: background 0.15s;
@@ -222,6 +226,12 @@
   padding: 1rem 1.5rem;
   font-size: 0.875rem;
   vertical-align: middle;
+}
+
+.customer-count {
+  text-align: center;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 /* --- Customer Name Cell --- */
