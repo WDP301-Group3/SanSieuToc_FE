@@ -30,7 +30,9 @@ const useAuthPage = () => {
   };
 
   const [authMode, setAuthMode] = useState(getInitialAuthMode());
-  const [loginRole, setLoginRole] = useState('customer'); // 'customer' | 'manager'
+  const [loginRole, setLoginRole] = useState(
+    location.pathname.includes('/manager') ? 'manager' : 'customer'
+  ); // 'customer' | 'manager'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,7 +55,6 @@ const useAuthPage = () => {
   });
 
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
-  const [managerForgotActive, setManagerForgotActive] = useState(false);
 
   // ============================================================================
   // EFFECTS
@@ -67,6 +68,12 @@ const useAuthPage = () => {
       setAuthMode('forgot-password');
     } else {
       setAuthMode('login');
+    }
+    // Cập nhật role dựa trên route (manager vs customer)
+    if (path.includes('/manager')) {
+      setLoginRole('manager');
+    } else {
+      setLoginRole('customer');
     }
   }, [location.pathname]);
 
@@ -96,29 +103,19 @@ const useAuthPage = () => {
     setAuthMode(mode);
     setErrors({});
     setForgotPasswordSuccess(false);
-    setManagerForgotActive(false);
 
     if (mode === 'register') {
       navigate('/register', { replace: true });
     } else if (mode === 'forgot-password') {
-      navigate('/forgot-password', { replace: true });
+      // Điều hướng khác nhau cho customer vs manager
+      if (loginRole === 'manager') {
+        navigate('/manager/forgot-password', { replace: true });
+      } else {
+        navigate('/forgot-password', { replace: true });
+      }
     } else {
       navigate('/login', { replace: true });
     }
-  };
-
-  const switchToManagerForgot = () => {
-    setManagerForgotActive(true);
-    setForgotPasswordEmail('');
-    setForgotPasswordSuccess(false);
-    setErrors({});
-  };
-
-  const switchBackFromManagerForgot = () => {
-    setManagerForgotActive(false);
-    setForgotPasswordSuccess(false);
-    setForgotPasswordEmail('');
-    setErrors({});
   };
 
   // ============================================================================
@@ -384,13 +381,9 @@ const useAuthPage = () => {
     setForgotPasswordEmail,
     forgotPasswordSuccess,
     setForgotPasswordSuccess,
-    managerForgotActive,
-    setManagerForgotActive,
     handleLoginChange,
     handleRegisterChange,
     switchAuthMode,
-    switchToManagerForgot,
-    switchBackFromManagerForgot,
     handleLoginSubmit,
     handleManagerLoginSubmit,
     handleRegisterSubmit,

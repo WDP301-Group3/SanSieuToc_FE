@@ -29,13 +29,9 @@ const AuthPage = () => {
     setForgotPasswordEmail,
     forgotPasswordSuccess,
     setForgotPasswordSuccess,
-    managerForgotActive,
-    setManagerForgotActive,
     handleLoginChange,
     handleRegisterChange,
     switchAuthMode,
-    switchToManagerForgot,
-    switchBackFromManagerForgot,
     handleLoginSubmit,
     handleManagerLoginSubmit,
     handleRegisterSubmit,
@@ -90,7 +86,7 @@ const AuthPage = () => {
                 switchAuthMode={switchAuthMode}
               />
             )}
-            {authMode === 'login' && loginRole === 'manager' && !managerForgotActive && (
+            {authMode === 'login' && loginRole === 'manager' && (
               <ManagerLoginForm
                 loginData={loginData}
                 errors={errors}
@@ -99,25 +95,9 @@ const AuthPage = () => {
                 setShowPassword={setShowPassword}
                 handleLoginChange={handleLoginChange}
                 handleManagerLoginSubmit={handleManagerLoginSubmit}
-                onForgotPassword={switchToManagerForgot}
-              />
-            )}
-            {authMode === 'login' && loginRole === 'manager' && managerForgotActive && (
-              <ForgotPasswordForm
-                forgotPasswordEmail={forgotPasswordEmail}
-                setForgotPasswordEmail={setForgotPasswordEmail}
-                forgotPasswordSuccess={forgotPasswordSuccess}
-                setForgotPasswordSuccess={setForgotPasswordSuccess}
-                errors={errors}
-                setErrors={setErrors}
-                loading={loading}
-                handleForgotPasswordSubmit={handleManagerForgotPasswordSubmit}
-                switchAuthMode={(mode) => {
-                  if (mode === 'login') {
-                    switchBackFromManagerForgot();
-                  } else {
-                    switchAuthMode(mode);
-                  }
+                onForgotPassword={() => {
+                  setLoginRole('manager');
+                  switchAuthMode('forgot-password');
                 }}
               />
             )}
@@ -144,7 +124,11 @@ const AuthPage = () => {
                 errors={errors}
                 setErrors={setErrors}
                 loading={loading}
-                handleForgotPasswordSubmit={handleForgotPasswordSubmit}
+                handleForgotPasswordSubmit={
+                  loginRole === 'manager'
+                    ? handleManagerForgotPasswordSubmit
+                    : handleForgotPasswordSubmit
+                }
                 switchAuthMode={switchAuthMode}
               />
             )}
