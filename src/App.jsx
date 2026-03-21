@@ -7,6 +7,7 @@ import HomePage from './pages/Home/HomePage';
 import AuthPage from './pages/Auth/AuthPage'; // Unified Auth Interface
 import AboutPage from './pages/AboutPage';
 import TermsPage from './pages/TermsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Field Pages
@@ -38,10 +39,12 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
           
           {/* Auth Routes (inside MainLayout with Header/Footer) */}
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/manager/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
           {/* Forgot password routes tách rõ customer/manager */}
           <Route path="/forgot-password" element={<AuthPage />} />

@@ -235,6 +235,74 @@
   font-weight: 700;
 }
 
+/* Image Gallery (Carousel) */
+.image-gallery-carousel {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--surface-light);
+}
+
+.dark .image-gallery-carousel {
+  background: var(--surface-dark);
+}
+
+.image-gallery-carousel--empty {
+  padding: 0;
+}
+
+.carousel-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0b0f0b;
+  overflow: hidden; /* needed for sliding track */
+}
+
+/* Real sliding track */
+.carousel-track {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transform: translateX(-100%);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.carousel-track-slide {
+  width: 100%;
+  height: 100%;
+  flex: 0 0 100%;
+  display: flex;
+}
+
+.carousel-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* option (1): fill the viewport, may crop */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Keep Shopee-like preview consistent */
+.image-gallery-carousel--shopee .carousel-preview-img {
+  object-fit: cover;
+  display: block;
+  transition: opacity 600ms ease, transform 600ms ease;
+  will-change: opacity, transform;
+}
+
+/* Option (1): remove contain override on small screens */
+@media (max-width: 640px) {
+  .carousel-viewport {
+    aspect-ratio: 4 / 3;
+    background: #0b0f0b;
+  }
+}
+
 /* Detail Sections */
 .detail-section {
   padding-bottom: 2rem;
@@ -1253,4 +1321,223 @@
   .btn-write-review {
     width: 100%;
   }
+}
+
+/* Image Gallery (Shopee-like: thumbs bottom + zoom modal) */
+.image-gallery-carousel--shopee {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.dark .image-gallery-carousel--shopee {
+  background: var(--surface-dark);
+}
+
+.image-gallery-carousel--shopee .carousel-viewport {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Horizontal Thumbs at Bottom */
+.carousel-thumbs--bottom {
+  display: flex !important;
+  gap: 8px;
+  padding: 4px 0;
+  overflow-x: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--primary) transparent;
+}
+
+.carousel-thumbs--bottom::-webkit-scrollbar {
+  height: 4px;
+}
+
+.carousel-thumbs--bottom::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.carousel-thumbs--bottom .carousel-thumb {
+  flex: 0 0 80px; /* Fixed size for horizontal thumbs */
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+.carousel-thumbs--bottom .carousel-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-thumbs--bottom .carousel-thumb.is-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(19, 236, 19, 0.2);
+}
+
+.carousel-thumbs--bottom .carousel-thumb:hover {
+  opacity: 0.9;
+  border-color: var(--primary);
+}
+
+.image-gallery-carousel--shopee .carousel-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Fixed: use cover to fill the 16:9 box without black bars */
+  background: #000;
+}
+
+/* Zoom overlay */
+.gallery-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.gallery-zoom-modal {
+  width: min(1100px, 96vw);
+  max-height: 92vh;
+  background: #0b0f0b;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.gallery-zoom-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+
+.gallery-zoom-close:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.gallery-zoom-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.gallery-zoom-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.gallery-zoom-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gallery-zoom-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.gallery-zoom-btn .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+.gallery-zoom-counter {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.gallery-zoom-spacer {
+  flex: 1;
+}
+
+.gallery-zoom-level {
+  font-weight: 700;
+  min-width: 64px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.gallery-zoom-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: zoom-in;
+}
+
+.gallery-zoom-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 120ms ease;
+  transform-origin: 50% 50%;
+}
+
+.gallery-zoom-thumbs {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.gallery-zoom-thumb {
+  width: 84px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.gallery-zoom-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-zoom-thumb.is-active {
+  border-color: var(--primary);
 }

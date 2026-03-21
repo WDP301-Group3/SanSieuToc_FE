@@ -73,7 +73,13 @@ const useAuthPage = () => {
     if (path.includes('/manager')) {
       setLoginRole('manager');
     } else {
-      setLoginRole('customer');
+      // Chỉ reset về customer nếu KHÔNG phải path login chung hoặc register
+      // Tránh việc nhấp nháy khi đang ở manager mà path chưa cập nhật kịp
+      if (!path.includes('register') && path !== '/forgot-password' && path !== '/login') {
+         setLoginRole('customer');
+      } else if (path === '/login' || path === '/register' || path === '/forgot-password') {
+         setLoginRole('customer');
+      }
     }
   }, [location.pathname]);
 
@@ -99,7 +105,8 @@ const useAuthPage = () => {
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const switchAuthMode = (mode) => {
+  const switchAuthMode = (mode, targetRole = null) => {
+    const role = targetRole || loginRole;
     setAuthMode(mode);
     setErrors({});
     setForgotPasswordSuccess(false);
@@ -108,13 +115,17 @@ const useAuthPage = () => {
       navigate('/register', { replace: true });
     } else if (mode === 'forgot-password') {
       // Điều hướng khác nhau cho customer vs manager
-      if (loginRole === 'manager') {
+      if (role === 'manager') {
         navigate('/manager/forgot-password', { replace: true });
       } else {
         navigate('/forgot-password', { replace: true });
       }
     } else {
-      navigate('/login', { replace: true });
+      if (role === 'manager') {
+        navigate('/manager/login', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
     }
   };
 

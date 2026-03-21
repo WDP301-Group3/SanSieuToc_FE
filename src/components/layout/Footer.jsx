@@ -57,6 +57,11 @@ const Footer = () => {
                   {t('footer.terms')}
                 </Link>
               </li>
+              <li>
+                <Link className="footer-link" to="/privacy">
+                  {t('footer.privacy')}
+                </Link>
+              </li>
             </ul>
           </div>
 

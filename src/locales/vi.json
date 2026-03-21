@@ -18,6 +18,21 @@
     "viewDetails": "Xem chi tiết",
     "noData": "Không có dữ liệu"
   },
+  "fieldDetail": {
+    "gallery": {
+      "empty": "Chưa có ảnh",
+      "zoomHint": "Click để phóng to",
+      "chooseImage": "Chọn ảnh",
+      "viewImage": "Xem ảnh {{index}}",
+      "imageAlt": "Ảnh sân {{index}}",
+      "prev": "Ảnh trước",
+      "next": "Ảnh tiếp theo",
+      "openZoom": "Mở ảnh phóng to",
+      "counterLabel": "Số thứ tự ảnh",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ"
+    }
+  },
   "auth": {
     "login": "Đăng nhập",
     "register": "Đăng ký",
