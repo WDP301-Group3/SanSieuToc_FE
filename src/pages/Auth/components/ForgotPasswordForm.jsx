@@ -12,6 +12,7 @@ const ForgotPasswordForm = ({
   errors,
   setErrors,
   loading,
+  isManager,
   handleForgotPasswordSubmit,
   switchAuthMode,
 }) => {
@@ -22,8 +23,8 @@ const ForgotPasswordForm = ({
     return (
       <div className="auth-form-wrapper forgot-password-success">
         {/* Success Icon */}
-        <div className="success-icon-wrapper">
-          <span className="material-icons-outlined success-icon">
+        <div className={`success-icon-wrapper ${isManager ? 'manager-success-icon-wrapper' : ''}`}>
+          <span className={`material-icons-outlined success-icon ${isManager ? 'manager-success-icon' : ''}`}>
             check_circle
           </span>
         </div>
@@ -49,7 +50,7 @@ const ForgotPasswordForm = ({
           <button
             type="button"
             onClick={() => switchAuthMode('login')}
-            className="success-btn-primary"
+            className={`success-btn-primary ${isManager ? 'manager-success-btn-primary' : ''}`}
           >
             <span className="material-icons-outlined">arrow_back</span>
             {t('auth.forgot.backToLogin')}
@@ -71,11 +72,11 @@ const ForgotPasswordForm = ({
 
   // Initial state - email input form
   return (
-    <div className="auth-form-wrapper">
+    <div className={`auth-form-wrapper ${isManager ? 'manager-auth-form' : ''}`}>
       {/* Header with Icon */}
-      <div className="auth-header forgot-password-header">
-        <div className="forgot-password-icon-wrapper">
-          <span className="material-icons-outlined forgot-password-icon">
+      <div className={`auth-header forgot-password-header ${isManager ? 'manager-forgot-password-header' : ''}`}>
+        <div className={`forgot-password-icon-wrapper ${isManager ? 'manager-forgot-password-icon-wrapper' : ''}`}>
+          <span className={`material-icons-outlined forgot-password-icon ${isManager ? 'manager-forgot-password-icon' : ''}`}>
             lock_reset
           </span>
         </div>
@@ -118,7 +119,7 @@ const ForgotPasswordForm = ({
         <button
           type="submit"
           disabled={loading}
-          className="auth-submit-btn"
+          className={`auth-submit-btn ${isManager ? 'manager-submit-btn' : ''}`}
         >
           {loading ? (
             <>

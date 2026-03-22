@@ -18,6 +18,21 @@
     "viewDetails": "View Details",
     "noData": "No data available"
   },
+  "fieldDetail": {
+    "gallery": {
+      "empty": "No images",
+      "zoomHint": "Click to zoom",
+      "chooseImage": "Choose image",
+      "viewImage": "View image {{index}}",
+      "imageAlt": "Field image {{index}}",
+      "prev": "Previous image",
+      "next": "Next image",
+      "openZoom": "Open zoom view",
+      "counterLabel": "Image position",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    }
+  },
   "auth": {
     "login": "Login",
     "register": "Register",

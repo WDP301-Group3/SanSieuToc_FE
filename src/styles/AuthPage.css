@@ -1050,3 +1050,61 @@
     padding: 3rem 1.5rem;
   }
 }
+/* Manager Specific Forgot Password Styles */
+.manager-forgot-password-icon-wrapper {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(146, 64, 14, 0.15) 100%) !important;
+}
+
+.manager-forgot-password-icon {
+  color: #d97706 !important;
+}
+
+.dark .manager-forgot-password-icon {
+  color: #fbbf24 !important;
+}
+
+.manager-success-icon-wrapper {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(146, 64, 14, 0.1) 100%) !important;
+}
+
+.manager-success-icon {
+  color: #f59e0b !important;
+}
+
+.manager-success-btn-primary {
+  background: linear-gradient(135deg, #f59e0b 0%, #92400e 100%) !important;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.25) !important;
+}
+
+.manager-success-btn-primary:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+}
+
+.manager-auth-form .auth-title {
+  color: #92400e;
+}
+
+.dark .manager-auth-form .auth-title {
+  color: #f59e0b;
+}
+
+.manager-auth-form .form-label .material-icons-outlined {
+  color: #f59e0b;
+}
+
+.manager-auth-form .form-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.manager-auth-form .auth-back-link {
+  color: #d97706;
+}
+
+.manager-auth-form .auth-back-link:hover {
+  color: #f59e0b;
+}
+
+.dark .manager-auth-form .auth-back-link {
+  color: #fbbf24;
+}

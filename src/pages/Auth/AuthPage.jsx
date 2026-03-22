@@ -48,7 +48,7 @@ const AuthPage = () => {
           <div className="auth-mode-tabs">
             <button
               type="button"
-              onClick={() => { switchAuthMode('login'); setLoginRole('customer'); }}
+              onClick={() => { switchAuthMode('login', 'customer'); setLoginRole('customer'); }}
               className={`auth-mode-tab ${authMode === 'login' && loginRole === 'customer' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>person</span>
@@ -64,7 +64,7 @@ const AuthPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => { switchAuthMode('login'); setLoginRole('manager'); setErrors({}); }}
+              onClick={() => { switchAuthMode('login', 'manager'); setLoginRole('manager'); setErrors({}); }}
               className={`auth-mode-tab manager-tab ${authMode === 'login' && loginRole === 'manager' ? 'active manager-tab-active' : ''}`}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }}>manage_accounts</span>
@@ -124,6 +124,7 @@ const AuthPage = () => {
                 errors={errors}
                 setErrors={setErrors}
                 loading={loading}
+                isManager={loginRole === 'manager'}
                 handleForgotPasswordSubmit={
                   loginRole === 'manager'
                     ? handleManagerForgotPasswordSubmit
