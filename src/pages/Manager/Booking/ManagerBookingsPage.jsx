@@ -341,7 +341,7 @@ const ManagerBookingsPage = () => {
                     <div className="booking-price">
                       <p className="price-total">{formatCurrency(booking.totalPrice)}</p>
                       <p className="price-deposit">Cọc: {formatCurrency(booking.depositAmount)}</p>
-                      <p className="booking-date">{new Date(booking.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <p className="booking-date">Tạo lúc: {booking.createdAt ? formatDateTime(booking.createdAt) : 'N/A'}</p>
                     </div>
 
                     {/* Slot count */}
