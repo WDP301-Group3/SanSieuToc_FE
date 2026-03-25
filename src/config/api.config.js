@@ -91,6 +91,7 @@ export const API_CONFIG = {
       CREATE:       '/api/customer/bookings',                              // POST (auth)
       MY_BOOKINGS:  '/api/customer/bookings/my-bookings',                  // GET  (auth)
       CANCEL: (bookingId) => `/api/customer/bookings/${bookingId}/cancel`, // PUT  (auth)
+      RENEW:  (bookingId) => `/api/customer/bookings/${bookingId}/renew`,  // POST (auth)
     },
 
     // ==========================================
