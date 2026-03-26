@@ -1,8 +1,9 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCustomerById, updateCustomerStatus, getManagerBookings } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/ManagerCustomerDetailPage.css';
+import '../../../styles/ManagerFieldsPage.css';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '—';
@@ -26,8 +27,8 @@ const formatCurrency = (amount) =>
  * Status config — khớp với BE: 'Active' | 'Banned'
  */
 const STATUS_CONFIG = {
-  Active: { label: 'Hoạt động', className: 'customer-status-active' },
-  Banned: { label: 'Đã bị khóa', className: 'customer-status-banned' },
+  Active: { label: 'Hoạt động', className: 'active' },
+  Banned: { label: 'Đã bị khóa', className: 'closed' },
 };
 
 const BOOKING_STATUS_CONFIG = {
@@ -184,8 +185,8 @@ const ManagerCustomerDetailPage = () => {
                   <span>{customer.address}</span>
                 </div>
               )}
-              <span className={`customer-status-badge ${statusConfig.className}`}>
-                {statusConfig.label}
+              <span className={`status-badge-field ${statusConfig.className}`}>
+                <span className="status-dot" />{statusConfig.label}
               </span>
             </div>
           </div>

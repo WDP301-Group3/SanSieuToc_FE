@@ -1,4 +1,4 @@
-﻿/* ===== Admin Fields Page ===== */
+/* ===== Admin Fields Page ===== */
 .manager-fields-page {
   display: flex;
   flex-direction: column;
@@ -402,6 +402,7 @@
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .status-badge-field .status-dot {
@@ -432,13 +433,13 @@
 }
 
 .status-badge-field.closed {
-  background: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 .status-badge-field.closed .status-dot {
-  background: #94a3b8;
+  background: #ef4444;
 }
 
 /* --- Field Price --- */
@@ -590,11 +591,11 @@
   color: #f1f5f9;
 }
 
-.dark .fields-page-header h1 {
+.dark .fields-page-title {
   color: #f1f5f9;
 }
 
-.dark .fields-page-header p {
+.dark .fields-page-subtitle {
   color: #94a3b8;
 }
 
@@ -620,21 +621,21 @@
   border-color: #2d4a2d;
 }
 
-.dark .search-input-wrapper input {
+.dark .fields-search-input {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
 }
 
-.dark .search-input-wrapper input::placeholder {
+.dark .fields-search-input::placeholder {
   color: #6b7280;
 }
 
-.dark .search-input-wrapper .material-symbols-outlined {
+.dark .fields-search-icon {
   color: #6b7280;
 }
 
-.dark .filter-select {
+.dark .fields-select {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
@@ -651,7 +652,7 @@
   color: #4ade80;
 }
 
-.dark .fields-table-container {
+.dark .fields-table-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
@@ -723,22 +724,67 @@
   border-color: #7f1d1d;
 }
 
-.dark .pagination-container {
+.dark .status-badge-field {
+  border-color: #2d4a2d;
+  background: #1a2a1a;
+  color: #94a3b8;
+}
+.dark .status-badge-field .status-dot {
+  background: #94a3b8;
+}
+
+.dark .status-badge-field.active {
+  background: #0f291e;
+  color: #34d399;
+  border-color: #059669;
+}
+.dark .status-badge-field.active .status-dot {
+  background: #10b981;
+}
+
+.dark .status-badge-field.maintenance {
+  background: #3b2a0f;
+  color: #fbbf24;
+  border-color: #b45309;
+}
+.dark .status-badge-field.maintenance .status-dot {
+  background: #f59e0b;
+}
+
+.dark .status-badge-field.closed {
+  background: #2d1f1f;
+  color: #f87171;
+  border-color: #991b1b;
+}
+.dark .status-badge-field.closed .status-dot {
+  background: #ef4444;
+}
+
+.dark .fields-pagination {
+  background: #1a2a1a;
   border-top-color: #2d4a2d;
 }
 
-.dark .pagination-btn {
+.dark .fields-pagination-info {
+  color: #94a3b8;
+}
+
+.dark .fields-pagination-bold {
+  color: #f1f5f9;
+}
+
+.dark .fields-page-btn {
   background: #1a2a1a;
   border-color: #2d4a2d;
   color: #94a3b8;
 }
 
-.dark .pagination-btn:hover {
+.dark .fields-page-btn:hover {
   background: #243524;
   color: #f1f5f9;
 }
 
-.dark .pagination-btn.active {
+.dark .fields-page-btn.active {
   background: #14532d;
   color: #4ade80;
   border-color: #166534;

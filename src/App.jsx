@@ -30,9 +30,12 @@ import ManagerCustomerDetailPage from './pages/Manager/Customer/ManagerCustomerD
 import ManagerFeedbackPage from './pages/Manager/Feedback/ManagerFeedbackPage';
 import ManagerBookingsPage from './pages/Manager/Booking/ManagerBookingsPage';
 
+import BannedModal from './components/common/BannedModal';
+
 function App() {
   return (
     <Router>
+      <BannedModal />
       <Routes>
         {/* Public Routes with MainLayout */}
         <Route element={<MainLayout />}>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { searchFields } from '../../../services/fieldService';
 import { deleteField, getManagerCategories } from '../../../services/managerService';
@@ -155,11 +155,26 @@ const ManagerFieldsPage = () => {
   }), [allFields, searchTerm, categoryFilter, statusFilter]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredFields.length / fieldsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredFields.length / fieldsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
   const paginatedFields = filteredFields.slice(
-    (currentPage - 1) * fieldsPerPage,
-    currentPage * fieldsPerPage
+    (safePage - 1) * fieldsPerPage,
+    safePage * fieldsPerPage
   );
+
+  const getPageNumbers = () => {
+    if (totalPages <= 4) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    let start = safePage - 1;
+    let end = safePage + 2;
+    if (start < 1) {
+      start = 1;
+      end = 4;
+    } else if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - 3;
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   // Delete handler
   const handleDeleteClick = (field) => setDeleteConfirm(field);
@@ -297,7 +312,7 @@ const ManagerFieldsPage = () => {
                     </td>
                     <td><div className="field-price">{field.priceFormatted}</div></td>
                     <td>
-                      <span className={`status-badge ${field.statusKey}`}>
+                      <span className={`status-badge-field ${field.statusKey}`}>
                         <span className="status-dot" />{field.statusLabel}
                       </span>
                     </td>
@@ -325,28 +340,36 @@ const ManagerFieldsPage = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {!loading && totalPages > 1 && (
-          <div className="fields-pagination">
-            <div className="fields-pagination-info">
-              Hiển thị <span className="fields-pagination-bold">
-                {filteredFields.length === 0 ? 0 : (currentPage - 1) * fieldsPerPage + 1}-{Math.min(currentPage * fieldsPerPage, filteredFields.length)}
-              </span> trong <span className="fields-pagination-bold">{filteredFields.length}</span> sân
-            </div>
-            <div className="fields-pagination-buttons">
-              <button className="fields-page-btn" disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}>Trước</button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button key={page}
-                  className={`fields-page-btn ${currentPage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(page)}>{page}</button>
-              ))}
-              <button className="fields-page-btn" disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}>Sau</button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="manager-pagination-centered">
+          <button
+            className="page-btn"
+            disabled={safePage <= 1}
+            onClick={() => setCurrentPage(safePage - 1)}
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          {getPageNumbers().map((p) => (
+            <button
+              key={p}
+              className={`page-btn ${p === safePage ? 'active' : ''}`}
+              onClick={() => setCurrentPage(p)}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            className="page-btn"
+            disabled={safePage >= totalPages}
+            onClick={() => setCurrentPage(safePage + 1)}
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      )}
 
       {/* Delete Confirm Modal */}
       {deleteConfirm && (

@@ -72,7 +72,20 @@ axiosInstance.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      console.error('Access denied:', error.response.data.message);
+      const data = error.response.data;
+      
+      // Account banned — dispatch event for AuthContext to handle
+      if (data.code === 'ACCOUNT_BANNED') {
+        tokenManager.clearAuth();
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.dispatchEvent(new CustomEvent('account-banned', {
+          detail: { message: data.message }
+        }));
+        return Promise.reject(error);
+      }
+      
+      console.error('Access denied:', data.message);
     }
 
     // Handle 404 Not Found

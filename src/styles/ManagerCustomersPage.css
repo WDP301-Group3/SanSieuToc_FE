@@ -1,4 +1,4 @@
-﻿/* ===== Admin Customers Page ===== */
+/* ===== Admin Customers Page ===== */
 .manager-customers-page {
   display: flex;
   flex-direction: column;
@@ -294,53 +294,7 @@
   font-size: 0.8125rem;
 }
 
-/* --- Status Badge --- */
-.customer-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
 
-.customer-status-badge .status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.customer-status-badge.active {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.customer-status-badge.active .status-dot {
-  background: #10b981;
-}
-
-.customer-status-badge.inactive {
-  background: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
-}
-
-.customer-status-badge.inactive .status-dot {
-  background: #94a3b8;
-}
-
-.customer-status-badge.banned {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.customer-status-badge.banned .status-dot {
-  background: #ef4444;
-}
 
 /* --- Action Buttons --- */
 .customer-actions {
@@ -592,28 +546,28 @@
   color: #f1f5f9;
 }
 
-.dark .customers-page-header h1 {
+.dark .customers-page-title {
   color: #f1f5f9;
 }
 
-.dark .customers-page-header p {
+.dark .customers-page-subtitle {
   color: #94a3b8;
 }
 
-.dark .customers-stats-row .stat-card {
+.dark .stat-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
 
-.dark .customers-stats-row .stat-card:hover {
+.dark .stat-card:hover {
   border-color: #4ade80;
 }
 
-.dark .customers-stats-row .stat-label {
+.dark .stat-label {
   color: #94a3b8;
 }
 
-.dark .customers-stats-row .stat-value {
+.dark .stat-value {
   color: #f1f5f9;
 }
 
@@ -622,23 +576,23 @@
   border-color: #2d4a2d;
 }
 
-.dark .customers-toolbar input {
+.dark .customers-search-input {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
 }
 
-.dark .customers-toolbar input::placeholder {
+.dark .customers-search-input::placeholder {
   color: #6b7280;
 }
 
-.dark .customers-toolbar select {
+.dark .customers-select {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
 }
 
-.dark .customers-table-container {
+.dark .customers-table-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
@@ -707,22 +661,31 @@
   background: #1e3a1e;
 }
 
-.dark .pagination-container {
+.dark .customers-pagination {
+  background: #1a2a1a;
   border-top-color: #2d4a2d;
 }
 
-.dark .pagination-btn {
+.dark .customers-pagination-info {
+  color: #94a3b8;
+}
+
+.dark .customers-pagination-bold {
+  color: #f1f5f9;
+}
+
+.dark .customers-page-btn {
   background: #1a2a1a;
   border-color: #2d4a2d;
   color: #94a3b8;
 }
 
-.dark .pagination-btn:hover {
+.dark .customers-page-btn:hover {
   background: #243524;
   color: #f1f5f9;
 }
 
-.dark .pagination-btn.active {
+.dark .customers-page-btn.active {
   background: #14532d;
   color: #4ade80;
   border-color: #166534;

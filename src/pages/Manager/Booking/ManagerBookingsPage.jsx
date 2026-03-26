@@ -26,45 +26,45 @@ const formatCurrency = (amount) =>
 // ─── config ──────────────────────────────────────────────────────────────────
 
 const BOOKING_STATUS_CONFIG = {
-  Pending:   { label: 'Chờ xác nhận', className: 'status-pending' },
-  Confirmed: { label: 'Đã xác nhận',  className: 'status-confirmed' },
-  Cancelled: { label: 'Đã hủy',       className: 'status-cancelled' },
+  Pending: { label: 'Chờ xác nhận', className: 'status-pending' },
+  Confirmed: { label: 'Đã xác nhận', className: 'status-confirmed' },
+  Cancelled: { label: 'Đã hủy', className: 'status-cancelled' },
 };
 
 const PAYMENT_STATUS_CONFIG = {
   Unpaid: { label: 'Chưa thanh toán', className: 'payment-unpaid' },
-  Paid:   { label: 'Đã thanh toán',   className: 'payment-paid' },
+  Paid: { label: 'Đã thanh toán', className: 'payment-paid' },
 };
 
 const DETAIL_STATUS_CONFIG = {
-  Active:    { label: 'Đang hoạt động', className: 'detail-active' },
-  Cancelled: { label: 'Đã hủy',         className: 'detail-cancelled' },
-  Completed: { label: 'Hoàn thành',     className: 'detail-completed' },
+  Active: { label: 'Đang hoạt động', className: 'detail-active' },
+  Cancelled: { label: 'Đã hủy', className: 'detail-cancelled' },
+  Completed: { label: 'Hoàn thành', className: 'detail-completed' },
 };
 
 const BOOKING_FILTERS = [
-  { key: '',          label: 'Tất cả' },
-  { key: 'Pending',   label: 'Chờ xác nhận' },
+  { key: '', label: 'Tất cả' },
+  { key: 'Pending', label: 'Chờ xác nhận' },
   { key: 'Confirmed', label: 'Đã xác nhận' },
   { key: 'Cancelled', label: 'Đã hủy' },
 ];
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 5;
 
 // ─── component ───────────────────────────────────────────────────────────────
 
 const ManagerBookingsPage = () => {
   const notification = useNotification();
 
-  const [bookings, setBookings]           = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState(null);
-  const [searchTerm, setSearchTerm]       = useState('');
-  const [statusFilter, setStatusFilter]   = useState('');
-  const [currentPage, setCurrentPage]     = useState(1);
-  const [expandedId, setExpandedId]       = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedId, setExpandedId] = useState(null);
   const [actionLoading, setActionLoading] = useState(null); // bookingId or detailId being processed
-  const [confirmModal, setConfirmModal]   = useState(null); // { type, bookingId?, detailId?, message, onConfirm }
+  const [confirmModal, setConfirmModal] = useState(null); // { type, bookingId?, detailId?, message, onConfirm }
 
   // ── fetch ──────────────────────────────────────────────────────────────────
 
@@ -105,9 +105,23 @@ const ManagerBookingsPage = () => {
     return list;
   }, [bookings, statusFilter, searchTerm]);
 
-  const totalPages   = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const safePage     = Math.min(currentPage, totalPages);
-  const paginated    = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginated = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+
+  const getPageNumbers = () => {
+    if (totalPages <= 4) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    let start = safePage - 1;
+    let end = safePage + 2;
+    if (start < 1) {
+      start = 1;
+      end = 4;
+    } else if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - 3;
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   const handleSearchChange = (e) => { setSearchTerm(e.target.value); setCurrentPage(1); };
   const handleFilterChange = (key) => { setStatusFilter(key); setCurrentPage(1); };
@@ -115,8 +129,8 @@ const ManagerBookingsPage = () => {
   // ── stats ─────────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => ({
-    total:     bookings.length,
-    pending:   bookings.filter((b) => b.status === 'Pending').length,
+    total: bookings.length,
+    pending: bookings.filter((b) => b.status === 'Pending').length,
     confirmed: bookings.filter((b) => b.status === 'Confirmed').length,
     cancelled: bookings.filter((b) => b.status === 'Cancelled').length,
   }), [bookings]);
@@ -217,7 +231,7 @@ const ManagerBookingsPage = () => {
       {/* Page title */}
       <div className="bookings-page-header">
         <h1 className="bookings-page-title">
-          <span className="material-symbols-outlined">calendar_month</span>
+
           Quản lý đặt sân
         </h1>
         <p className="bookings-page-subtitle">
@@ -225,34 +239,22 @@ const ManagerBookingsPage = () => {
         </p>
       </div>
       {/* Stats bar */}
-      <div className="manager-stats-grid">
-        <div className="manager-stat-card">
-          <span className="material-symbols-outlined stat-icon blue">calendar_month</span>
-          <div>
-            <p className="stat-value">{stats.total}</p>
-            <p className="stat-label">Tổng đặt sân</p>
-          </div>
+      <div className="fields-stats">
+        <div className="field-stat-card">
+          <div className="field-stat-icon total"><span className="material-symbols-outlined">calendar_month</span></div>
+          <div><div className="field-stat-value">{stats.total}</div><div className="field-stat-label">Tổng đặt sân</div></div>
         </div>
-        <div className="manager-stat-card">
-          <span className="material-symbols-outlined stat-icon yellow">schedule</span>
-          <div>
-            <p className="stat-value">{stats.pending}</p>
-            <p className="stat-label">Chờ xác nhận</p>
-          </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon maintenance"><span className="material-symbols-outlined">schedule</span></div>
+          <div><div className="field-stat-value">{stats.pending}</div><div className="field-stat-label">Chờ xác nhận</div></div>
         </div>
-        <div className="manager-stat-card">
-          <span className="material-symbols-outlined stat-icon green">check_circle</span>
-          <div>
-            <p className="stat-value">{stats.confirmed}</p>
-            <p className="stat-label">Đã xác nhận</p>
-          </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon active"><span className="material-symbols-outlined">check_circle</span></div>
+          <div><div className="field-stat-value">{stats.confirmed}</div><div className="field-stat-label">Đã xác nhận</div></div>
         </div>
-        <div className="manager-stat-card">
-          <span className="material-symbols-outlined stat-icon red">cancel</span>
-          <div>
-            <p className="stat-value">{stats.cancelled}</p>
-            <p className="stat-label">Đã hủy</p>
-          </div>
+        <div className="field-stat-card">
+          <div className="field-stat-icon closed"><span className="material-symbols-outlined">cancel</span></div>
+          <div><div className="field-stat-value">{stats.cancelled}</div><div className="field-stat-label">Đã hủy</div></div>
         </div>
       </div>
 
@@ -309,8 +311,8 @@ const ManagerBookingsPage = () => {
             {paginated.map((booking) => {
               const bookingStatus = BOOKING_STATUS_CONFIG[booking.status] || { label: booking.status, className: '' };
               const paymentStatus = PAYMENT_STATUS_CONFIG[booking.statusPayment] || { label: booking.statusPayment, className: '' };
-              const isExpanded    = expandedId === booking.id;
-              const isActing      = actionLoading === booking.id;
+              const isExpanded = expandedId === booking.id;
+              const isActing = actionLoading === booking.id;
 
               return (
                 <div key={booking.id} className={`booking-card ${isExpanded ? 'expanded' : ''}`}>
@@ -362,45 +364,45 @@ const ManagerBookingsPage = () => {
                   {(booking.status === 'Pending' ||
                     (booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid') ||
                     isActing) && (
-                    <div className="booking-actions">
-                      {booking.status === 'Pending' && (
-                        <>
+                      <div className="booking-actions">
+                        {booking.status === 'Pending' && (
+                          <>
+                            <button
+                              className="btn-action btn-success"
+                              disabled={isActing}
+                              onClick={(e) => { e.stopPropagation(); handleConfirmDeposit(booking.id); }}
+                              title="Đã nhận tiền cọc → Xác nhận booking"
+                            >
+                              <span className="material-symbols-outlined">check_circle</span>
+                              Xác nhận cọc
+                            </button>
+                            <button
+                              className="btn-action btn-danger"
+                              disabled={isActing}
+                              onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking.id); }}
+                              title="Không nhận được cọc → Hủy booking"
+                            >
+                              <span className="material-symbols-outlined">cancel</span>
+                              Hủy booking
+                            </button>
+                          </>
+                        )}
+                        {booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid' && (
                           <button
                             className="btn-action btn-success"
                             disabled={isActing}
-                            onClick={(e) => { e.stopPropagation(); handleConfirmDeposit(booking.id); }}
-                            title="Đã nhận tiền cọc → Xác nhận booking"
+                            onClick={(e) => { e.stopPropagation(); handleConfirmPayment(booking.id); }}
+                            title="Khách đã thanh toán đủ tiền sân"
                           >
-                            <span className="material-symbols-outlined">check_circle</span>
-                            Xác nhận cọc
+                            <span className="material-symbols-outlined">paid</span>
+                            Xác nhận thanh toán
                           </button>
-                          <button
-                            className="btn-action btn-danger"
-                            disabled={isActing}
-                            onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking.id); }}
-                            title="Không nhận được cọc → Hủy booking"
-                          >
-                            <span className="material-symbols-outlined">cancel</span>
-                            Hủy booking
-                          </button>
-                        </>
-                      )}
-                      {booking.status === 'Confirmed' && booking.statusPayment === 'Unpaid' && (
-                        <button
-                          className="btn-action btn-success"
-                          disabled={isActing}
-                          onClick={(e) => { e.stopPropagation(); handleConfirmPayment(booking.id); }}
-                          title="Khách đã thanh toán đủ tiền sân"
-                        >
-                          <span className="material-symbols-outlined">paid</span>
-                          Xác nhận thanh toán
-                        </button>
-                      )}
-                      {isActing && (
-                        <span className="material-symbols-outlined spin action-spinner">progress_activity</span>
-                      )}
-                    </div>
-                  )}
+                        )}
+                        {isActing && (
+                          <span className="material-symbols-outlined spin action-spinner">progress_activity</span>
+                        )}
+                      </div>
+                    )}
 
                   {/* Expanded: booking detail slots */}
                   {isExpanded && (
@@ -486,8 +488,8 @@ const ManagerBookingsPage = () => {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="manager-pagination">
+          {!loading && totalPages > 1 && (
+            <div className="manager-pagination-centered">
               <button
                 className="page-btn"
                 disabled={safePage <= 1}
@@ -495,7 +497,7 @@ const ManagerBookingsPage = () => {
               >
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              {getPageNumbers().map((p) => (
                 <button
                   key={p}
                   className={`page-btn ${p === safePage ? 'active' : ''}`}
@@ -511,9 +513,6 @@ const ManagerBookingsPage = () => {
               >
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
-              <span className="page-info">
-                {safePage}/{totalPages} · {filtered.length} booking
-              </span>
             </div>
           )}
         </>
