@@ -110,6 +110,15 @@ const useFieldDetail = () => {
 
   // ========== Computed Values ==========
 
+  const maxBookingYear = useMemo(() => {
+    const now = new Date();
+    return now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+  }, []);
+
+  const maxBookingDateStr = useMemo(() => {
+    return `${maxBookingYear}-12-31`;
+  }, [maxBookingYear]);
+
   const calculateRecurringDates = useMemo(() => {
     if (!selectedDate) return [];
     if (recurringType === 'once') return [selectedDate];
@@ -199,6 +208,18 @@ const useFieldDetail = () => {
       return;
     }
 
+    if (selectedDateValue && selectedDateValue > maxBookingDateStr) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const isDecember = now.getMonth() === 11;
+      notification.warning(
+        isDecember
+          ? `Chỉ có thể đặt sân đến hết năm ${maxBookingYear}.`
+          : `Hiện chỉ mở đặt sân đến hết năm ${currentYear}. Năm ${currentYear + 1} sẽ mở đặt từ tháng 12.`
+      );
+      return;
+    }
+
     setSelectedDate(selectedDateValue);
     setSelectedSlots([]);
   };
@@ -272,6 +293,19 @@ const useFieldDetail = () => {
     today.setHours(0, 0, 0, 0);
     if (new Date(selectedDate) < today) {
       notification.error('Không thể đặt sân cho ngày trong quá khứ');
+      return;
+    }
+
+    const outOfWindowDate = calculateRecurringDates.find(d => d > maxBookingDateStr);
+    if (outOfWindowDate) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const isDecember = now.getMonth() === 11;
+      notification.warning(
+        isDecember
+          ? `Lịch lặp có ngày vượt quá năm ${maxBookingYear}. Vui lòng chọn ngày hoặc thời gian lặp khác.`
+          : `Hiện chỉ mở đặt sân đến hết năm ${currentYear}. Năm ${currentYear + 1} sẽ mở đặt từ tháng 12.`
+      );
       return;
     }
 
@@ -363,6 +397,7 @@ const useFieldDetail = () => {
     mergedTimeRanges,
     timeSlots,
     ratingBreakdown,
+    maxBookingDateStr,
 
     // Handlers
     handleOpenMap,

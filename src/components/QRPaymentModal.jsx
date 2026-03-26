@@ -88,7 +88,7 @@ const QRPaymentModal = ({
             <span className="qr-modal-price-value">{totalPrice?.toLocaleString('vi-VN')}đ</span>
           </div>
           <div className="qr-modal-price-row deposit">
-            <span>Tiền cọc cần trả (20%):</span>
+            <span>Tiền cọc cần trả (30%):</span>
             <span className="qr-modal-deposit-value">{depositAmount?.toLocaleString('vi-VN')}đ</span>
           </div>
         </div>
@@ -149,7 +149,7 @@ const QRPaymentModal = ({
         {/* Warning */}
         <div className="qr-modal-warning">
           <span className="material-symbols-outlined">warning</span>
-          <p>Vui lòng thanh toán cọc trong vòng <strong>24 giờ</strong>. Booking sẽ tự động hủy nếu không nhận được thanh toán.</p>
+          <p>Vui lòng thanh toán cọc trong vòng <strong>24 giờ</strong>. Booking sẽ bị hủy nếu không nhận được thanh toán.</p>
         </div>
 
         {/* Footer */}

@@ -45,6 +45,7 @@ const FieldDetailPage = () => {
     mergedTimeRanges,
     timeSlots,
     ratingBreakdown,
+    maxBookingDateStr,
     handleOpenMap,
     handleDateChange,
     handleSlotSelection,
@@ -154,6 +155,7 @@ const FieldDetailPage = () => {
             <BookingSidebar
               field={field}
               selectedDate={selectedDate}
+              maxDate={maxBookingDateStr}
               selectedSlots={selectedSlots}
               recurringType={recurringType}
               setRecurringType={setRecurringType}

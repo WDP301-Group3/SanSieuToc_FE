@@ -546,7 +546,7 @@ const BookingDetailPage = () => {
               <div className="bh-price-section">
                 {depositDisplay > 0 && (
                   <div className="bh-price-row">
-                    <span>Tiền cọc (20%)</span>
+                    <span>Tiền cọc (30%)</span>
                     <span>{depositDisplay.toLocaleString('vi-VN')}đ</span>
                   </div>
                 )}
