@@ -132,7 +132,15 @@ const ManagerSettingsPage = () => {
       setProfileError('Tên không được để trống.');
       return;
     }
-    if (profileForm.phone && !/^(0|\+84)[3-9]\d{8}$/.test(profileForm.phone)) {
+    if (!String(user?.email || '').trim()) {
+      setProfileError('Email không được để trống.');
+      return;
+    }
+    if (!profileForm.phone.trim()) {
+      setProfileError('Số điện thoại không được để trống.');
+      return;
+    }
+    if (!/^(0|\+84)[3-9]\d{8}$/.test(profileForm.phone.trim())) {
       setProfileError('Số điện thoại không hợp lệ (VD: 0901234567).');
       return;
     }
@@ -141,7 +149,8 @@ const ManagerSettingsPage = () => {
     try {
       const payload = {
         name: profileForm.name.trim(),
-        phone: profileForm.phone,
+        phone: profileForm.phone.trim(),
+        email: String(user?.email || '').trim(),
       };
       // Chỉ gửi image/imageQR nếu user đã chọn file mới
       if (avatarBase64 !== null) payload.image = avatarBase64;
@@ -333,7 +342,7 @@ const ManagerSettingsPage = () => {
                 />
               </div>
               <div className="ms-form-field">
-                <label className="ms-form-label">Email</label>
+                <label className="ms-form-label">Email *</label>
                 <input
                   type="email"
                   value={user?.email || ''}
@@ -343,13 +352,14 @@ const ManagerSettingsPage = () => {
                 />
               </div>
               <div className="ms-form-field">
-                <label className="ms-form-label">Số điện thoại</label>
+                <label className="ms-form-label">Số điện thoại *</label>
                 <input
                   type="tel"
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
                   className="ms-input"
                   placeholder="0901234567"
+                  required
                 />
               </div>
             </div>

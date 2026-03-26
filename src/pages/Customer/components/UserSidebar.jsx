@@ -71,6 +71,8 @@ const UserSidebar = ({ activeTab, onTabChange, userName, userImage }) => {
       // Call API to update profile with new image
       const response = await authService.updateProfile({
         name: user?.name || userName,
+        phone: user?.phone,
+        email: user?.email,
         image: base64,
       });
 

@@ -41,8 +41,20 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
       notification.error('Tên không được để trống');
       return;
     }
-    if (formData.phone && !/^(0|\+84)[0-9]{9,10}$/.test(formData.phone)) {
+    if (!formData.phone.trim()) {
+      notification.error('Số điện thoại không được để trống');
+      return;
+    }
+    if (!/^(0|\+84)[0-9]{9,10}$/.test(formData.phone.trim())) {
       notification.error('Số điện thoại không hợp lệ (VD: 0901234567)');
+      return;
+    }
+    if (!formData.email.trim()) {
+      notification.error('Email không được để trống');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      notification.error('Email không hợp lệ (VD: example@gmail.com)');
       return;
     }
 
@@ -51,6 +63,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
       const response = await authService.updateProfile({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
+        email: formData.email.trim(),
         address: formData.address.trim(),
       });
 
@@ -61,6 +74,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
           ...user,
           name: updatedCustomer?.name || formData.name.trim(),
           phone: updatedCustomer?.phone || formData.phone.trim(),
+          email: updatedCustomer?.email || formData.email.trim(),
           address: updatedCustomer?.address || formData.address.trim(),
         });
         notification.success('Cập nhật thông tin thành công!');
@@ -134,6 +148,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
                 value={formData.name}
                 onChange={handleChange}
                 disabled={!isEditing}
+                required
               />
             </label>
 
@@ -146,6 +161,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
                 value={formData.phone}
                 onChange={handleChange}
                 disabled={!isEditing}
+                required
               />
             </label>
 
@@ -158,6 +174,7 @@ const ProfileTab = ({ user, upcomingBookings, onTabChange }) => {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
+                required
               />
             </label>
 

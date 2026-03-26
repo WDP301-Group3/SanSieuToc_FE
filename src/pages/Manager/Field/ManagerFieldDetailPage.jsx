@@ -305,7 +305,7 @@ const ManagerFieldDetailPage = () => {
               <ul className="afd-rules-list">
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>
-                  <span>Đặt cọc tối thiểu 20% giá trị giờ thuê.</span>
+                  <span>Đặt cọc tối thiểu 30% giá trị giờ thuê.</span>
                 </li>
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>

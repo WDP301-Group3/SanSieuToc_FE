@@ -8,6 +8,7 @@ import { getDayOfWeekName } from '../fieldDetailHelpers';
 const BookingSidebar = ({
   field,
   selectedDate,
+  maxDate,
   selectedSlots,
   recurringType,
   setRecurringType,
@@ -35,6 +36,7 @@ const BookingSidebar = ({
             type="date"
             value={selectedDate}
             min={new Date().toISOString().split('T')[0]}
+            max={maxDate}
             onChange={handleDateChange}
             className="form-input"
           />
@@ -189,8 +191,8 @@ const BookingSidebar = ({
           
           {selectedSlots.length > 0 && (
             <div className="price-row deposit">
-              <span>Tiền cọc (20%)</span>
-              <span>{Math.round(calculateTotalPrice() * 0.2).toLocaleString('vi-VN')}đ</span>
+              <span>Tiền cọc (30%)</span>
+              <span>{Math.round(calculateTotalPrice() * 0.3).toLocaleString('vi-VN')}đ</span>
             </div>
           )}
           
