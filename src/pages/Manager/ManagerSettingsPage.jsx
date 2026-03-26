@@ -4,7 +4,6 @@
  */
 import { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 import { useNotification } from '../../context/NotificationContext';
 import authService from '../../services/authService';
 import { getUserAvatar } from '../../utils/defaultAvatar';
@@ -43,7 +42,6 @@ const PasswordInput = ({ label, name, value, onChange, placeholder }) => {
 // ─── Main Component ─────────────────────────────────────────────────────────
 const ManagerSettingsPage = () => {
   const { user, updateUser } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const notification = useNotification();
 
   // ── Profile form state ──
@@ -392,39 +390,8 @@ const ManagerSettingsPage = () => {
           </form>
         </section>
 
-        {/* ── Appearance Card ── */}
-        <section className="ms-card">
-          <div className="ms-card-header">
-            <span className="material-symbols-outlined ms-card-icon">palette</span>
-            <h2 className="ms-card-title">Giao diện</h2>
-          </div>
-          <div className="ms-setting-row">
-            <div>
-              <p className="ms-setting-label">Chế độ tối</p>
-              <p className="ms-setting-desc">Chuyển đổi giữa giao diện sáng và tối</p>
-            </div>
-            <button
-              type="button"
-              className={`ms-toggle-btn ${isDark ? 'active' : ''}`}
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-            >
-              <span className="ms-toggle-knob" />
-            </button>
-          </div>
-          <div className="ms-setting-row">
-            <div>
-              <p className="ms-setting-label">Chế độ hiện tại</p>
-              <p className="ms-setting-desc">{isDark ? '🌙 Tối' : '☀️ Sáng'}</p>
-            </div>
-            <span className="material-symbols-outlined ms-theme-icon">
-              {isDark ? 'dark_mode' : 'light_mode'}
-            </span>
-          </div>
-        </section>
-
         {/* ── Change Password Card ── */}
-        <section className="ms-card ms-card-full">
+        <section className="ms-card">
           <div className="ms-card-header">
             <span className="material-symbols-outlined ms-card-icon">lock</span>
             <h2 className="ms-card-title">Đổi mật khẩu</h2>
@@ -454,22 +421,20 @@ const ManagerSettingsPage = () => {
               onChange={handlePwChange}
               placeholder="Nhập mật khẩu hiện tại"
             />
-            <div className="ms-pw-row">
-              <PasswordInput
-                label="Mật khẩu mới"
-                name="newPassword"
-                value={pwForm.newPassword}
-                onChange={handlePwChange}
-                placeholder="Ít nhất 8 ký tự"
-              />
-              <PasswordInput
-                label="Xác nhận mật khẩu mới"
-                name="confirmNewPassword"
-                value={pwForm.confirmNewPassword}
-                onChange={handlePwChange}
-                placeholder="Nhập lại mật khẩu mới"
-              />
-            </div>
+            <PasswordInput
+              label="Mật khẩu mới"
+              name="newPassword"
+              value={pwForm.newPassword}
+              onChange={handlePwChange}
+              placeholder="Ít nhất 8 ký tự"
+            />
+            <PasswordInput
+              label="Xác nhận mật khẩu mới"
+              name="confirmNewPassword"
+              value={pwForm.confirmNewPassword}
+              onChange={handlePwChange}
+              placeholder="Nhập lại mật khẩu mới"
+            />
             <div className="ms-pw-actions">
               <button
                 type="button"

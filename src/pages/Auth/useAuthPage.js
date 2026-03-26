@@ -228,7 +228,8 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.loginSuccess'));
-      navigate('/');
+      const from = location.state?.from || '/';
+      navigate(from === '/login' ? '/' : from);
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Login error:', error);
@@ -275,7 +276,8 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.managerLoginSuccess'));
-      navigate('/admin/dashboard');
+      const from = location.state?.from || '/admin/dashboard';
+      navigate(from === '/manager/login' || from === '/login' ? '/admin/dashboard' : from);
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Manager login error:', error);
@@ -316,7 +318,8 @@ const useAuthPage = () => {
 
       login(userData, token);
       notification.success(t('auth.notifications.registerSuccess'));
-      navigate('/');
+      const from = location.state?.from || '/';
+      navigate(from === '/register' || from === '/login' ? '/' : from);
     } catch (error) {
       if (error.errors) {
         setErrors(error.errors);

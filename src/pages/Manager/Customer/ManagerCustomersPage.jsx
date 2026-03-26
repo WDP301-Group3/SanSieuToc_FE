@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getCustomers, getCustomerStats, updateCustomerStatus } from '../../../services/managerService';
 import { useNotification } from '../../../context/NotificationContext';
@@ -28,7 +28,7 @@ const CUSTOMER_STATUSES = [
  */
 const STATUS_CONFIG = {
   Active: { label: 'Đang hoạt động', className: 'active' },
-  Banned: { label: 'Đã bị khóa', className: 'banned' },
+  Banned: { label: 'Đã bị khóa', className: 'closed' },
 };
 
 const ManagerCustomersPage = () => {
@@ -110,11 +110,26 @@ const ManagerCustomersPage = () => {
   }, [apiStats, allCustomers]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / customersPerPage));
+  const safePage = Math.min(currentPage, totalPages);
   const paginatedCustomers = filteredCustomers.slice(
-    (currentPage - 1) * customersPerPage,
-    currentPage * customersPerPage
+    (safePage - 1) * customersPerPage,
+    safePage * customersPerPage
   );
+
+  const getPageNumbers = () => {
+    if (totalPages <= 4) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    let start = safePage - 1;
+    let end = safePage + 2;
+    if (start < 1) {
+      start = 1;
+      end = 4;
+    } else if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - 3;
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   const handleToggleStatus = (customer) => setConfirmModal({ type: 'toggle', customer });
   const handleBan = (customer) => setConfirmModal({ type: 'ban', customer });
@@ -282,9 +297,8 @@ const ManagerCustomersPage = () => {
                     <td className="customer-count">{customer.completedCount}</td>
                     <td className="customer-count">{customer.cancelledCount}</td>
                     <td>
-                      <span className={`customer-status-badge ${statusCfg.className}`}>
-                        <span className="status-dot" />
-                        {statusCfg.label}
+                      <span className={`status-badge-field ${statusCfg.className}`}>
+                        <span className="status-dot" />{statusCfg.label}
                       </span>
                     </td>
                     <td>
@@ -331,47 +345,36 @@ const ManagerCustomersPage = () => {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="customers-pagination">
-          <div className="customers-pagination-info">
-            Hiển thị{' '}
-            <span className="customers-pagination-bold">
-              {filteredCustomers.length === 0
-                ? 0
-                : (currentPage - 1) * customersPerPage + 1}
-              -{Math.min(currentPage * customersPerPage, filteredCustomers.length)}
-            </span>{' '}
-            của{' '}
-            <span className="customers-pagination-bold">{filteredCustomers.length}</span>{' '}
-            khách hàng
-          </div>
-          <div className="customers-pagination-buttons">
-            <button
-              className="customers-page-btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                className={`customers-page-btn ${currentPage === page ? 'active' : ''}`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              className="customers-page-btn"
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              Sau
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="manager-pagination-centered">
+          <button
+            className="page-btn"
+            disabled={safePage <= 1}
+            onClick={() => setCurrentPage(safePage - 1)}
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          {getPageNumbers().map((p) => (
+            <button
+              key={p}
+              className={`page-btn ${p === safePage ? 'active' : ''}`}
+              onClick={() => setCurrentPage(p)}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            className="page-btn"
+            disabled={safePage >= totalPages}
+            onClick={() => setCurrentPage(safePage + 1)}
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      )}
 
       {/* Confirm Modal */}
       {confirmModal && (

@@ -292,7 +292,7 @@ const ManagerFieldDetailPage = () => {
                 <p className="afd-price-label">Giá thuê</p>
                 <div className="afd-price-amount">
                   <span className="afd-price-value">{formatPrice(field.hourlyPrice)}</span>
-                  <span className="afd-price-unit">/ giờ</span>
+                  <span className="afd-price-unit">/ slot</span>
                 </div>
               </div>
               <div className="afd-price-icon">

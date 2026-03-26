@@ -1,4 +1,4 @@
-﻿/* ===== Admin Dashboard Page ===== */
+/* ===== Admin Dashboard Page ===== */
 /* Matches: home_dashboard_admin.html */
 .manager-dashboard {
   display: flex;
@@ -286,7 +286,7 @@
 /* --- Shortcuts Grid --- */
 .shortcuts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
@@ -578,21 +578,25 @@
   color: #94a3b8;
 }
 
-.dark .stat-card {
+.dark .dashboard-section-title {
+  color: #f1f5f9;
+}
+
+.dark .field-stat-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
 
-.dark .stat-card:hover {
+.dark .field-stat-card:hover {
   border-color: #4ade80;
   box-shadow: 0 8px 24px rgba(74,222,128,0.1);
 }
 
-.dark .stat-label {
+.dark .field-stat-label {
   color: #94a3b8;
 }
 
-.dark .stat-value {
+.dark .field-stat-value {
   color: #f1f5f9;
 }
 
@@ -629,11 +633,12 @@
   border-color: #2d4a2d;
 }
 
-.dark .table-card-header {
+.dark .table-header {
+  background: transparent;
   border-bottom-color: #2d4a2d;
 }
 
-.dark .table-card-header h3 {
+.dark .table-title {
   color: #f1f5f9;
 }
 
@@ -655,6 +660,27 @@
 .dark .dashboard-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+.dark .customer-name {
+  color: #f1f5f9;
+}
+
+.dark .field-cell {
+  color: #e2e8f0;
+}
+
+.dark .time-cell {
+  color: #cbd5e1;
+}
+
+.dark .customer-email {
+  color: #94a3b8;
+}
+
+.dark .rank-badge.rank-1 { background: rgba(253, 224, 71, 0.15); color: #fde047; border-color: rgba(253, 224, 71, 0.3); }
+.dark .rank-badge.rank-2 { background: rgba(241, 245, 249, 0.15); color: #e2e8f0; border-color: rgba(203, 213, 225, 0.3); }
+.dark .rank-badge.rank-3 { background: rgba(253, 186, 116, 0.15); color: #fdba74; border-color: rgba(253, 186, 116, 0.3); }
+.dark .rank-badge        { background: rgba(248, 250, 252, 0.05); color: #94a3b8; border-color: rgba(226, 232, 240, 0.2); }
 
 .dark .status-badge {
   background: rgba(74,222,128,0.12);

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getAllFeedbacks } from '../../../services/managerService';
 import '../../../styles/ManagerFeedbackPage.css';
 import '../../../styles/ManagerFieldsPage.css';
@@ -165,11 +165,26 @@ const ManagerFeedbackPage = () => {
   }, [allFeedbacks, apiAvgRating]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredFeedbacks.length / feedbacksPerPage));
+  const safePage = Math.min(currentPage, totalPages);
   const paginatedFeedbacks = filteredFeedbacks.slice(
-    (currentPage - 1) * feedbacksPerPage,
-    currentPage * feedbacksPerPage
+    (safePage - 1) * feedbacksPerPage,
+    safePage * feedbacksPerPage
   );
+
+  const getPageNumbers = () => {
+    if (totalPages <= 4) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    let start = safePage - 1;
+    let end = safePage + 2;
+    if (start < 1) {
+      start = 1;
+      end = 4;
+    } else if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - 3;
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   const handleSearch = (v) => { setSearchTerm(v); setCurrentPage(1); };
   const handleDateFromChange = (v) => { setDateFrom(v); setCurrentPage(1); };
@@ -373,40 +388,36 @@ const ManagerFeedbackPage = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {filteredFeedbacks.length > 0 && (
-          <div className="customers-pagination">
-            <div className="customers-pagination-info">
-              Hiển thị{' '}
-              <span className="customers-pagination-bold">
-                {(currentPage - 1) * feedbacksPerPage + 1}–{Math.min(currentPage * feedbacksPerPage, filteredFeedbacks.length)}
-              </span>{' '}
-              của{' '}
-              <span className="customers-pagination-bold">{filteredFeedbacks.length}</span>{' '}
-              phản hồi
-            </div>
-            <div className="customers-pagination-buttons">
-              <button
-                className="customers-page-btn"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >Trước</button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`customers-page-btn ${currentPage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(page)}
-                >{page}</button>
-              ))}
-              <button
-                className="customers-page-btn"
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >Sau</button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="manager-pagination-centered">
+          <button
+            className="page-btn"
+            disabled={safePage <= 1}
+            onClick={() => setCurrentPage(safePage - 1)}
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          {getPageNumbers().map((p) => (
+            <button
+              key={p}
+              className={`page-btn ${p === safePage ? 'active' : ''}`}
+              onClick={() => setCurrentPage(p)}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            className="page-btn"
+            disabled={safePage >= totalPages}
+            onClick={() => setCurrentPage(safePage + 1)}
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

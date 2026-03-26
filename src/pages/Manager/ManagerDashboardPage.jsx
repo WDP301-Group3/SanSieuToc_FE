@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   getDashboardSummary,
@@ -57,9 +57,10 @@ const getInitials = (name) => {
 };
 
 const SHORTCUTS = [
-  { icon: 'stadium',     title: 'Quản lý sân',       desc: 'Cập nhật thông tin & trạng thái sân', link: '/admin/fields',    image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&q=80' },
-  { icon: 'people_alt',  title: 'Quản lý khách hàng', desc: 'Quản lý người dùng & lịch sử đặt',   link: '/admin/customers', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80' },
-  { icon: 'rate_review', title: 'Xem Feedback',        desc: 'Xem và xử lý góp ý từ khách hàng',   link: '/admin/feedback',  image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80' },
+  { icon: 'stadium',       title: 'Quản lý sân',        desc: 'Cập nhật thông tin & trạng thái sân', link: '/admin/fields',    image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&q=80' },
+  { icon: 'calendar_month',title: 'Quản lý đặt sân',    desc: 'Theo dõi, xác nhận & xử lý đơn đặt sân',     link: '/admin/bookings',  image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' },
+  { icon: 'people_alt',    title: 'Quản lý khách hàng', desc: 'Quản lý người dùng & lịch sử đặt',   link: '/admin/customers', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80' },
+  { icon: 'rate_review',   title: 'Xem Feedback',       desc: 'Xem và xử lý góp ý từ khách hàng',   link: '/admin/feedback',  image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80' },
 ];
 
 // ============================================================================
