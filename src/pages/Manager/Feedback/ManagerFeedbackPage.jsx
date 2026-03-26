@@ -24,8 +24,26 @@ const renderStars = (rating) => {
   return stars;
 };
 
+const getAddressParts = (address) => {
+  const raw = typeof address === 'string' ? address.trim() : '';
+  if (!raw) return [];
+  return raw.split(',').map((p) => p.trim()).filter(Boolean);
+};
+
+const getProvinceLabel = (address) => {
+  const parts = getAddressParts(address);
+  return parts.length >= 1 ? parts[parts.length - 1] : '';
+};
+
+const getDistrictLabel = (address) => {
+  const parts = getAddressParts(address);
+  return parts.length >= 2 ? parts[parts.length - 2] : '';
+};
+
 const ManagerFeedbackPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [provinceFilter, setProvinceFilter] = useState('');
+  const [districtFilter, setDistrictFilter] = useState('');
   const [ratingFilter, setRatingFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -74,6 +92,9 @@ const ManagerFeedbackPage = () => {
     rawFeedbacks.map((fb) => {
       const detail = fb.bookingDetailID;
       const customer = detail?.bookingID?.customerID;
+      const fieldAddress = detail?.fieldID?.address || '';
+      const provinceLabel = getProvinceLabel(fieldAddress);
+      const districtLabel = getDistrictLabel(fieldAddress);
       return {
         _id: fb._id,
         rating: fb.rate || 0,
@@ -82,9 +103,30 @@ const ManagerFeedbackPage = () => {
         customerName: customer?.name || '—',
         customerImage: customer?.image || null,
         fieldName: detail?.fieldID?.fieldName || '—',
+        fieldAddress,
+        provinceLabel,
+        districtLabel,
       };
     }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
   [rawFeedbacks]);
+
+  const provinceOptions = useMemo(() => {
+    const set = new Set();
+    allFeedbacks.forEach((fb) => {
+      if (fb.provinceLabel) set.add(fb.provinceLabel);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'vi'));
+  }, [allFeedbacks]);
+
+  const districtOptions = useMemo(() => {
+    if (!provinceFilter) return [];
+    const set = new Set();
+    allFeedbacks.forEach((fb) => {
+      if (fb.provinceLabel !== provinceFilter) return;
+      if (fb.districtLabel) set.add(fb.districtLabel);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'vi'));
+  }, [allFeedbacks, provinceFilter]);
 
   // Filter
   const filteredFeedbacks = useMemo(() => allFeedbacks.filter((fb) => {
@@ -92,7 +134,13 @@ const ManagerFeedbackPage = () => {
     const matchSearch = !term ||
       fb.comment.toLowerCase().includes(term) ||
       fb.customerName.toLowerCase().includes(term) ||
-      fb.fieldName.toLowerCase().includes(term);
+      fb.fieldName.toLowerCase().includes(term) ||
+      (fb.fieldAddress || '').toLowerCase().includes(term) ||
+      (fb.districtLabel || '').toLowerCase().includes(term) ||
+      (fb.provinceLabel || '').toLowerCase().includes(term);
+
+    const matchProvince = !provinceFilter || fb.provinceLabel === provinceFilter;
+    const matchDistrict = !districtFilter || fb.districtLabel === districtFilter;
     const matchRating = !ratingFilter || fb.rating === Number(ratingFilter);
     let matchDate = true;
     if (dateFrom) matchDate = matchDate && new Date(fb.createdAt) >= new Date(dateFrom);
@@ -100,8 +148,8 @@ const ManagerFeedbackPage = () => {
       const to = new Date(dateTo); to.setHours(23, 59, 59, 999);
       matchDate = matchDate && new Date(fb.createdAt) <= to;
     }
-    return matchSearch && matchRating && matchDate;
-  }), [allFeedbacks, searchTerm, ratingFilter, dateFrom, dateTo]);
+    return matchSearch && matchProvince && matchDistrict && matchRating && matchDate;
+  }), [allFeedbacks, searchTerm, provinceFilter, districtFilter, ratingFilter, dateFrom, dateTo]);
 
   // Stats
   const stats = useMemo(() => {
@@ -200,6 +248,32 @@ const ManagerFeedbackPage = () => {
           />
         </div>
         <div className="feedback-date-filters">
+          <select
+            className="feedback-select"
+            value={provinceFilter}
+            onChange={(e) => {
+              const next = e.target.value;
+              setProvinceFilter(next);
+              setDistrictFilter('');
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Tất cả tỉnh/thành</option>
+            {provinceOptions.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+          <select
+            className="feedback-select"
+            value={districtFilter}
+            disabled={!provinceFilter}
+            onChange={(e) => { setDistrictFilter(e.target.value); setCurrentPage(1); }}
+          >
+            <option value="">Tất cả quận/huyện</option>
+            {districtOptions.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
           <select
             className="feedback-select"
             value={ratingFilter}

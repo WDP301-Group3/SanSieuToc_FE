@@ -1585,7 +1585,7 @@
   margin-top: 1rem;
   padding: 0.75rem 2rem;
   background: var(--primary-green);
-  color: white;
+  color: var(--text-primary);
   border: none;
   border-radius: 8px;
   font-weight: 600;
