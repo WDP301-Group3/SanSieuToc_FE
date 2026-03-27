@@ -29,6 +29,11 @@ const LoginForm = ({
       {/* Login Form */}
       <form onSubmit={handleLoginSubmit} className="auth-form">
         {/* Error Message */}
+        {errors.general && (
+          <div className="error-alert">
+            {errors.general}
+          </div>
+        )}
         {errors.submit && (
           <div className="error-alert">
             {errors.submit}
