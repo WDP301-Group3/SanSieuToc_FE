@@ -5,6 +5,8 @@ import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ManagerLoginForm from './components/ManagerLoginForm';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 /**
  * AuthPage Component - Unified Authentication Interface
@@ -12,6 +14,7 @@ import { useTranslation } from 'react-i18next';
  */
 const AuthPage = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const {
     authMode,
     loginRole,
@@ -38,6 +41,16 @@ const AuthPage = () => {
     handleForgotPasswordSubmit,
     handleManagerForgotPasswordSubmit,
   } = useAuthPage();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const banned = params.get('banned');
+    const message = params.get('message');
+    if (banned === '1' && message) {
+      // Surface the message as a form-level error so user sees it immediately.
+      setErrors((prev) => ({ ...prev, general: decodeURIComponent(message) }));
+    }
+  }, [location.search, setErrors]);
 
   return (
     <div className="auth-page">

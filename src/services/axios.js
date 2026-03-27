@@ -82,6 +82,11 @@ axiosInstance.interceptors.response.use(
         window.dispatchEvent(new CustomEvent('account-banned', {
           detail: { message: data.message }
         }));
+        // Kick out immediately and preserve a message for the login screen.
+        const msg = encodeURIComponent(data.message || 'Tài khoản của bạn đã bị khóa.');
+        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/auth')) {
+          window.location.href = `/login?banned=1&message=${msg}`;
+        }
         return Promise.reject(error);
       }
       
