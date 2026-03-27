@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error checking auth:', error);
-        localStorage.removeItem('user');
         tokenManager.clearAuth();
       } finally {
         setLoading(false);
@@ -56,25 +55,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, token) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    tokenManager.setUser(userData);
     tokenManager.setToken(token);
-    // Clean up legacy key if exists
-    localStorage.removeItem('token');
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
     tokenManager.clearAuth();
-    // Clean up legacy key if exists
-    localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
   };
 
   const updateUser = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    tokenManager.setUser(userData);
     setUser(userData);
   };
 

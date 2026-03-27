@@ -5,7 +5,8 @@
 
 const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
-const USER_KEY = 'user_data';
+// Keep in sync with AuthContext storage key
+const USER_KEY = 'user';
 
 export const tokenManager = {
   /**
@@ -70,6 +71,9 @@ export const tokenManager = {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    // Cleanup legacy/alternate keys if they exist
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('token');
   },
 
   /**
