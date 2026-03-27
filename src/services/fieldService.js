@@ -150,17 +150,57 @@ export const searchFields = async (filters = {}) => {
       result = result.filter(f => f.status === statusFilter);
     }
 
-    // Time range filter — lọc sân có giờ mở cửa bao phủ khoảng giờ user chọn
-    // So sánh "HH:MM" string (lexicographic safe vì cùng format 24h 2 chữ số)
-    if (filters.startTime || filters.endTime) {
-      result = result.filter(f => {
-        const open = f.openingTime || '00:00';   // "06:00"
-        const close = f.closingTime || '23:59';  // "22:00"
-        // Sân hợp lệ khi: openingTime <= startTime  AND  endTime <= closingTime
-        if (filters.startTime && filters.startTime < open) return false;
-        if (filters.endTime && filters.endTime > close) return false;
-        return true;
-      });
+    // Time range filter — customer không biết giờ mở cửa, nên chỉ hiển thị sân
+    // còn slot trống trong khoảng giờ user chọn (theo availability theo ngày).
+    // Lưu ý: logic này chỉ chạy khi có `date` + (startTime/endTime).
+    const start24 = normaliseTimeTo24h(filters.startTime);
+    const end24 = normaliseTimeTo24h(filters.endTime);
+    const date = typeof filters.date === 'string' ? filters.date.trim() : '';
+
+    // ---- sort ----
+    result = sortFieldsArr(result, filters.sortBy || 'name');
+
+    // ---- paginate ----
+    const page = filters.page || 1;
+    const limit = filters.limit || 9;
+    const totalBeforeTime = result.length;
+    const totalPagesBeforeTime = Math.ceil(totalBeforeTime / limit);
+    const start = (page - 1) * limit;
+    let paginated = result.slice(start, start + limit);
+
+    // Slot-based time filter (only checks current page to keep requests bounded)
+    if (date && (start24 || end24) && paginated.length) {
+      const fieldChecks = await Promise.all(
+        paginated.map(async (f) => {
+          try {
+            const avRes = await getFieldAvailability(f._id, date);
+            if (!avRes.success) return { ok: false, field: f };
+
+            const slots = Array.isArray(avRes.data?.slots) ? avRes.data.slots : [];
+            const hasAvailableSlotInRange = slots.some(s => {
+              if (!s?.isAvailable) return false;
+              const slotStart = normaliseTimeTo24h(s.startTime instanceof Date ? s.startTime : (typeof s.startTime === 'string' ? s.startTime : ''));
+              const slotEnd = normaliseTimeTo24h(s.endTime instanceof Date ? s.endTime : (typeof s.endTime === 'string' ? s.endTime : ''));
+
+              // BE trả startTime/endTime là Date (thường). Nếu là string ISO, normaliseTimeTo24h() sẽ trả ''
+              // → fallback parse bằng Date.
+              const startStr = slotStart || timeFromDateish(s.startTime);
+              const endStr = slotEnd || timeFromDateish(s.endTime);
+              if (!startStr || !endStr) return false;
+
+              if (start24 && startStr < start24) return false;
+              if (end24 && endStr > end24) return false;
+              return true;
+            });
+
+            return { ok: hasAvailableSlotInRange, field: f };
+          } catch {
+            return { ok: false, field: f };
+          }
+        })
+      );
+
+      paginated = fieldChecks.filter(x => x.ok).map(x => x.field);
     }
 
     // ---- facets (computed from ALL normalised fields, NOT filtered result) ----
@@ -186,16 +226,10 @@ export const searchFields = async (filters = {}) => {
       }
     });
 
-    // ---- sort ----
-    result = sortFieldsArr(result, filters.sortBy || 'name');
-
-    // ---- paginate ----
-    const page = filters.page || 1;
-    const limit = filters.limit || 9;
-    const total = result.length;
-    const totalPages = Math.ceil(total / limit);
-    const start = (page - 1) * limit;
-    const paginated = result.slice(start, start + limit);
+    // Note: slot-based time filter is applied AFTER paging (on current page only),
+    // so pagination totals reflect pre-time-filter results.
+    const total = totalBeforeTime;
+    const totalPages = totalPagesBeforeTime;
 
     const prices = normalised.map(f => f.hourlyPrice).filter(Boolean);
 
@@ -482,6 +516,62 @@ function splitDistrict(district) {
   const city = parts[parts.length - 1];
   const ward = parts.slice(0, parts.length - 1).join(', ');
   return { ward, city };
+}
+
+function timeFromDateish(value) {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value);
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+/**
+ * Convert various time inputs to 24h "HH:mm".
+ * Accepts:
+ * - "HH:mm" (already 24h)
+ * - "H:mm SA/CH" (VN) or "H:mm AM/PM" (EN)
+ * - Date instance
+ * Returns '' when invalid/empty.
+ */
+function normaliseTimeTo24h(value) {
+  if (!value) return '';
+
+  // Date object
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const hh = String(value.getHours()).padStart(2, '0');
+    const mm = String(value.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  if (typeof value !== 'string') return '';
+  const raw = value.trim();
+  if (!raw) return '';
+
+  // Already 24h HH:mm
+  const m24 = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (m24) {
+    const hh = String(parseInt(m24[1], 10)).padStart(2, '0');
+    const mm = m24[2];
+    return `${hh}:${mm}`;
+  }
+
+  // 12h with suffix: SA/CH or AM/PM (case-insensitive)
+  const m12 = raw.match(/^([0]?\d|1[0-2]):([0-5]\d)\s*(SA|CH|AM|PM)$/i);
+  if (!m12) return '';
+
+  let hours = parseInt(m12[1], 10);
+  const minutes = m12[2];
+  const suffix = m12[3].toUpperCase();
+  const isPM = suffix === 'CH' || suffix === 'PM';
+
+  // 12 AM -> 00, 12 PM -> 12
+  if (hours === 12) hours = isPM ? 12 : 0;
+  else if (isPM) hours += 12;
+
+  const hh = String(hours).padStart(2, '0');
+  return `${hh}:${minutes}`;
 }
 
 /**
