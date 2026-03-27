@@ -174,12 +174,12 @@ const ManagerCustomersPage = () => {
   return (
     <div className="manager-customers-page">
       {/* Top Bar */}
-      <div className="customers-top-bar">
+      {/* <div className="customers-top-bar">
         <div>
           <h2 className="customers-page-title">Quản lý khách hàng</h2>
           <p className="customers-page-subtitle">Danh sách tài khoản người dùng trên hệ thống</p>
         </div>
-      </div>
+      </div> */}
 
       {error && (
         <div className="customers-error-banner">
