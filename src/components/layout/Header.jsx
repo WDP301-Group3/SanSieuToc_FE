@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,6 +17,7 @@ const Header = () => {
   const lastScrollY = useRef(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
 
@@ -190,7 +191,7 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <button className="header-login-btn" onClick={() => handleNavClick('/login')}>
+              <button className="header-login-btn" onClick={() => { scrollToTop(); navigate('/login', { state: { from: `${location.pathname}${location.search || ''}` } }); }}>
                 <span className="material-icons-outlined text-sm">login</span>
                 {t('auth.login')}
               </button>

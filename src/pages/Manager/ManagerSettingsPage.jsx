@@ -4,7 +4,6 @@
  */
 import { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 import { useNotification } from '../../context/NotificationContext';
 import authService from '../../services/authService';
 import { getUserAvatar } from '../../utils/defaultAvatar';
@@ -43,7 +42,6 @@ const PasswordInput = ({ label, name, value, onChange, placeholder }) => {
 // ─── Main Component ─────────────────────────────────────────────────────────
 const ManagerSettingsPage = () => {
   const { user, updateUser } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const notification = useNotification();
 
   // ── Profile form state ──
@@ -132,7 +130,15 @@ const ManagerSettingsPage = () => {
       setProfileError('Tên không được để trống.');
       return;
     }
-    if (profileForm.phone && !/^(0|\+84)[3-9]\d{8}$/.test(profileForm.phone)) {
+    if (!String(user?.email || '').trim()) {
+      setProfileError('Email không được để trống.');
+      return;
+    }
+    if (!profileForm.phone.trim()) {
+      setProfileError('Số điện thoại không được để trống.');
+      return;
+    }
+    if (!/^(0|\+84)[3-9]\d{8}$/.test(profileForm.phone.trim())) {
       setProfileError('Số điện thoại không hợp lệ (VD: 0901234567).');
       return;
     }
@@ -141,7 +147,8 @@ const ManagerSettingsPage = () => {
     try {
       const payload = {
         name: profileForm.name.trim(),
-        phone: profileForm.phone,
+        phone: profileForm.phone.trim(),
+        email: String(user?.email || '').trim(),
       };
       // Chỉ gửi image/imageQR nếu user đã chọn file mới
       if (avatarBase64 !== null) payload.image = avatarBase64;
@@ -333,7 +340,7 @@ const ManagerSettingsPage = () => {
                 />
               </div>
               <div className="ms-form-field">
-                <label className="ms-form-label">Email</label>
+                <label className="ms-form-label">Email *</label>
                 <input
                   type="email"
                   value={user?.email || ''}
@@ -343,13 +350,14 @@ const ManagerSettingsPage = () => {
                 />
               </div>
               <div className="ms-form-field">
-                <label className="ms-form-label">Số điện thoại</label>
+                <label className="ms-form-label">Số điện thoại *</label>
                 <input
                   type="tel"
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
                   className="ms-input"
                   placeholder="0901234567"
+                  required
                 />
               </div>
             </div>
@@ -382,39 +390,8 @@ const ManagerSettingsPage = () => {
           </form>
         </section>
 
-        {/* ── Appearance Card ── */}
-        <section className="ms-card">
-          <div className="ms-card-header">
-            <span className="material-symbols-outlined ms-card-icon">palette</span>
-            <h2 className="ms-card-title">Giao diện</h2>
-          </div>
-          <div className="ms-setting-row">
-            <div>
-              <p className="ms-setting-label">Chế độ tối</p>
-              <p className="ms-setting-desc">Chuyển đổi giữa giao diện sáng và tối</p>
-            </div>
-            <button
-              type="button"
-              className={`ms-toggle-btn ${isDark ? 'active' : ''}`}
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-            >
-              <span className="ms-toggle-knob" />
-            </button>
-          </div>
-          <div className="ms-setting-row">
-            <div>
-              <p className="ms-setting-label">Chế độ hiện tại</p>
-              <p className="ms-setting-desc">{isDark ? '🌙 Tối' : '☀️ Sáng'}</p>
-            </div>
-            <span className="material-symbols-outlined ms-theme-icon">
-              {isDark ? 'dark_mode' : 'light_mode'}
-            </span>
-          </div>
-        </section>
-
         {/* ── Change Password Card ── */}
-        <section className="ms-card ms-card-full">
+        <section className="ms-card">
           <div className="ms-card-header">
             <span className="material-symbols-outlined ms-card-icon">lock</span>
             <h2 className="ms-card-title">Đổi mật khẩu</h2>
@@ -444,22 +421,20 @@ const ManagerSettingsPage = () => {
               onChange={handlePwChange}
               placeholder="Nhập mật khẩu hiện tại"
             />
-            <div className="ms-pw-row">
-              <PasswordInput
-                label="Mật khẩu mới"
-                name="newPassword"
-                value={pwForm.newPassword}
-                onChange={handlePwChange}
-                placeholder="Ít nhất 8 ký tự"
-              />
-              <PasswordInput
-                label="Xác nhận mật khẩu mới"
-                name="confirmNewPassword"
-                value={pwForm.confirmNewPassword}
-                onChange={handlePwChange}
-                placeholder="Nhập lại mật khẩu mới"
-              />
-            </div>
+            <PasswordInput
+              label="Mật khẩu mới"
+              name="newPassword"
+              value={pwForm.newPassword}
+              onChange={handlePwChange}
+              placeholder="Ít nhất 8 ký tự"
+            />
+            <PasswordInput
+              label="Xác nhận mật khẩu mới"
+              name="confirmNewPassword"
+              value={pwForm.confirmNewPassword}
+              onChange={handlePwChange}
+              placeholder="Nhập lại mật khẩu mới"
+            />
             <div className="ms-pw-actions">
               <button
                 type="button"

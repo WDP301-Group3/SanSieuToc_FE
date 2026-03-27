@@ -4,6 +4,8 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotification } from '../../../context/NotificationContext';
+import bookingService from '../../../services/bookingService';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -80,8 +82,11 @@ const formatDetailTime = (isoStr) => {
 /** BookingsTab — main component */
 const BookingsTab = ({ allBookings, stats, loading, onRefresh }) => {
   const navigate = useNavigate();
+  const notification = useNotification();
   const [bookingTab, setBookingTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [renewDurationById, setRenewDurationById] = useState({});
+  const [renewLoadingById, setRenewLoadingById] = useState({});
 
   const bookingTabs = [
     { key: 'all',       label: `Tất cả (${stats.total})` },
@@ -110,6 +115,53 @@ const BookingsTab = ({ allBookings, stats, loading, onRefresh }) => {
   const handleBookingTabChange = (tabKey) => {
     setBookingTab(tabKey);
     setCurrentPage(1);
+  };
+
+  const getRenewDuration = (bookingId) => {
+    const v = renewDurationById[bookingId];
+    const n = Number(v);
+    return [1, 2, 3].includes(n) ? n : 3;
+  };
+
+  const setRenewDuration = (bookingId, duration) => {
+    setRenewDurationById((prev) => ({ ...prev, [bookingId]: duration }));
+  };
+
+  const isRenewEligible = (booking) => {
+    const repeatType = booking.repeatType;
+    const durationMonths = Number(booking.durationMonths);
+    const hasContractDates = Boolean(booking.contractStartAt && booking.contractEndAt);
+    const isConfirmed = (booking.displayStatus || booking.status) === BOOKING_STATUS.CONFIRMED;
+    const notCancelledOrExpired = ![BOOKING_STATUS.CANCELLED, BOOKING_STATUS.EXPIRED].includes(booking.displayStatus || booking.status);
+
+    return repeatType === 'recurring' && durationMonths === 3 && hasContractDates && isConfirmed && notCancelledOrExpired;
+  };
+
+  const handleRenew = async (booking) => {
+    const bookingId = booking.id || booking._id;
+    if (!bookingId) return;
+
+    setRenewLoadingById((prev) => ({ ...prev, [bookingId]: true }));
+    try {
+      const duration = getRenewDuration(bookingId);
+      const result = await bookingService.renewBooking(bookingId, duration);
+
+      if (!result?.success) {
+        notification.error(result?.message || 'Gia hạn thất bại.');
+        return;
+      }
+
+      const newBookingId = result?.data?.bookingId || result?.data?.id || result?.data?._id;
+      notification.success(result?.message || 'Đã tạo booking gia hạn. Vui lòng thanh toán tiền cọc.');
+      if (typeof onRefresh === 'function') await onRefresh();
+      if (newBookingId) navigate(`/booking-history/${newBookingId}`);
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi gia hạn.';
+      notification.error(msg);
+      console.error('Renew booking error:', err);
+    } finally {
+      setRenewLoadingById((prev) => ({ ...prev, [bookingId]: false }));
+    }
   };
 
   if (loading) {
@@ -185,6 +237,9 @@ const BookingsTab = ({ allBookings, stats, loading, onRefresh }) => {
               const isExpired = displayStatus === BOOKING_STATUS.EXPIRED;
               const display = extractBookingDisplay(booking);
               const bookingId = booking.id || booking._id;
+              const canRenew = isRenewEligible(booking);
+              const renewDuration = bookingId ? getRenewDuration(bookingId) : 3;
+              const renewing = Boolean(bookingId && renewLoadingById[bookingId]);
 
               return (
                 <div
@@ -266,6 +321,29 @@ const BookingsTab = ({ allBookings, stats, loading, onRefresh }) => {
                         {displayStatus === BOOKING_STATUS.COMPLETED ? 'Chi tiết & Đánh giá' : 'Chi tiết'}
                       </button>
                     )}
+
+                    {canRenew && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <select
+                          value={renewDuration}
+                          onChange={(e) => setRenewDuration(bookingId, Number(e.target.value))}
+                          disabled={renewing}
+                          style={{ padding: '0.55rem 0.7rem', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)' }}
+                        >
+                          <option value={1}>Gia hạn 1 tháng</option>
+                          <option value={2}>Gia hạn 2 tháng</option>
+                          <option value={3}>Gia hạn 3 tháng</option>
+                        </select>
+                        <button
+                          className="user-dashboard-btn-detail"
+                          onClick={() => handleRenew(booking)}
+                          disabled={renewing}
+                        >
+                          {renewing ? 'Đang tạo...' : 'Gia hạn'}
+                        </button>
+                      </div>
+                    )}
+
                     {(displayStatus === BOOKING_STATUS.COMPLETED || isCancelled || isExpired) && (
                       <button
                         className="user-dashboard-btn-rebook"

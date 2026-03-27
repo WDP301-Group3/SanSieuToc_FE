@@ -8,6 +8,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isBanned, setIsBanned] = useState(false);
+  const [bannedMessage, setBannedMessage] = useState('');
 
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
@@ -31,7 +33,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error checking auth:', error);
-        localStorage.removeItem('user');
         tokenManager.clearAuth();
       } finally {
         setLoading(false);
@@ -41,36 +42,51 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Listen for account-banned event from axios interceptor
+  useEffect(() => {
+    const handleBanned = (e) => {
+      setBannedMessage(e.detail?.message || 'Tài khoản của bạn đã bị khóa.');
+      setIsBanned(true);
+      setUser(null);
+      setIsAuthenticated(false);
+    };
+    window.addEventListener('account-banned', handleBanned);
+    return () => window.removeEventListener('account-banned', handleBanned);
+  }, []);
+
   const login = (userData, token) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    tokenManager.setUser(userData);
     tokenManager.setToken(token);
-    // Clean up legacy key if exists
-    localStorage.removeItem('token');
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
     tokenManager.clearAuth();
-    // Clean up legacy key if exists
-    localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
   };
 
   const updateUser = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    tokenManager.setUser(userData);
     setUser(userData);
+  };
+
+  const dismissBanned = () => {
+    setIsBanned(false);
+    setBannedMessage('');
   };
 
   const value = {
     user,
     isAuthenticated,
     loading,
+    isBanned,
+    bannedMessage,
     login,
     logout,
     updateUser,
+    dismissBanned,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -292,7 +292,7 @@ const ManagerFieldDetailPage = () => {
                 <p className="afd-price-label">Giá thuê</p>
                 <div className="afd-price-amount">
                   <span className="afd-price-value">{formatPrice(field.hourlyPrice)}</span>
-                  <span className="afd-price-unit">/ giờ</span>
+                  <span className="afd-price-unit">/ slot</span>
                 </div>
               </div>
               <div className="afd-price-icon">
@@ -305,7 +305,7 @@ const ManagerFieldDetailPage = () => {
               <ul className="afd-rules-list">
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>
-                  <span>Đặt cọc tối thiểu 20% giá trị giờ thuê.</span>
+                  <span>Đặt cọc tối thiểu 30% giá trị giờ thuê.</span>
                 </li>
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>

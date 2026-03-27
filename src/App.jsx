@@ -30,9 +30,12 @@ import ManagerCustomerDetailPage from './pages/Manager/Customer/ManagerCustomerD
 import ManagerFeedbackPage from './pages/Manager/Feedback/ManagerFeedbackPage';
 import ManagerBookingsPage from './pages/Manager/Booking/ManagerBookingsPage';
 
+import BannedModal from './components/common/BannedModal';
+
 function App() {
   return (
     <Router>
+      <BannedModal />
       <Routes>
         {/* Public Routes with MainLayout */}
         <Route element={<MainLayout />}>
@@ -52,7 +55,10 @@ function App() {
           
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
+          <Route path="/field" element={<Navigate to="/fields" replace />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
+          {/* Legacy alias: giữ tương thích link cũ /field/:id */}
+          <Route path="/field/:id" element={<FieldDetailPage />} />
           {/* Customer profile — /customer/profile (canonical) + legacy aliases */}
           <Route path="/customer/profile" element={<UserProfilePage />} />
           <Route path="/customer/dashboard" element={<Navigate to="/customer/profile" replace />} />

@@ -36,7 +36,8 @@ const ManagerLayout = () => {
   }
 
   if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'manager')) {
-    return <Navigate to="/login" replace />;
+    const from = `${location.pathname}${location.search || ''}`;
+    return <Navigate to="/login" replace state={{ from }} />;
   }
 
   const menuItems = [

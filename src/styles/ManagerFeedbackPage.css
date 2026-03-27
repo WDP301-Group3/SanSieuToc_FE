@@ -1,4 +1,4 @@
-﻿/* ===== Admin Feedback Page ===== */
+/* ===== Admin Feedback Page ===== */
 .manager-feedback-page {
   display: flex;
   flex-direction: column;
@@ -638,28 +638,28 @@
   color: #f1f5f9;
 }
 
-.dark .feedback-page-header h1 {
+.dark .feedback-page-title {
   color: #f1f5f9;
 }
 
-.dark .feedback-page-header p {
+.dark .feedback-page-subtitle {
   color: #94a3b8;
 }
 
-.dark .feedback-stats-row .stat-card {
+.dark .stat-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
 
-.dark .feedback-stats-row .stat-card:hover {
+.dark .stat-card:hover {
   border-color: #4ade80;
 }
 
-.dark .feedback-stats-row .stat-label {
+.dark .stat-label {
   color: #94a3b8;
 }
 
-.dark .feedback-stats-row .stat-value {
+.dark .stat-value {
   color: #f1f5f9;
 }
 
@@ -668,23 +668,23 @@
   border-color: #2d4a2d;
 }
 
-.dark .feedback-toolbar input {
+.dark .feedback-search-input, .dark .feedback-date-input {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
 }
 
-.dark .feedback-toolbar input::placeholder {
+.dark .feedback-search-input::placeholder, .dark .feedback-date-input::placeholder {
   color: #6b7280;
 }
 
-.dark .feedback-toolbar select {
+.dark .feedback-select {
   background: #0f1a0f;
   border-color: #2d4a2d;
   color: #f1f5f9;
 }
 
-.dark .feedback-table-container {
+.dark .feedback-table-card {
   background: #1a2a1a;
   border-color: #2d4a2d;
 }
@@ -756,22 +756,31 @@
   color: #d1d5db;
 }
 
-.dark .pagination-container {
+.dark .customers-pagination {
+  background: #1a2a1a;
   border-top-color: #2d4a2d;
 }
 
-.dark .pagination-btn {
+.dark .customers-pagination-info {
+  color: #94a3b8;
+}
+
+.dark .customers-pagination-bold {
+  color: #f1f5f9;
+}
+
+.dark .customers-page-btn {
   background: #1a2a1a;
   border-color: #2d4a2d;
   color: #94a3b8;
 }
 
-.dark .pagination-btn:hover {
+.dark .customers-page-btn:hover {
   background: #243524;
   color: #f1f5f9;
 }
 
-.dark .pagination-btn.active {
+.dark .customers-page-btn.active {
   background: #14532d;
   color: #4ade80;
   border-color: #166534;

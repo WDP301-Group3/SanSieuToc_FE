@@ -74,6 +74,25 @@ const bookingService = {
       throw error;
     }
   },
+
+  /**
+   * Renew a recurring contract booking
+   * @param {string} bookingId
+   * @param {number} duration - 1|2|3 months
+   * @returns {Promise} API response
+   */
+  async renewBooking(bookingId, duration) {
+    try {
+      const response = await axiosInstance.post(
+        API_CONFIG.ENDPOINTS.BOOKINGS.RENEW(bookingId),
+        { duration }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error renewing booking:', error);
+      throw error;
+    }
+  },
 };
 
 export default bookingService;

@@ -11,6 +11,35 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import authService from '../../services/authService';
 
+const getRedirectTarget = (location, fallback, role = null) => {
+  const fromState = typeof location?.state?.from === 'string' ? location.state.from : '';
+  const searchParams = new URLSearchParams(location?.search || '');
+  const fromQuery = searchParams.get('redirect') || '';
+
+  const candidate = (fromState || fromQuery || '').trim();
+  if (!candidate) return fallback;
+
+  // Chỉ cho phép internal path để tránh open-redirect.
+  if (!candidate.startsWith('/')) return fallback;
+
+  // Tránh loop quay lại chính trang auth.
+  if (candidate === '/login' || candidate === '/register' || candidate === '/forgot-password' || candidate === '/manager/login' || candidate === '/manager/forgot-password') {
+    return fallback;
+  }
+
+  // Role-aware redirect safety:
+  // - Customer không được redirect vào khu vực admin (sẽ bị ManagerLayout đá về /login -> nhìn như login không chạy)
+  // - Manager/admin không được redirect ra ngoài /admin
+  if (role === 'customer' && candidate.startsWith('/admin')) {
+    return fallback;
+  }
+  if ((role === 'manager' || role === 'admin') && !candidate.startsWith('/admin')) {
+    return fallback;
+  }
+
+  return candidate;
+};
+
 const useAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -228,7 +257,7 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.loginSuccess'));
-      navigate('/');
+      navigate(getRedirectTarget(location, '/', 'customer'), { replace: true });
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Login error:', error);
@@ -275,7 +304,7 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.managerLoginSuccess'));
-      navigate('/admin/dashboard');
+      navigate(getRedirectTarget(location, '/admin/dashboard', 'manager'), { replace: true });
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Manager login error:', error);
@@ -316,7 +345,7 @@ const useAuthPage = () => {
 
       login(userData, token);
       notification.success(t('auth.notifications.registerSuccess'));
-      navigate('/');
+      navigate(getRedirectTarget(location, '/', 'customer'), { replace: true });
     } catch (error) {
       if (error.errors) {
         setErrors(error.errors);

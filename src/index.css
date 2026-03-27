@@ -23,6 +23,8 @@
     /* Additional variables for Field pages */
     --primary: #00E536;
     --primary-hover: #00CC30;
+    /* Backward-compat alias used by some pages */
+    --primary-green: var(--primary);
     --bg-primary: #F0FDF4;
     --bg-primary-dark: #102210;
     --text-primary: #111811;

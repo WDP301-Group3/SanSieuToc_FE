@@ -1,4 +1,4 @@
-﻿/* ===== Admin Customer Detail Page ===== */
+/* ===== Admin Customer Detail Page ===== */
 .manager-customer-detail-page {
   display: flex;
   flex-direction: column;
@@ -195,31 +195,7 @@
   color: #64748b;
 }
 
-/* Customer Status Badge */
-.customer-status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
-.customer-status-active {
-  background: rgba(25, 230, 43, 0.15);
-  color: #15803d;
-}
-
-.customer-status-inactive {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.customer-status-banned {
-  background: #fef2f2;
-  color: #dc2626;
-}
 
 /* Profile Stats Box */
 .profile-stats-box {
