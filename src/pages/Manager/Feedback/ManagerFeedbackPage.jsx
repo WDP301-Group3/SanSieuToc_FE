@@ -108,7 +108,7 @@ const ManagerFeedbackPage = () => {
         districtLabel,
       };
     }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
-  [rawFeedbacks]);
+    [rawFeedbacks]);
 
   const provinceOptions = useMemo(() => {
     const set = new Set();
@@ -193,14 +193,14 @@ const ManagerFeedbackPage = () => {
   return (
     <div className="manager-feedback-page">
       {/* Header */}
-      <div className="feedback-top-bar">
+      {/* <div className="feedback-top-bar">
         <div>
           <h2 className="feedback-page-title">Quản lý Feedback</h2>
           <p className="feedback-page-subtitle">
             Xem các ý kiến phản hồi từ người dùng hệ thống
           </p>
         </div>
-      </div>
+      </div> */}
 
       {error && (
         <div className="feedback-error-banner">

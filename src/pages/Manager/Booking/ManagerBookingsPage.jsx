@@ -228,7 +228,7 @@ const ManagerBookingsPage = () => {
 
   return (
     <div className="manager-page">
-      {/* Page title */}
+      {/* Page title
       <div className="bookings-page-header">
         <h1 className="bookings-page-title">
 
@@ -237,7 +237,7 @@ const ManagerBookingsPage = () => {
         <p className="bookings-page-subtitle">
           Xác nhận tiền cọc, thanh toán và theo dõi trạng thái các slot
         </p>
-      </div>
+      </div> */}
       {/* Stats bar */}
       <div className="fields-stats">
         <div className="field-stat-card">
