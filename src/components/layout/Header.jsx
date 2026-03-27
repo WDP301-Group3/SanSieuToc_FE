@@ -191,7 +191,7 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <button className="header-login-btn" onClick={() => { scrollToTop(); navigate('/login', { state: { from: location.pathname } }); }}>
+              <button className="header-login-btn" onClick={() => { scrollToTop(); navigate('/login', { state: { from: `${location.pathname}${location.search || ''}` } }); }}>
                 <span className="material-icons-outlined text-sm">login</span>
                 {t('auth.login')}
               </button>

@@ -11,6 +11,25 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import authService from '../../services/authService';
 
+const getRedirectTarget = (location, fallback) => {
+  const fromState = typeof location?.state?.from === 'string' ? location.state.from : '';
+  const searchParams = new URLSearchParams(location?.search || '');
+  const fromQuery = searchParams.get('redirect') || '';
+
+  const candidate = (fromState || fromQuery || '').trim();
+  if (!candidate) return fallback;
+
+  // Chỉ cho phép internal path để tránh open-redirect.
+  if (!candidate.startsWith('/')) return fallback;
+
+  // Tránh loop quay lại chính trang auth.
+  if (candidate === '/login' || candidate === '/register' || candidate === '/forgot-password' || candidate === '/manager/login' || candidate === '/manager/forgot-password') {
+    return fallback;
+  }
+
+  return candidate;
+};
+
 const useAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -228,8 +247,7 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.loginSuccess'));
-      const from = location.state?.from || '/';
-      navigate(from === '/login' ? '/' : from);
+      navigate(getRedirectTarget(location, '/'));
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Login error:', error);
@@ -276,8 +294,7 @@ const useAuthPage = () => {
 
       login(userData, token || accessToken);
       notification.success(t('auth.notifications.managerLoginSuccess'));
-      const from = location.state?.from || '/admin/dashboard';
-      navigate(from === '/manager/login' || from === '/login' ? '/admin/dashboard' : from);
+      navigate(getRedirectTarget(location, '/admin/dashboard'));
     } catch (error) {
       setErrors({ submit: error.message || t('auth.errors.loginFailedTryAgain') });
       console.error('Manager login error:', error);
@@ -318,8 +335,7 @@ const useAuthPage = () => {
 
       login(userData, token);
       notification.success(t('auth.notifications.registerSuccess'));
-      const from = location.state?.from || '/';
-      navigate(from === '/register' || from === '/login' ? '/' : from);
+      navigate(getRedirectTarget(location, '/'));
     } catch (error) {
       if (error.errors) {
         setErrors(error.errors);

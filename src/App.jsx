@@ -55,7 +55,10 @@ function App() {
           
           {/* Field & Customer Routes */}
           <Route path="/fields" element={<FieldListPage />} />
+          <Route path="/field" element={<Navigate to="/fields" replace />} />
           <Route path="/fields/:id" element={<FieldDetailPage />} />
+          {/* Legacy alias: giữ tương thích link cũ /field/:id */}
+          <Route path="/field/:id" element={<FieldDetailPage />} />
           {/* Customer profile — /customer/profile (canonical) + legacy aliases */}
           <Route path="/customer/profile" element={<UserProfilePage />} />
           <Route path="/customer/dashboard" element={<Navigate to="/customer/profile" replace />} />
