@@ -160,18 +160,14 @@ export const searchFields = async (filters = {}) => {
     // ---- sort ----
     result = sortFieldsArr(result, filters.sortBy || 'name');
 
-    // ---- paginate ----
-    const page = filters.page || 1;
-    const limit = filters.limit || 9;
-    const totalBeforeTime = result.length;
-    const totalPagesBeforeTime = Math.ceil(totalBeforeTime / limit);
-    const start = (page - 1) * limit;
-    let paginated = result.slice(start, start + limit);
-
-    // Slot-based time filter (only checks current page to keep requests bounded)
-    if (date && (start24 || end24) && paginated.length) {
+    // ---- time filter (slot availability) ----
+    // IMPORTANT: Run time filter BEFORE pagination.
+    // Previously it filtered only the current page, which could reduce the
+    // number of items shown on a page (e.g., 5 instead of 6) and push the
+    // remaining matching items to later pages.
+    if (date && (start24 || end24) && result.length) {
       const fieldChecks = await Promise.all(
-        paginated.map(async (f) => {
+        result.map(async (f) => {
           try {
             const avRes = await getFieldAvailability(f._id, date);
             if (!avRes.success) return { ok: false, field: f };
@@ -200,8 +196,17 @@ export const searchFields = async (filters = {}) => {
         })
       );
 
-      paginated = fieldChecks.filter(x => x.ok).map(x => x.field);
+      result = fieldChecks.filter(x => x.ok).map(x => x.field);
     }
+
+    // ---- paginate ----
+    const page = filters.page || 1;
+    const limit = filters.limit || 9;
+    const total = result.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const safePage = Math.min(Math.max(1, page), totalPages);
+    const start = (safePage - 1) * limit;
+    const paginated = result.slice(start, start + limit);
 
     // ---- facets (computed from ALL normalised fields, NOT filtered result) ----
     // This ensures all categories always appear in the sidebar even when one is selected
@@ -226,10 +231,7 @@ export const searchFields = async (filters = {}) => {
       }
     });
 
-    // Note: slot-based time filter is applied AFTER paging (on current page only),
-    // so pagination totals reflect pre-time-filter results.
-    const total = totalBeforeTime;
-    const totalPages = totalPagesBeforeTime;
+    // Pagination totals reflect post-filter result (including time filter).
 
     const prices = normalised.map(f => f.hourlyPrice).filter(Boolean);
 
@@ -237,7 +239,7 @@ export const searchFields = async (filters = {}) => {
       success: true,
       data: {
         fields: paginated,
-        pagination: { page, limit, total, totalPages },
+        pagination: { page: safePage, limit, total, totalPages },
         facets: {
           categories: Object.entries(categoryCount).map(([name, count]) => ({ name, count })),
           districts: Object.entries(districtCount).map(([name, count]) => ({ name, count })),
@@ -520,8 +522,11 @@ function splitDistrict(district) {
 
 function timeFromDateish(value) {
   if (!value) return '';
+  // Prefer extracting local time-of-day safely.
+  // For Date objects returned by axios, it's usually a string → new Date(iso) is ok,
+  // but we only use hours/minutes (local) to avoid lexicographic issues.
   const d = value instanceof Date ? value : new Date(value);
-  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+  if (Number.isNaN(d.getTime())) return '';
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
